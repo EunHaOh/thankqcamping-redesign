@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    @apply min-h-screen bg-white font-sans text-ink antialiased;
+  }
+
+  body {
+    @apply m-0;
+  }
+}
+
+@layer components {
+  .btn-cta {
+    @apply h-14 rounded-[14px] bg-[#F26522] text-sm font-semibold text-white;
+  }
+
+  .btn-cta:disabled {
+    @apply cursor-not-allowed bg-[#E5E7EB] text-[#9CA3AF];
+  }
+
+  .btn-secondary {
+    @apply rounded-lg border border-surface-border bg-white text-sm font-medium text-ink;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
