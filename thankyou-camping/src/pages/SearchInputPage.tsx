@@ -8,6 +8,7 @@ import {
   SEARCH_INPUT_PLACEHOLDER,
 } from '../data/searchData';
 import { ROUTES } from '../routes/paths';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
 
 function SearchKeywordChip({
   label,
@@ -40,6 +41,11 @@ export function SearchInputPage() {
   const executeSearch = (query: string) => {
     const trimmed = query.trim();
     setSearchQuery(trimmed);
+    trackEvent('tq_submit_search', {
+      page_name: 'search_input',
+      search_term: trimmed,
+      test_version: TEST_VERSION,
+    });
     navigate(ROUTES.searchResultList);
   };
 

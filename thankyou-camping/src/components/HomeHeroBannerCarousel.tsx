@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import type { HomeHeroBanner } from '../data/homeData';
 import { ROUTES } from '../routes/paths';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
 import { CoverImage } from './CoverImage';
 
 interface HomeHeroBannerCarouselProps {
@@ -32,7 +33,15 @@ export function HomeHeroBannerCarousel({ banners }: HomeHeroBannerCarouselProps)
           <p className="mt-3 text-2xl font-bold leading-tight text-white">{banner.title}</p>
           <button
             type="button"
-            onClick={() => navigate(ROUTES.searchResultList)}
+            onClick={() => {
+              trackEvent('tq_click_home_banner', {
+                page_name: 'home',
+                banner_name: banner.title,
+                destination_page: 'search_results',
+                test_version: TEST_VERSION,
+              });
+              navigate(ROUTES.searchResultList);
+            }}
             className="mt-3 rounded-full bg-[#F26522] px-4 py-2 text-xs font-semibold text-white"
           >
             {banner.ctaLabel}

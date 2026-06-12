@@ -3,21 +3,44 @@ import type { Campground } from '../types';
 import { getCampHero } from '../data/images';
 import { formatPrice } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
+import {
+  TEST_VERSION,
+  trackAnotherCampAfterReturnIfNeeded,
+  trackEvent,
+} from '../lib/analytics';
+import { campgroundAnalyticsFields } from '../lib/analyticsHelpers';
 import { CoverImage } from './CoverImage';
 import { StarRating } from './StarRating';
 
 interface CampCardProps {
   campground: Campground;
+  cardIndex: number;
+  resultCount: number;
 }
 
-export function CampCard({ campground }: CampCardProps) {
+export function CampCard({ campground, cardIndex, resultCount }: CampCardProps) {
   const navigate = useNavigate();
   const hero = getCampHero(campground.id);
+
+  const handleClick = () => {
+    trackAnotherCampAfterReturnIfNeeded({
+      id: campground.id,
+      name: campground.name,
+    });
+    trackEvent('tq_click_camp_card', {
+      page_name: 'search_results',
+      ...campgroundAnalyticsFields(campground),
+      card_index: cardIndex,
+      result_count: resultCount,
+      test_version: TEST_VERSION,
+    });
+    navigate(ROUTES.campgroundDetail(campground.id));
+  };
 
   return (
     <button
       type="button"
-      onClick={() => navigate(ROUTES.campgroundDetail(campground.id))}
+      onClick={handleClick}
       className="w-full overflow-hidden rounded-lg border border-surface-border bg-white text-left shadow-card"
     >
       <CoverImage

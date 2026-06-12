@@ -3,9 +3,14 @@ import { Link } from 'react-router-dom';
 interface ReviewSummaryCardProps {
   items: string[];
   reviewsTo?: string;
+  onViewAllReviews?: () => void;
 }
 
-export function ReviewSummaryCard({ items, reviewsTo }: ReviewSummaryCardProps) {
+export function ReviewSummaryCard({
+  items,
+  reviewsTo,
+  onViewAllReviews,
+}: ReviewSummaryCardProps) {
   return (
     <section className="rounded-2xl border border-surface-border bg-white p-4">
       <h2 className="mb-3 text-base font-bold text-ink">후기 요약</h2>
@@ -22,6 +27,7 @@ export function ReviewSummaryCard({ items, reviewsTo }: ReviewSummaryCardProps) 
       {reviewsTo && (
         <Link
           to={reviewsTo}
+          onClick={() => onViewAllReviews?.()}
           className="btn-secondary mt-4 flex h-10 w-full items-center justify-center"
         >
           전체 후기 보기

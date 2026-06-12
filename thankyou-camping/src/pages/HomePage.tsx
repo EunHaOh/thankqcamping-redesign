@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { HomeCategoryRow } from '../components/HomeCategoryRow';
 import { HomeCompactCampCard } from '../components/HomeCompactCampCard';
@@ -20,6 +20,7 @@ import {
   type NewCampRegion,
 } from '../data/homeData';
 import { getCampgroundById } from '../data/mockData';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
 
 function matchesNewCampRegion(campgroundId: string, region: NewCampRegion): boolean {
   if (region === '전체') return true;
@@ -34,6 +35,14 @@ function matchesNewCampRegion(campgroundId: string, region: NewCampRegion): bool
 export function HomePage() {
   const { setRegionLabel } = useSearch();
   const [newCampRegion, setNewCampRegion] = useState<NewCampRegion>('전체');
+
+  useEffect(() => {
+    trackEvent('tq_view_home', {
+      page_name: 'home',
+      page_path: '/',
+      test_version: TEST_VERSION,
+    });
+  }, []);
 
   const filteredNewCamps = useMemo(
     () => HOME_NEW_CAMPS.filter((id) => matchesNewCampRegion(id, newCampRegion)),
@@ -61,8 +70,13 @@ export function HomePage() {
         <section>
           <HomeSectionHeader title="맞춤 캠핑장" />
           <HomeHorizontalScroll>
-            {HOME_CUSTOM_CAMPS.map((id) => (
-              <HomeCompactCampCard key={id} campgroundId={id} />
+            {HOME_CUSTOM_CAMPS.map((id, index) => (
+              <HomeCompactCampCard
+                key={id}
+                campgroundId={id}
+                sectionName="맞춤 캠핑장"
+                cardIndex={index}
+              />
             ))}
           </HomeHorizontalScroll>
         </section>
@@ -70,8 +84,14 @@ export function HomePage() {
         <section>
           <HomeSectionHeader title="지금 예약 가능한 캠핑장" />
           <HomeHorizontalScroll>
-            {HOME_AVAILABLE_CAMPS.map((id) => (
-              <HomeCompactCampCard key={id} campgroundId={id} showAvailable />
+            {HOME_AVAILABLE_CAMPS.map((id, index) => (
+              <HomeCompactCampCard
+                key={id}
+                campgroundId={id}
+                showAvailable
+                sectionName="지금 예약 가능한 캠핑장"
+                cardIndex={index}
+              />
             ))}
           </HomeHorizontalScroll>
         </section>
@@ -79,11 +99,12 @@ export function HomePage() {
         <section>
           <HomeSectionHeader title="실시간 인기 캠핑장" />
           <HomeHorizontalScroll>
-            {HOME_POPULAR_CAMPS.map((item) => (
+            {HOME_POPULAR_CAMPS.map((item, index) => (
               <HomePopularCampCard
                 key={item.id}
                 campgroundId={item.id}
                 viewerLabel={item.viewerLabel}
+                cardIndex={index}
               />
             ))}
           </HomeHorizontalScroll>
@@ -114,8 +135,8 @@ export function HomePage() {
             })}
           </div>
           <div className="space-y-2.5">
-            {filteredNewCamps.map((id) => (
-              <HomeNewCampCard key={id} campgroundId={id} />
+            {filteredNewCamps.map((id, index) => (
+              <HomeNewCampCard key={id} campgroundId={id} cardIndex={index} />
             ))}
           </div>
         </section>

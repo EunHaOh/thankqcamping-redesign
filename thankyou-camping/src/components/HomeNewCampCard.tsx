@@ -4,12 +4,14 @@ import { StarRating } from './StarRating';
 import { getCampHero } from '../data/images';
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
 
 interface HomeNewCampCardProps {
   campgroundId: string;
+  cardIndex: number;
 }
 
-export function HomeNewCampCard({ campgroundId }: HomeNewCampCardProps) {
+export function HomeNewCampCard({ campgroundId, cardIndex }: HomeNewCampCardProps) {
   const navigate = useNavigate();
   const campground = getCampgroundById(campgroundId);
 
@@ -20,7 +22,17 @@ export function HomeNewCampCard({ campgroundId }: HomeNewCampCardProps) {
   return (
     <button
       type="button"
-      onClick={() => navigate(ROUTES.campgroundDetail(campground.id))}
+      onClick={() => {
+        trackEvent('tq_click_home_camp_card', {
+          page_name: 'home',
+          section_name: '신생 캠핑장',
+          campground_id: campground.id,
+          campground_name: campground.name,
+          card_index: cardIndex,
+          test_version: TEST_VERSION,
+        });
+        navigate(ROUTES.campgroundDetail(campground.id));
+      }}
       className="flex w-full gap-3 overflow-hidden rounded-xl border border-surface-border bg-white p-3 text-left shadow-sm"
     >
       <CoverImage

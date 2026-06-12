@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BackHeader } from '../components/BackHeader';
 import { MobileShell } from '../components/MobileShell';
 import { ReviewCard } from '../components/ReviewCard';
 import { StarRating } from '../components/StarRating';
 import { getCampgroundById } from '../data/mockData';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
 import { ROUTES } from '../routes/paths';
 import type { Review } from '../types';
 
@@ -40,6 +41,16 @@ export function AllReviewsPage() {
   const [activeFilter, setActiveFilter] = useState<string>('전체');
 
   const campground = id ? getCampgroundById(id) : undefined;
+
+  useEffect(() => {
+    if (!campground) return;
+    trackEvent('tq_view_all_reviews', {
+      page_name: 'all_reviews',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      test_version: TEST_VERSION,
+    });
+  }, [campground?.id, campground?.name]);
 
   if (!campground) {
     return (
@@ -101,9 +112,17 @@ export function AllReviewsPage() {
               <ReviewCard
                 key={review.id}
                 review={review}
-                onDetail={() =>
-                  navigate(ROUTES.reviewDetailPage(campground.id, review.id))
-                }
+                onDetail={() => {
+                  trackEvent('tq_click_review_detail', {
+                    page_name: 'camp_detail',
+                    campground_id: campground.id,
+                    campground_name: campground.name,
+                    review_id: review.id,
+                    site_name: review.siteName,
+                    test_version: TEST_VERSION,
+                  });
+                  navigate(ROUTES.reviewDetailPage(campground.id, review.id));
+                }}
               />
             ))
           ) : (

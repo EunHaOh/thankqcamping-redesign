@@ -4,16 +4,19 @@ interface BackHeaderProps {
   title?: string;
   transparent?: boolean;
   backTo?: string;
+  onBack?: () => void;
 }
 
 export function BackHeader({
   title,
   transparent = false,
   backTo,
+  onBack,
 }: BackHeaderProps) {
   const navigate = useNavigate();
 
   const handleBack = () => {
+    onBack?.();
     if (backTo) {
       navigate(backTo);
       return;

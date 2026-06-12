@@ -3,15 +3,18 @@ import { CoverImage } from './CoverImage';
 import { getCampHero } from '../data/images';
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
 
 interface HomePopularCampCardProps {
   campgroundId: string;
   viewerLabel: string;
+  cardIndex: number;
 }
 
 export function HomePopularCampCard({
   campgroundId,
   viewerLabel,
+  cardIndex,
 }: HomePopularCampCardProps) {
   const navigate = useNavigate();
   const campground = getCampgroundById(campgroundId);
@@ -23,7 +26,17 @@ export function HomePopularCampCard({
   return (
     <button
       type="button"
-      onClick={() => navigate(ROUTES.campgroundDetail(campground.id))}
+      onClick={() => {
+        trackEvent('tq_click_home_camp_card', {
+          page_name: 'home',
+          section_name: '실시간 인기 캠핑장',
+          campground_id: campground.id,
+          campground_name: campground.name,
+          card_index: cardIndex,
+          test_version: TEST_VERSION,
+        });
+        navigate(ROUTES.campgroundDetail(campground.id));
+      }}
       className="relative w-[280px] shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm"
       style={{ scrollSnapAlign: 'start' }}
     >

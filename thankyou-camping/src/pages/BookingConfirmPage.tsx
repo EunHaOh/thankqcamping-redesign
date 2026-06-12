@@ -1,21 +1,52 @@
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BackHeader } from '../components/BackHeader';
 import { CoverImage } from '../components/CoverImage';
 import { FixedCTA } from '../components/FixedCTA';
 import { MobileShell } from '../components/MobileShell';
 import { useBooking } from '../context/BookingContext';
+import { useSearch } from '../context/SearchContext';
 import { SCENE_FALLBACK, getSiteImageSources } from '../data/images';
+import { formatGuestSummary } from '../data/guestData';
 import { formatPrice, getCampgroundById, getSiteById } from '../data/mockData';
 import { tentFitLabels } from '../data/siteHelpers';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
 import { ROUTES } from '../routes/paths';
 
 export function BookingConfirmPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { siteId, checkIn, checkOut, guests } = useBooking();
+  const { guestCounts } = useSearch();
 
   const campground = id ? getCampgroundById(id) : undefined;
   const site = id && siteId ? getSiteById(id, siteId) : undefined;
+
+  useEffect(() => {
+    if (!campground || !site) return;
+    trackEvent('tq_view_reservation_confirm', {
+      page_name: 'reservation_confirm',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      site_id: site.id,
+      site_name: site.name,
+      site_size: site.size,
+      site_price: site.price,
+      selected_date: `${checkIn} ~ ${checkOut}`,
+      selected_guest: formatGuestSummary(guestCounts),
+      test_version: TEST_VERSION,
+    });
+  }, [
+    campground?.id,
+    campground?.name,
+    site?.id,
+    site?.name,
+    site?.size,
+    site?.price,
+    checkIn,
+    checkOut,
+    guestCounts,
+  ]);
 
   if (!campground || !site) {
     return (
@@ -36,6 +67,17 @@ export function BookingConfirmPage() {
   }
 
   const handleConfirm = () => {
+    trackEvent('tq_click_final_reserve', {
+      page_name: 'reservation_confirm',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      site_id: site.id,
+      site_name: site.name,
+      site_price: site.price,
+      selected_date: `${checkIn} ~ ${checkOut}`,
+      selected_guest: formatGuestSummary(guestCounts),
+      test_version: TEST_VERSION,
+    });
     alert('예약이 접수되었습니다! (데모 — 실제 결제는 포함되지 않습니다)');
     navigate(ROUTES.home);
   };
@@ -44,7 +86,16 @@ export function BookingConfirmPage() {
 
   return (
     <MobileShell>
-      <BackHeader title="예약 확인" />
+      <BackHeader
+        title="예약 확인"
+        onBack={() => {
+          trackEvent('tq_click_reservation_back', {
+            page_name: 'reservation_confirm',
+            destination_page: id ? `/campgrounds/${id}/sites` : 'site_select',
+            test_version: TEST_VERSION,
+          });
+        }}
+      />
 
       <main className="space-y-4 px-4 pb-40 pt-4">
         <section className="overflow-hidden rounded-2xl border border-surface-border bg-white">

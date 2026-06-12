@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { BackHeader } from '../components/BackHeader';
 import { CampCard } from '../components/CampCard';
@@ -23,6 +23,8 @@ import { formatGuestLabel } from '../data/guestData';
 import { matchesRegion } from '../data/regionData';
 import { matchesSearchQuery } from '../data/searchData';
 import { campgrounds } from '../data/mockData';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
+import { searchContextFields } from '../lib/analyticsHelpers';
 import { ROUTES } from '../routes/paths';
 
 const FILTER_OPTIONS = [
@@ -99,11 +101,27 @@ export function CampgroundListPage() {
   const [fullFilterOpen, setFullFilterOpen] = useState(false);
 
   const toggleFilter = (filter: string) => {
-    setActiveFilters(
-      activeFilters.includes(filter)
-        ? activeFilters.filter((f) => f !== filter)
-        : [...activeFilters, filter],
+    const nextFilters = activeFilters.includes(filter)
+      ? activeFilters.filter((f) => f !== filter)
+      : [...activeFilters, filter];
+
+    setActiveFilters(nextFilters);
+
+    const previewList = applyChipBarFilters(
+      campgrounds
+        .filter((c) => matchesRegion(c, regionLabel))
+        .filter((c) => matchesFullFilterChips(c, fullFilter))
+        .filter((c) => matchesSearchQuery(c, searchQuery)),
+      nextFilters,
     );
+
+    trackEvent('tq_click_filter_chip', {
+      page_name: 'search_results',
+      filter_name: 'quick_filter',
+      filter_value: filter,
+      result_count: previewList.length,
+      test_version: TEST_VERSION,
+    });
   };
 
   const applyFullFilter = () => {
@@ -111,6 +129,13 @@ export function CampgroundListPage() {
       .map((chip) => CHIP_TO_QUICK_FILTER[chip])
       .filter((chip): chip is string => Boolean(chip));
     setActiveFilters(next);
+
+    trackEvent('tq_apply_filter', {
+      page_name: 'search_results',
+      selected_filters: fullFilter.join('|'),
+      result_count: countWithFilters(fullFilter),
+      test_version: TEST_VERSION,
+    });
   };
 
   const countWithFilters = (chips: FullFilterState) => {
@@ -141,10 +166,35 @@ export function CampgroundListPage() {
     [fullFilterDraft, activeFilters, regionLabel],
   );
 
+  useEffect(() => {
+    trackEvent('tq_view_search_results', {
+      page_name: 'search_results',
+      page_path: '/search',
+      ...searchContextFields({
+        checkIn,
+        checkOut,
+        regionLabel,
+        guestCounts,
+        searchQuery,
+        resultCount: filtered.length,
+      }),
+    });
+  }, []);
+
   return (
     <AppShell showBottomNav>
       <div className="sticky top-0 z-30 bg-white">
-        <BackHeader title={headerTitle} backTo={ROUTES.home} />
+        <BackHeader
+          title={headerTitle}
+          backTo={ROUTES.home}
+          onBack={() => {
+            trackEvent('tq_click_back_to_home', {
+              page_name: 'search_results',
+              destination_page: 'home',
+              test_version: TEST_VERSION,
+            });
+          }}
+        />
         <div className="space-y-3 border-b border-[#E5E7EB] px-4 pb-3 pt-3">
           <SearchConditionBar
             dateLabel={dateLabel}
@@ -160,6 +210,10 @@ export function CampgroundListPage() {
             activeFilters={activeFilters}
             onToggle={toggleFilter}
             onFullFilterClick={() => {
+              trackEvent('tq_open_full_filter', {
+                page_name: 'search_results',
+                test_version: TEST_VERSION,
+              });
               setFullFilterDraft(fullFilter);
               setFullFilterOpen(true);
             }}
@@ -183,7 +237,15 @@ export function CampgroundListPage() {
           </p>
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+            onChange={(e) => {
+              const sortName = e.target.value as typeof sortBy;
+              setSortBy(sortName);
+              trackEvent('tq_click_sort', {
+                page_name: 'search_results',
+                sort_name: sortName,
+                test_version: TEST_VERSION,
+              });
+            }}
             className="rounded border border-surface-border bg-white px-2 py-1 text-xs text-ink-secondary"
           >
             <option value="추천순">추천순</option>
@@ -194,8 +256,13 @@ export function CampgroundListPage() {
 
         <div className="space-y-3">
           {filtered.length > 0 ? (
-            filtered.map((campground) => (
-              <CampCard key={campground.id} campground={campground} />
+            filtered.map((campground, index) => (
+              <CampCard
+                key={campground.id}
+                campground={campground}
+                cardIndex={index}
+                resultCount={filtered.length}
+              />
             ))
           ) : (
             <div className="flex flex-col items-center justify-center px-4 py-16 text-center">

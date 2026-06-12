@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BackHeader } from '../components/BackHeader';
 import { FixedCTA } from '../components/FixedCTA';
@@ -12,7 +12,8 @@ import { ViewTabs } from '../components/ViewTabs';
 import { useBooking } from '../context/BookingContext';
 import { getCampgroundById } from '../data/mockData';
 import { campgroundTentLabels } from '../data/siteHelpers';
-import type { ReviewDetailData } from '../types';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
+import type { ReviewDetailData, Site } from '../types';
 
 interface LocationState {
   openSiteId?: string;
@@ -28,6 +29,7 @@ export function SiteSelectionPage() {
   const [detailSiteId, setDetailSiteId] = useState<string | null>(null);
   const [reviewsSiteId, setReviewsSiteId] = useState<string | null>(null);
   const [reviewDetail, setReviewDetail] = useState<ReviewDetailData | null>(null);
+  const viewedSiteDetailRef = useRef<string | null>(null);
 
   const campground = id ? getCampgroundById(id) : undefined;
 
@@ -38,6 +40,36 @@ export function SiteSelectionPage() {
       window.history.replaceState({}, '');
     }
   }, [location.state]);
+
+  useEffect(() => {
+    if (!campground) return;
+    trackEvent('tq_view_site_select', {
+      page_name: 'site_select',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      test_version: TEST_VERSION,
+    });
+  }, [campground?.id, campground?.name]);
+
+  useEffect(() => {
+    if (!campground || !detailSiteId) return;
+    if (viewedSiteDetailRef.current === detailSiteId) return;
+
+    const site = campground.sites.find((item) => item.id === detailSiteId);
+    if (!site) return;
+
+    viewedSiteDetailRef.current = detailSiteId;
+    trackEvent('tq_view_site_detail', {
+      page_name: 'site_detail',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      site_id: site.id,
+      site_name: site.name,
+      site_size: site.size,
+      site_price: site.price,
+      test_version: TEST_VERSION,
+    });
+  }, [campground, detailSiteId]);
 
   if (!campground) {
     return (
@@ -54,12 +86,66 @@ export function SiteSelectionPage() {
   const detailSite = campground.sites.find((s) => s.id === detailSiteId) ?? null;
   const reviewsSite = campground.sites.find((s) => s.id === reviewsSiteId) ?? null;
 
-  const handleSelect = (siteIdToSelect: string) => {
+  const trackSiteSelect = (site: Site) => {
+    trackEvent('tq_click_site_select', {
+      page_name: 'site_detail',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      site_id: site.id,
+      site_name: site.name,
+      site_size: site.size,
+      site_price: site.price,
+      test_version: TEST_VERSION,
+    });
+  };
+
+  const handleSelect = (siteIdToSelect: string, fromDetail = false) => {
     setSelectedSiteId(siteIdToSelect);
+    if (fromDetail) {
+      const site = campground.sites.find((item) => item.id === siteIdToSelect);
+      if (site) trackSiteSelect(site);
+    }
+  };
+
+  const handleSiteCardDetail = (site: Site, cardIndex: number) => {
+    trackEvent('tq_click_site_card', {
+      page_name: 'site_select',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      site_id: site.id,
+      site_name: site.name,
+      site_size: site.size,
+      site_price: site.price,
+      card_index: cardIndex,
+      test_version: TEST_VERSION,
+    });
+    setDetailSiteId(site.id);
+  };
+
+  const handleViewTabChange = (tab: 'list' | 'map') => {
+    setViewTab(tab);
+    trackEvent('tq_toggle_site_view', {
+      page_name: 'site_select',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      view_mode: tab === 'list' ? 'list' : 'map',
+      test_version: TEST_VERSION,
+    });
   };
 
   const handleContinue = () => {
     if (!selectedSiteId || !selectedSite?.available) return;
+
+    trackEvent('tq_click_reservation_info', {
+      page_name: 'site_select',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      site_id: selectedSite.id,
+      site_name: selectedSite.name,
+      destination_page: 'reservation_confirm',
+      test_version: TEST_VERSION,
+    });
+
     setSite(selectedSiteId);
     navigate(`/campgrounds/${campground.id}/confirm`);
   };
@@ -100,17 +186,17 @@ export function SiteSelectionPage() {
           </p>
         </section>
 
-        <ViewTabs active={viewTab} onChange={setViewTab} />
+        <ViewTabs active={viewTab} onChange={handleViewTabChange} />
 
         {viewTab === 'list' ? (
           <section className="space-y-4">
-            {campground.sites.map((site) => (
+            {campground.sites.map((site, index) => (
               <SiteListCard
                 key={site.id}
                 site={site}
                 selected={selectedSiteId === site.id}
                 onSelect={() => handleSelect(site.id)}
-                onDetail={() => setDetailSiteId(site.id)}
+                onDetail={() => handleSiteCardDetail(site, index)}
                 onReviews={() => setReviewsSiteId(site.id)}
               />
             ))}
@@ -149,8 +235,11 @@ export function SiteSelectionPage() {
         site={detailSite}
         allSites={campground.sites}
         mapLandmarks={campground.mapLandmarks}
-        onClose={() => setDetailSiteId(null)}
-        onSelect={handleSelect}
+        onClose={() => {
+          viewedSiteDetailRef.current = null;
+          setDetailSiteId(null);
+        }}
+        onSelect={(nextSiteId) => handleSelect(nextSiteId, true)}
         onReviewClick={handleReviewDetail}
       />
 
@@ -164,9 +253,9 @@ export function SiteSelectionPage() {
       <ReviewDetailBottomSheet
         review={reviewDetail}
         onClose={() => setReviewDetail(null)}
-        onViewSite={(siteId) => {
-          handleSelect(siteId);
-          setDetailSiteId(siteId);
+        onViewSite={(nextSiteId) => {
+          handleSelect(nextSiteId, true);
+          setDetailSiteId(nextSiteId);
         }}
       />
     </MobileShell>

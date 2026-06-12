@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSearch } from '../context/SearchContext';
 import type { HomeCategory } from '../data/homeData';
 import { ROUTES } from '../routes/paths';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
 
 function CategoryIcon({ id }: { id: string }) {
   const common = 'stroke-current';
@@ -68,6 +69,12 @@ export function HomeCategoryRow({ categories }: HomeCategoryRowProps) {
   const { applyTheme } = useSearch();
 
   const handleClick = (category: HomeCategory) => {
+    trackEvent('tq_click_home_category', {
+      page_name: 'home',
+      category_name: category.label,
+      destination_page: 'search_results',
+      test_version: TEST_VERSION,
+    });
     applyTheme(category);
     navigate(ROUTES.searchResultList);
   };

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BackHeader } from '../components/BackHeader';
 import { HorizontalGallery } from '../components/CoverImage';
@@ -7,6 +8,7 @@ import { StarIcons } from '../components/StarIcons';
 import { useBooking } from '../context/BookingContext';
 import { REVIEW_IMAGE_FALLBACK, getReviewImageSources } from '../data/images';
 import { getCampgroundById, getReviewById } from '../data/mockData';
+import { TEST_VERSION, trackEvent } from '../lib/analytics';
 import { ROUTES } from '../routes/paths';
 
 export function ReviewDetailPage() {
@@ -17,6 +19,18 @@ export function ReviewDetailPage() {
   const campground = id ? getCampgroundById(id) : undefined;
   const review =
     id && reviewId ? getReviewById(id, reviewId) : undefined;
+
+  useEffect(() => {
+    if (!campground || !review) return;
+    trackEvent('tq_view_review_detail', {
+      page_name: 'review_detail',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      review_id: review.id,
+      site_name: review.siteName,
+      test_version: TEST_VERSION,
+    });
+  }, [campground?.id, campground?.name, review?.id, review?.siteName]);
 
   if (!campground || !review) {
     return (
