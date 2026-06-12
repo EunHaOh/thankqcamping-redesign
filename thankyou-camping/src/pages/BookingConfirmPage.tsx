@@ -7,6 +7,7 @@ import { useBooking } from '../context/BookingContext';
 import { SCENE_FALLBACK, getSiteImageSources } from '../data/images';
 import { formatPrice, getCampgroundById, getSiteById } from '../data/mockData';
 import { tentFitLabels } from '../data/siteHelpers';
+import { ROUTES } from '../routes/paths';
 
 export function BookingConfirmPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,7 +25,7 @@ export function BookingConfirmPage() {
           <p>예약 정보가 없습니다.</p>
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate(ROUTES.home)}
             className="text-sm font-medium text-[#F26522]"
           >
             캠핑장 목록으로
@@ -36,7 +37,7 @@ export function BookingConfirmPage() {
 
   const handleConfirm = () => {
     alert('예약이 접수되었습니다! (데모 — 실제 결제는 포함되지 않습니다)');
-    navigate('/');
+    navigate(ROUTES.home);
   };
 
   const tentLabel = tentFitLabels[site.tentFit];

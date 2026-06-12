@@ -5,7 +5,7 @@ import { FixedCTA } from '../components/FixedCTA';
 import { MobileShell } from '../components/MobileShell';
 import { StarIcons } from '../components/StarIcons';
 import { useBooking } from '../context/BookingContext';
-import { SCENE_FALLBACK, getReviewImageSources } from '../data/images';
+import { REVIEW_IMAGE_FALLBACK, getReviewImageSources } from '../data/images';
 import { getCampgroundById, getReviewById } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
 
@@ -63,7 +63,7 @@ export function ReviewDetailPage() {
             <HorizontalGallery
               items={photos.slice(0, 3).map((photo) => ({
                 sources: getReviewImageSources(photo),
-                fallback: SCENE_FALLBACK.nature,
+                fallback: REVIEW_IMAGE_FALLBACK,
               }))}
               height={120}
               cardWidth="min(65vw, 240px)"

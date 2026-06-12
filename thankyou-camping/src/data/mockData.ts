@@ -1,7 +1,40 @@
 import type { Campground, Review, Site } from '../types';
-import { IMG } from './images';
+import {
+  getCampDetailImages,
+  getCampMainImage,
+  getCampSiteImages,
+} from './images';
+import { pickReviewImage, pickReviewPhotos } from './reviewImages';
 
 export const MY_TENT_SIZE = { width: 3.0, depth: 3.5, name: '4인용 돔 텐트' };
+
+function buildCampPhotos(campId: string): string[] {
+  const merged = [...getCampDetailImages(campId), ...getCampSiteImages(campId)];
+  return merged.filter((url, index) => merged.indexOf(url) === index).slice(0, 4);
+}
+
+function sitePhotoSet(campId: string): string[] {
+  const photos = getCampSiteImages(campId);
+  const details = getCampDetailImages(campId);
+  return photos.length >= 2
+    ? photos.slice(0, 3)
+    : [...photos, ...details].filter((url, i, a) => a.indexOf(url) === i).slice(0, 3);
+}
+
+function sitePhotosForIndex(campId: string, index: number) {
+  const pool = [...getCampSiteImages(campId), ...getCampDetailImages(campId)].filter(
+    (url, i, arr) => arr.indexOf(url) === i,
+  );
+  const image = pool[index % pool.length] ?? getCampMainImage(campId);
+  const photos = pool.slice(index, index + 3);
+  while (photos.length < 3 && pool.length > 0) {
+    photos.push(pool[(index + photos.length) % pool.length]);
+  }
+  return {
+    image,
+    photos: photos.filter((url, i, arr) => arr.indexOf(url) === i).slice(0, 3),
+  };
+}
 
 function createMinimalSite(
   id: string,
@@ -18,8 +51,8 @@ function createMinimalSite(
     price,
     tentFit: 'fit',
     available: true,
-    image: IMG.forestSite1,
-    photos: [IMG.forestSite1, IMG.forestSite2, IMG.forestTent],
+    image: getCampSiteImages('camp-1')[0] ?? getCampMainImage('camp-1'),
+    photos: sitePhotoSet('camp-1'),
     locationLabel: '캠핑장 내 편리한 위치',
     locationNotes: ['캠핑장 내 편리한 위치'],
     floor: '파쇄석',
@@ -59,6 +92,10 @@ function createMinimalSite(
   };
 }
 
+const siteA1Photos = sitePhotosForIndex('camp-1', 0);
+const siteA2Photos = sitePhotosForIndex('camp-1', 1);
+const siteA3Photos = sitePhotosForIndex('camp-1', 2);
+
 const siteA1: Site = {
   id: 'site-a1',
   name: 'A-1 사이트',
@@ -68,8 +105,8 @@ const siteA1: Site = {
   price: 55000,
   tentFit: 'fit',
   available: true,
-  image: IMG.forestSite1,
-  photos: [IMG.forestSite1, IMG.forestSite2, IMG.forestTent],
+  image: siteA1Photos.image,
+  photos: siteA1Photos.photos,
   locationLabel: '입구에서 가까운 위치',
   locationNotes: [
     '입구에서 가까운 위치',
@@ -100,8 +137,8 @@ const siteA1: Site = {
       content: '사이트가 넓고 바닥이 평평해서 텐트 설치가 편했어요.',
       fullContent:
         '사이트가 넓고 바닥이 평평해서 텐트 설치가 편했어요. 옆 사이트와 간격이 있어 조용했고, 샤워장도 깨끗했습니다.',
-      photo: IMG.reviewThumb,
-      photos: [IMG.reviewThumb, IMG.forestSite2, IMG.forestSite3],
+      photo: pickReviewImage('camp-1', 0),
+      photos: pickReviewPhotos('camp-1', 0, 3),
       confirmTags: ['텐트 설치 편함', '사이트 간격 넓음', '샤워장 깨끗함', '반려견 동반 가능'],
       previewTags: ['사이트 넓음', '바닥 평평'],
       siteId: 'site-a1',
@@ -113,7 +150,7 @@ const siteA1: Site = {
       date: '2026.04.28',
       siteName: 'A-1 사이트',
       content: '옆 사이트와 간격이 있어 조용하게 쉬기 좋았어요.',
-      photo: IMG.forestSite3,
+      photo: pickReviewImage('camp-1', 1),
       previewTags: ['사이트 간격', '조용함'],
       siteId: 'site-a1',
     },
@@ -130,8 +167,8 @@ const siteA2: Site = {
   price: 50000,
   tentFit: 'fit',
   available: true,
-  image: IMG.forestSite2,
-  photos: [IMG.forestSite2, IMG.forestSite3, IMG.forestSite4],
+  image: siteA2Photos.image,
+  photos: siteA2Photos.photos,
   locationLabel: '계곡 가까운 위치',
   locationNotes: [
     '계곡과 가까운 위치',
@@ -183,8 +220,8 @@ const siteA3: Site = {
   price: 58000,
   tentFit: 'fit',
   available: true,
-  image: IMG.forestSite3,
-  photos: [IMG.forestSite3, IMG.forestSite4, IMG.forestTent],
+  image: siteA3Photos.image,
+  photos: siteA3Photos.photos,
   locationLabel: '개별 화장실 가까움',
   locationNotes: [
     '개별 화장실과 가까움',
@@ -227,6 +264,9 @@ const siteA3: Site = {
   features: ['전기', '잔디', '개별 화장실 인접'],
 };
 
+const siteG1Photos = sitePhotosForIndex('camp-2', 0);
+const siteG2Photos = sitePhotosForIndex('camp-2', 1);
+
 export const campgrounds: Campground[] = [
   {
     id: 'camp-1',
@@ -236,11 +276,11 @@ export const campgrounds: Campground[] = [
     rating: 4.8,
     reviewCount: 328,
     priceFrom: 45000,
-    heroImage: IMG.forestHero,
-    photos: [IMG.forestSite1, IMG.forestSite2, IMG.forestSite3, IMG.forestSite4],
+    heroImage: getCampMainImage('camp-1'),
+    photos: buildCampPhotos('camp-1'),
     available: true,
     hasReviewPhotos: true,
-    listTags: ['반려견 가능', '평균 8m × 10m', '후기 사진 있음'],
+    listTags: ['반려견 가능', '평균 8m × 10m', '후기 사진 있음', '사이트 넓음'],
     siteSizeSummary: '평균 8m × 10m',
     tentFit: 'fit',
     tentFitMessage: '내 텐트 기준 설치 가능',
@@ -272,8 +312,8 @@ export const campgrounds: Campground[] = [
         content: '사이트가 넓고 바닥이 평평해서 텐트 설치가 편했어요. 샤워장도 깨끗합니다.',
         fullContent:
           '사이트가 넓고 바닥이 평평해서 텐트 설치가 편했어요. 옆 사이트와 간격이 있어 조용했고, 샤워장도 깨끗했습니다.',
-        photo: IMG.reviewThumb,
-        photos: [IMG.reviewThumb, IMG.forestSite2, IMG.forestSite3],
+        photo: pickReviewImage('camp-1', 0),
+        photos: pickReviewPhotos('camp-1', 0, 3),
         confirmTags: ['사이트 간격 넓음', '바닥 평평함', '텐트 설치 편함', '샤워장 깨끗함'],
       },
       {
@@ -284,8 +324,8 @@ export const campgrounds: Campground[] = [
         siteName: 'A-2 사이트',
         siteId: 'site-a2',
         content: '위치가 좋고 주변 산책로가 예뻐요. 계곡이 가까워서 산책하기 좋았습니다.',
-        photo: IMG.forestSite3,
-        photos: [IMG.forestSite3, IMG.forestSite4, IMG.forestSite2],
+        photo: pickReviewImage('camp-1', 1),
+        photos: pickReviewPhotos('camp-1', 1, 3),
         confirmTags: ['산책로 가까움', '계곡 인접', '반려견 동반 가능'],
       },
       {
@@ -296,7 +336,7 @@ export const campgrounds: Campground[] = [
         siteName: 'A-3 사이트',
         siteId: 'site-a3',
         content: '처음 캠핑인데 사이트 크기 안내가 정확해서 텐트 맞출 때 도움이 됐습니다.',
-        photo: IMG.forestSite4,
+        photo: pickReviewImage('camp-1', 2),
         confirmTags: ['사이트 크기 정확', '조용함', '화장실 가까움'],
       },
     ],
@@ -316,8 +356,8 @@ export const campgrounds: Campground[] = [
     rating: 4.6,
     reviewCount: 215,
     priceFrom: 89000,
-    heroImage: IMG.glampingHero,
-    photos: [IMG.glampingHero, IMG.glampingSite],
+    heroImage: getCampMainImage('camp-2'),
+    photos: buildCampPhotos('camp-2'),
     available: true,
     hasReviewPhotos: true,
     listTags: ['글램핑', '수영장', '가족 추천'],
@@ -351,7 +391,7 @@ export const campgrounds: Campground[] = [
         siteName: 'G-1 사이트',
         siteId: 'site-g1',
         content: '밤하늘이 정말 예뻐요. 시설도 깔끔하고 아이들이 좋아했습니다.',
-        photo: IMG.glampingHero,
+        photo: pickReviewImage('camp-2', 0),
         confirmTags: ['시설 깨끗함', '가족 추천', '반려견 동반 가능'],
       },
       {
@@ -362,7 +402,7 @@ export const campgrounds: Campground[] = [
         siteName: 'G-2 사이트',
         siteId: 'site-g2',
         content: '사이트 간 간격이 넓어서 프라이빗하게 쉬기 좋았어요.',
-        photo: IMG.glampingSite,
+        photo: pickReviewImage('camp-2', 1),
         confirmTags: ['사이트 간격 넓음', '프라이빗함'],
       },
     ],
@@ -376,8 +416,8 @@ export const campgrounds: Campground[] = [
         price: 120000,
         tentFit: 'fit',
         available: true,
-        image: IMG.glampingHero,
-        photos: [IMG.glampingHero, IMG.glampingSite, IMG.reviewThumb],
+        image: siteG1Photos.image,
+        photos: siteG1Photos.photos,
         locationLabel: '수영장 인접',
         locationNotes: [
           '수영장 바로 옆 위치',
@@ -425,8 +465,8 @@ export const campgrounds: Campground[] = [
         price: 110000,
         tentFit: 'fit',
         available: true,
-        image: IMG.glampingSite,
-        photos: [IMG.glampingSite, IMG.glampingHero, IMG.reviewThumb],
+        image: siteG2Photos.image,
+        photos: siteG2Photos.photos,
         locationLabel: '정원 뷰',
         locationNotes: [
           '정원 전망이 좋은 위치',
@@ -481,8 +521,8 @@ export const campgrounds: Campground[] = [
     rating: 4.7,
     reviewCount: 142,
     priceFrom: 52000,
-    heroImage: IMG.forestSite3,
-    photos: [IMG.forestSite3, IMG.forestSite2, IMG.forestTent],
+    heroImage: getCampMainImage('camp-4'),
+    photos: buildCampPhotos('camp-4'),
     available: true,
     hasReviewPhotos: true,
     listTags: ['계곡 인접', '파쇄석', '4인용 돔 텐트 가능'],
@@ -509,12 +549,14 @@ export const campgrounds: Campground[] = [
         siteName: 'D-1 사이트',
         siteId: 'site-c4-1',
         content: '계곡이 가까워서 물놀이하기 좋았어요.',
-        photo: IMG.forestSite3,
+        photo: pickReviewImage('camp-4', 0),
         confirmTags: ['계곡 가까움', '파쇄석'],
       },
     ],
     sites: [
       createMinimalSite('site-c4-1', 'D-1 사이트', 52000, {
+        image: getCampSiteImages('camp-4')[0],
+        photos: sitePhotoSet('camp-4'),
         floor: '파쇄석',
         nearbyInfo: ['파쇄석', '계곡 뷰', '전기 사용 가능'],
         features: ['전기', '파쇄석'],
@@ -531,28 +573,28 @@ export const campgrounds: Campground[] = [
   },
   {
     id: 'camp-3',
-    name: '리버뷰 카라반 캠프',
+    name: '리버뷰 카라반',
     location: '충남 태안군 안면읍',
     region: '충남',
     rating: 4.5,
     reviewCount: 98,
-    priceFrom: 75000,
-    heroImage: IMG.beachHero,
-    photos: [IMG.beachHero, IMG.beachSite, IMG.forestSite4],
+    priceFrom: 79000,
+    heroImage: getCampMainImage('camp-3'),
+    photos: buildCampPhotos('camp-3'),
     available: true,
     hasReviewPhotos: true,
-    listTags: ['카라반', '바다 인접', '후기 사진 있음'],
+    listTags: ['카라반', '바다 인접', '후기 사진 있음', '개별 화장실'],
     siteSizeSummary: '평균 10m × 8m',
     tentFit: 'fit',
     tentFitMessage: '내 텐트 기준 설치 가능',
     petFriendly: false,
-    conditionChips: ['카라반', '바다 인접', '후기 사진 있음', '4인용 돔 텐트 가능'],
+    conditionChips: ['카라반', '바다 인접', '개별 화장실', '후기 사진 있음'],
     reviewSummary: [
       '바다 뷰가 좋다는 후기가 많아요',
       '카라반이 깨끗하다는 후기가 많아요',
       '해변 접근이 편하다는 후기가 많아요',
     ],
-    facilities: ['전기', '화장실', '매점', '해변 접근', '주차장'],
+    facilities: ['전기', '개별 화장실', '매점', '해변 접근', '주차장'],
     address: '충청남도 태안군 안면읍 창기리 78-1',
     distance: '서울에서 약 2시간 30분',
     tags: ['카라반', '바다', '해변'],
@@ -565,13 +607,15 @@ export const campgrounds: Campground[] = [
         siteName: 'R-1 사이트',
         siteId: 'site-r1',
         content: '카라반에서 바다가 보여서 좋았어요.',
-        photo: IMG.beachHero,
+        photo: pickReviewImage('camp-3', 0),
         confirmTags: ['바다 뷰', '카라반'],
       },
     ],
     sites: [
-      createMinimalSite('site-r1', 'R-1 사이트', 75000, {
+      createMinimalSite('site-r1', 'R-1 사이트', 79000, {
         size: '10m × 8m',
+        image: getCampSiteImages('camp-3')[0],
+        photos: sitePhotoSet('camp-3'),
         floor: '데크',
         petFriendly: false,
         nearbyInfo: ['카라반', '바다 뷰', '전기 사용 가능'],
@@ -595,11 +639,11 @@ export const campgrounds: Campground[] = [
     rating: 4.4,
     reviewCount: 176,
     priceFrom: 48000,
-    heroImage: IMG.forestSite4,
-    photos: [IMG.forestSite4, IMG.forestSite1, IMG.forestTent],
+    heroImage: getCampMainImage('camp-5'),
+    photos: buildCampPhotos('camp-5'),
     available: true,
     hasReviewPhotos: true,
-    listTags: ['가족 추천', '키즈놀이터', '반려견 가능'],
+    listTags: ['가족 추천', '키즈놀이터', '반려견 가능', '사이트 넓음'],
     siteSizeSummary: '평균 8m × 10m',
     tentFit: 'fit',
     tentFitMessage: '내 텐트 기준 설치 가능',
@@ -623,12 +667,14 @@ export const campgrounds: Campground[] = [
         siteName: 'F-1 사이트',
         siteId: 'site-c5-1',
         content: '아이들이 놀이터를 좋아했어요.',
-        photo: IMG.forestSite4,
+        photo: pickReviewImage('camp-5', 0),
         confirmTags: ['가족 추천', '키즈놀이터'],
       },
     ],
     sites: [
       createMinimalSite('site-c5-1', 'F-1 사이트', 48000, {
+        image: getCampSiteImages('camp-5')[0],
+        photos: sitePhotoSet('camp-5'),
         floor: '잔디',
         nearbyInfo: ['잔디', '키즈놀이터', '전기 사용 가능'],
         features: ['전기', '잔디'],
@@ -651,8 +697,8 @@ export const campgrounds: Campground[] = [
     rating: 4.3,
     reviewCount: 121,
     priceFrom: 58000,
-    heroImage: IMG.glampingSite,
-    photos: [IMG.glampingSite, IMG.forestSite2, IMG.forestSite3],
+    heroImage: getCampMainImage('camp-6'),
+    photos: buildCampPhotos('camp-6'),
     available: true,
     hasReviewPhotos: true,
     listTags: ['데크', '산·숲', '사이트 후기 있음'],
@@ -679,7 +725,7 @@ export const campgrounds: Campground[] = [
         siteName: 'N-1 사이트',
         siteId: 'site-c6-1',
         content: '노을이 정말 예뻤어요. 데크가 깔끔했습니다.',
-        photo: IMG.glampingSite,
+        photo: pickReviewImage('camp-6', 0),
         confirmTags: ['노을 뷰', '데크'],
       },
     ],
@@ -687,6 +733,8 @@ export const campgrounds: Campground[] = [
       createMinimalSite('site-c6-1', 'N-1 사이트', 58000, {
         size: '8m × 11m',
         depth: 11,
+        image: getCampSiteImages('camp-6')[0],
+        photos: sitePhotoSet('camp-6'),
         floor: '데크',
         nearbyInfo: ['데크', '산·숲', '전기 사용 가능'],
         features: ['전기', '데크'],
@@ -703,62 +751,190 @@ export const campgrounds: Campground[] = [
   },
   {
     id: 'camp-7',
-    name: '태안 바다숲 캠핑장',
-    location: '충남 태안군 안면읍',
-    region: '충남',
-    rating: 4.2,
-    reviewCount: 87,
-    priceFrom: 42000,
-    heroImage: IMG.beachSite,
-    photos: [IMG.beachSite, IMG.beachHero, IMG.forestSite4],
+    name: '잔디마당 캠핑파크',
+    location: '경기 연천군 전곡읍',
+    region: '경기',
+    rating: 4.6,
+    reviewCount: 134,
+    priceFrom: 43000,
+    heroImage: getCampMainImage('camp-7'),
+    photos: buildCampPhotos('camp-7'),
     available: true,
     hasReviewPhotos: true,
-    showInNationwide: false,
-    listTags: ['해변 인접', '오토캠핑', '후기 사진 있음'],
-    siteSizeSummary: '평균 7m × 9m',
+    listTags: ['잔디', '사이트 넓음', '차박 가능', '카라반'],
+    siteSizeSummary: '평균 9m × 11m',
     tentFit: 'fit',
     tentFitMessage: '내 텐트 기준 설치 가능',
-    petFriendly: false,
-    conditionChips: ['해변 인접', '오토캠핑', '후기 사진 있음'],
+    petFriendly: true,
+    conditionChips: ['잔디', '사이트 넓음', '차박 가능', '반려견 가능'],
     reviewSummary: [
-      '해변이 가깝다는 후기가 많아요',
-      '나무 그늘이 좋다는 후기가 많아요',
+      '잔디가 깔끔하다는 후기가 많아요',
+      '사이트가 넓다는 후기가 많아요',
+      '차박하기 좋다는 후기가 많아요',
     ],
-    facilities: ['전기', '화장실', '매점', '해변 접근'],
-    address: '충청남도 태안군 안면읍 모항리 55-1',
-    distance: '서울에서 약 2시간 20분',
-    tags: ['해변', '오토캠핑'],
+    facilities: ['전기', '온수 샤워장', '매점', '반려견 동반', '주차장'],
+    address: '경기도 연천군 전곡읍 전곡리 112-8',
+    distance: '서울에서 약 1시간 10분',
+    tags: ['오토캠핑', '잔디', '차박'],
     reviews: [
       {
         id: 'r-c7-1',
-        author: '해변캠핑',
-        rating: 4,
-        date: '2026.03.10',
-        siteName: 'B-1 사이트',
+        author: '잔디캠퍼',
+        rating: 5,
+        date: '2026.04.22',
+        siteName: 'G-1 사이트',
         siteId: 'site-c7-1',
-        content: '해변 산책이 좋았어요.',
-        photo: IMG.beachSite,
-        confirmTags: ['해변', '산책'],
+        content: '잔디가 넓고 평평해서 아이와 텐트 설치가 편했어요.',
+        photo: pickReviewImage('camp-7', 0),
+        confirmTags: ['잔디', '사이트 넓음'],
       },
     ],
     sites: [
-      createMinimalSite('site-c7-1', 'B-1 사이트', 42000, {
-        size: '7m × 9m',
-        width: 7,
-        depth: 9,
+      createMinimalSite('site-c7-1', 'G-1 사이트', 43000, {
+        size: '9m × 11m',
+        width: 9,
+        depth: 11,
+        image: getCampSiteImages('camp-7')[0],
+        photos: sitePhotoSet('camp-7'),
         floor: '잔디',
-        petFriendly: false,
-        nearbyInfo: ['잔디', '해변 접근'],
-        features: ['전기', '잔디'],
-        mapX: 60,
-        mapY: 55,
+        nearbyInfo: ['잔디', '차박 가능', '전기 사용 가능'],
+        features: ['전기', '잔디', '차박 가능'],
+        mapX: 42,
+        mapY: 48,
+      }),
+      createMinimalSite('site-c7-2', 'C-1 카라반', 68000, {
+        size: '8m × 10m',
+        image: getCampSiteImages('camp-7')[1] ?? getCampSiteImages('camp-7')[0],
+        photos: sitePhotoSet('camp-7'),
+        floor: '데크',
+        nearbyInfo: ['카라반', '잔디', '전기 사용 가능'],
+        features: ['카라반', '전기', '데크'],
+        mapX: 62,
+        mapY: 52,
       }),
     ],
     mapLandmarks: [
-      { label: '입구', x: 14, y: 16 },
-      { label: '매점', x: 65, y: 35 },
-      { label: '화장실', x: 45, y: 70 },
-      { label: '해변', x: 90, y: 20 },
+      { label: '입구', x: 12, y: 16 },
+      { label: '매점', x: 58, y: 28 },
+      { label: '화장실', x: 78, y: 55 },
+      { label: '주차장', x: 22, y: 78 },
+    ],
+  },
+  {
+    id: 'camp-8',
+    name: '별하늘 오토캠핑장',
+    location: '충북 제천시 청풍면',
+    region: '충북',
+    rating: 4.7,
+    reviewCount: 109,
+    priceFrom: 55000,
+    heroImage: getCampMainImage('camp-8'),
+    photos: buildCampPhotos('camp-8'),
+    available: true,
+    hasReviewPhotos: true,
+    showInNationwide: true,
+    listTags: ['별보기', '조용한 캠핑', '파쇄석', '후기 사진 있음'],
+    siteSizeSummary: '평균 8m × 10m',
+    tentFit: 'fit',
+    tentFitMessage: '내 텐트 기준 설치 가능',
+    petFriendly: true,
+    conditionChips: ['별보기', '파쇄석', '조용한 캠핑', '반려견 가능'],
+    reviewSummary: [
+      '별이 잘 보인다는 후기가 많아요',
+      '조용하다는 후기가 많아요',
+      '파쇄석 사이트가 깔끔하다는 후기가 많아요',
+    ],
+    facilities: ['전기', '온수 샤워장', '매점', '반려견 동반', '주차장'],
+    address: '충청북도 제천시 청풍면 산곡리 45-1',
+    distance: '서울에서 약 2시간 10분',
+    tags: ['오토캠핑', '산·숲', '별보기'],
+    reviews: [
+      {
+        id: 'r-c8-1',
+        author: '별빛캠퍼',
+        rating: 5,
+        date: '2026.05.18',
+        siteName: 'S-1 사이트',
+        siteId: 'site-c8-1',
+        content: '밤하늘 별보기가 정말 좋았어요. 주변도 조용했습니다.',
+        photo: pickReviewImage('camp-8', 0),
+        confirmTags: ['별보기', '조용함'],
+      },
+    ],
+    sites: [
+      createMinimalSite('site-c8-1', 'S-1 사이트', 55000, {
+        image: getCampSiteImages('camp-8')[0],
+        photos: sitePhotoSet('camp-8'),
+        floor: '파쇄석',
+        nearbyInfo: ['파쇄석', '별보기', '전기 사용 가능'],
+        features: ['전기', '파쇄석'],
+        mapX: 48,
+        mapY: 44,
+      }),
+    ],
+    mapLandmarks: [
+      { label: '입구', x: 10, y: 14 },
+      { label: '개수대', x: 52, y: 24 },
+      { label: '화장실', x: 80, y: 48 },
+      { label: '주차장', x: 18, y: 82 },
+    ],
+  },
+  {
+    id: 'camp-9',
+    name: '달빛 글램핑 빌리지',
+    location: '강원 평창군 대관령면',
+    region: '강원',
+    rating: 4.6,
+    reviewCount: 92,
+    priceFrom: 95000,
+    heroImage: getCampMainImage('camp-9'),
+    photos: buildCampPhotos('camp-9'),
+    available: true,
+    hasReviewPhotos: true,
+    showInNationwide: true,
+    listTags: ['글램핑', '가족 추천', '후기 사진 있음'],
+    siteSizeSummary: '평균 10m × 12m',
+    tentFit: 'fit',
+    tentFitMessage: '내 텐트 기준 설치 가능',
+    petFriendly: true,
+    conditionChips: ['글램핑', '가족 추천', '후기 사진 있음'],
+    reviewSummary: [
+      '글램핑 텐트가 깨끗하다는 후기가 많아요',
+      '야경이 예쁘다는 후기가 많아요',
+    ],
+    facilities: ['전기', '온수 샤워장', '매점', '바비큐', '주차장'],
+    address: '강원도 평창군 대관령면 용소리 22-3',
+    distance: '서울에서 약 2시간 30분',
+    tags: ['글램핑', '가족 추천'],
+    reviews: [
+      {
+        id: 'r-c9-1',
+        author: '글램퍼',
+        rating: 5,
+        date: '2026.05.09',
+        siteName: 'M-1 사이트',
+        siteId: 'site-c9-1',
+        content: '글램핑 텐트가 깨끗하고 야경이 정말 좋았어요.',
+        photo: pickReviewImage('camp-9', 0),
+        confirmTags: ['글램핑', '야경'],
+      },
+    ],
+    sites: [
+      createMinimalSite('site-c9-1', 'M-1 사이트', 95000, {
+        image: getCampSiteImages('camp-9')[0],
+        photos: sitePhotoSet('camp-9'),
+        floor: '데크',
+        nearbyInfo: ['글램핑 텐트', '데크', '전기 사용 가능'],
+        features: ['글램핑 텐트', '전기', '데크'],
+        mapX: 50,
+        mapY: 46,
+      }),
+    ],
+    mapLandmarks: [
+      { label: '입구', x: 12, y: 18 },
+      { label: '카페', x: 55, y: 30 },
+      { label: '화장실', x: 78, y: 52 },
+      { label: '주차장', x: 20, y: 80 },
     ],
   },
 ];

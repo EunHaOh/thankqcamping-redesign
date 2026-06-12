@@ -1,5 +1,7 @@
 export const ROUTES = {
-  searchResultList: '/',
+  home: '/',
+  searchInput: '/search-input',
+  searchResultList: '/search',
   campgroundDetail: (id: string) => `/campgrounds/${id}`,
   reviewListPage: (id: string) => `/campgrounds/${id}/reviews`,
   reviewDetailPage: (id: string, reviewId: string) =>

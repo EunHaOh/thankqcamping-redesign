@@ -107,9 +107,14 @@ export function getSubRegionFromLabel(label: string, broad: BroadRegion): string
 }
 
 const SUBREGION_CAMP_IDS: Record<string, string[]> = {
-  '경기 가평': ['camp-1', 'camp-4', 'camp-5'],
-  '강원 홍천': ['camp-2', 'camp-6'],
-  '충남 태안': ['camp-3', 'camp-7'],
+  '경기 가평': ['camp-1', 'camp-4'],
+  '경기 양평': ['camp-5'],
+  '경기 연천': ['camp-7'],
+  '경기 포천': ['camp-4'],
+  '강원 홍천': ['camp-2'],
+  '강원 춘천': ['camp-6'],
+  '충남 태안': ['camp-3'],
+  '충북 제천': ['camp-8'],
 };
 
 export function matchesRegion(camp: Campground, selection: string): boolean {

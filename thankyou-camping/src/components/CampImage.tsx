@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { IMAGE_FALLBACK, getReviewImageSources, getSiteImageSources } from '../data/images';
+import { IMAGE_FALLBACK, REVIEW_IMAGE_FALLBACK, getReviewImageSources, getSiteImageSources } from '../data/images';
 import { CoverImage } from './CoverImage';
 
 interface CampImageProps {
@@ -46,7 +46,7 @@ export function ReviewImage({
   return (
     <CoverImage
       sources={getReviewImageSources(src)}
-      fallback={IMAGE_FALLBACK}
+      fallback={REVIEW_IMAGE_FALLBACK}
       height={height}
       className={`w-full ${containerClassName}`}
       style={style}

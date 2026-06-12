@@ -1,4 +1,4 @@
-import { SCENE_FALLBACK, getReviewImageSources } from '../data/images';
+import { REVIEW_IMAGE_FALLBACK, getReviewImageSources } from '../data/images';
 import type { Review } from '../types';
 import { CoverImage } from './CoverImage';
 import { StarIcons } from './StarIcons';
@@ -22,7 +22,7 @@ export function ReviewCard({ review, onDetail }: ReviewCardProps) {
       </p>
       <CoverImage
         sources={getReviewImageSources(review.photo)}
-        fallback={SCENE_FALLBACK.nature}
+        fallback={REVIEW_IMAGE_FALLBACK}
         height={100}
         className="mt-3 w-full rounded-lg"
       />

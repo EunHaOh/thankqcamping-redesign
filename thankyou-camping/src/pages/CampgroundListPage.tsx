@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react';
+import { AppShell } from '../components/AppShell';
+import { BackHeader } from '../components/BackHeader';
 import { CampCard } from '../components/CampCard';
 import { FilterChips } from '../components/FilterChips';
 import {
@@ -7,10 +9,8 @@ import {
 } from '../components/FullFilterBottomSheet';
 import {
   CHIP_TO_QUICK_FILTER,
-  DEFAULT_FULL_FILTER_CHIPS,
   matchesFullFilterChips,
 } from '../data/filterData';
-import { MobileShell } from '../components/MobileShell';
 import {
   DatePickerBottomSheet,
   formatDateRangeLabel,
@@ -18,13 +18,12 @@ import {
 import { GuestPickerBottomSheet } from '../components/GuestPickerBottomSheet';
 import { RegionPickerBottomSheet } from '../components/RegionPickerBottomSheet';
 import { SearchConditionBar } from '../components/SearchConditionBar';
-import {
-  DEFAULT_GUEST_COUNTS,
-  formatGuestLabel,
-  type GuestCounts,
-} from '../data/guestData';
+import { useSearch } from '../context/SearchContext';
+import { formatGuestLabel } from '../data/guestData';
 import { matchesRegion } from '../data/regionData';
+import { matchesSearchQuery } from '../data/searchData';
 import { campgrounds } from '../data/mockData';
+import { ROUTES } from '../routes/paths';
 
 const FILTER_OPTIONS = [
   '예약 가능',
@@ -54,7 +53,11 @@ function applyChipBarFilters(
   }
   if (activeFilters.includes('사이트 크기')) {
     result = result.filter(
-      (c) => c.siteSizeSummary.includes('8m') || c.siteSizeSummary.includes('10m'),
+      (c) =>
+        c.siteSizeSummary.includes('8m') ||
+        c.siteSizeSummary.includes('9m') ||
+        c.siteSizeSummary.includes('10m') ||
+        c.listTags.includes('사이트 넓음'),
     );
   }
   if (activeFilters.includes('가족 추천')) {
@@ -69,17 +72,26 @@ function applyChipBarFilters(
 }
 
 export function CampgroundListPage() {
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [fullFilter, setFullFilter] = useState<FullFilterState>(DEFAULT_FULL_FILTER_CHIPS);
-  const [fullFilterDraft, setFullFilterDraft] = useState<FullFilterState>(DEFAULT_FULL_FILTER_CHIPS);
+  const {
+    checkIn,
+    checkOut,
+    regionLabel,
+    guestCounts,
+    activeFilters,
+    fullFilter,
+    searchQuery,
+    setCheckIn,
+    setCheckOut,
+    setRegionLabel,
+    setGuestCounts,
+    setActiveFilters,
+    setFullFilter,
+  } = useSearch();
+
+  const [fullFilterDraft, setFullFilterDraft] = useState<FullFilterState>(fullFilter);
   const [sortBy, setSortBy] = useState<'추천순' | '가격순' | '평점순'>('추천순');
 
-  const [checkIn, setCheckIn] = useState(new Date(2026, 5, 20));
-  const [checkOut, setCheckOut] = useState(new Date(2026, 5, 21));
   const dateLabel = formatDateRangeLabel(checkIn, checkOut);
-  const [regionLabel, setRegionLabel] = useState('전국');
-  const [guestCounts, setGuestCounts] = useState<GuestCounts>(DEFAULT_GUEST_COUNTS);
-  const guestLabel = formatGuestLabel(guestCounts);
 
   const [dateSheetOpen, setDateSheetOpen] = useState(false);
   const [regionSheetOpen, setRegionSheetOpen] = useState(false);
@@ -87,8 +99,10 @@ export function CampgroundListPage() {
   const [fullFilterOpen, setFullFilterOpen] = useState(false);
 
   const toggleFilter = (filter: string) => {
-    setActiveFilters((prev) =>
-      prev.includes(filter) ? prev.filter((f) => f !== filter) : [...prev, filter],
+    setActiveFilters(
+      activeFilters.includes(filter)
+        ? activeFilters.filter((f) => f !== filter)
+        : [...activeFilters, filter],
     );
   };
 
@@ -110,12 +124,17 @@ export function CampgroundListPage() {
     let list = campgrounds.filter((c) => matchesRegion(c, regionLabel));
     list = list.filter((c) => matchesFullFilterChips(c, fullFilter));
     list = applyChipBarFilters(list, activeFilters);
+    list = list.filter((c) => matchesSearchQuery(c, searchQuery));
 
     if (sortBy === '가격순') list.sort((a, b) => a.priceFrom - b.priceFrom);
     if (sortBy === '평점순') list.sort((a, b) => b.rating - a.rating);
 
     return list;
-  }, [activeFilters, fullFilter, sortBy, regionLabel]);
+  }, [activeFilters, fullFilter, sortBy, regionLabel, searchQuery]);
+
+  const headerTitle = searchQuery.trim()
+    ? `${searchQuery.trim()} 검색결과`
+    : '검색결과';
 
   const fullFilterPreviewCount = useMemo(
     () => countWithFilters(fullFilterDraft),
@@ -123,13 +142,14 @@ export function CampgroundListPage() {
   );
 
   return (
-    <MobileShell>
-      <header className="sticky top-0 z-30 border-b border-surface-border bg-white">
-        <div className="space-y-3 px-4 pb-3 pt-4">
+    <AppShell showBottomNav>
+      <div className="sticky top-0 z-30 bg-white">
+        <BackHeader title={headerTitle} backTo={ROUTES.home} />
+        <div className="space-y-3 border-b border-[#E5E7EB] px-4 pb-3 pt-3">
           <SearchConditionBar
             dateLabel={dateLabel}
             regionLabel={regionLabel}
-            guestLabel={guestLabel}
+            guestLabel={formatGuestLabel(guestCounts)}
             onDateClick={() => setDateSheetOpen(true)}
             onRegionClick={() => setRegionSheetOpen(true)}
             onGuestClick={() => setGuestSheetOpen(true)}
@@ -139,15 +159,27 @@ export function CampgroundListPage() {
             filters={FILTER_OPTIONS}
             activeFilters={activeFilters}
             onToggle={toggleFilter}
-            onFullFilterClick={() => setFullFilterOpen(true)}
+            onFullFilterClick={() => {
+              setFullFilterDraft(fullFilter);
+              setFullFilterOpen(true);
+            }}
           />
         </div>
-      </header>
+      </div>
 
-      <main className="px-4 py-3 pb-8">
+      <main className="px-4 py-3">
         <div className="mb-3 flex items-center justify-between">
           <p className="text-sm text-ink-secondary">
-            검색결과 <span className="font-semibold text-ink">{filtered.length}</span>곳
+            {searchQuery.trim() ? (
+              <>
+                <span className="font-semibold text-ink">{searchQuery.trim()}</span> 검색{' '}
+                <span className="font-semibold text-ink">{filtered.length}</span>곳
+              </>
+            ) : (
+              <>
+                검색결과 <span className="font-semibold text-ink">{filtered.length}</span>곳
+              </>
+            )}
           </p>
           <select
             value={sortBy}
@@ -161,9 +193,18 @@ export function CampgroundListPage() {
         </div>
 
         <div className="space-y-3">
-          {filtered.map((campground) => (
-            <CampCard key={campground.id} campground={campground} />
-          ))}
+          {filtered.length > 0 ? (
+            filtered.map((campground) => (
+              <CampCard key={campground.id} campground={campground} />
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+              <p className="text-base font-semibold text-ink">검색 결과가 없어요</p>
+              <p className="mt-2 text-sm text-ink-secondary">
+                지역이나 캠핑장 이름을 다시 입력해주세요
+              </p>
+            </div>
+          )}
         </div>
       </main>
 
@@ -201,6 +242,6 @@ export function CampgroundListPage() {
         onClose={() => setFullFilterOpen(false)}
         resultCount={fullFilterPreviewCount}
       />
-    </MobileShell>
+    </AppShell>
   );
 }

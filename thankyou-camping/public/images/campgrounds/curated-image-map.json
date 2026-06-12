@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "note": "앱은 src/data/curatedImages.ts 를 단일 소스로 사용합니다. 이 파일은 참고용입니다.",
+  "fallbackImage": "/images/campgrounds/raw/camp-003.jpg",
+  "curatedCampgroundImages": [
+    "/images/campgrounds/raw/camp-003.jpg",
+    "/images/campgrounds/raw/camp-021.jpg",
+    "/images/campgrounds/raw/camp-022.jpg",
+    "/images/campgrounds/raw/camp-004.jpg",
+    "/images/campgrounds/raw/camp-019.jpg",
+    "/images/campgrounds/raw/camp-005.jpg",
+    "/images/campgrounds/raw/camp-006.jpg",
+    "/images/campgrounds/raw/camp-024.jpg",
+    "/images/campgrounds/raw/camp-025.jpg",
+    "/images/campgrounds/raw/camp-001.jpg",
+    "/images/campgrounds/raw/camp-002.jpg"
+  ],
+  "homeBanner": [
+    "/images/campgrounds/raw/camp-019.jpg",
+    "/images/campgrounds/raw/camp-004.jpg",
+    "/images/campgrounds/raw/camp-005.jpg"
+  ]
+}

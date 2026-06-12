@@ -111,7 +111,7 @@ const CHIP_MATCHERS: Partial<Record<string, (camp: Campground) => boolean>> = {
   오토캠핑: (c) => c.tags.includes('오토캠핑') || c.name.includes('캠핑'),
   글램핑: (c) => c.tags.includes('글램핑') || c.name.includes('글램핑'),
   차박: (c) => siteHasFeature(c, '차박'),
-  카라반: (c) => c.tags.includes('카라반'),
+  카라반: (c) => c.tags.includes('카라반') || c.listTags.includes('카라반'),
   펜션: (c) => c.name.includes('펜션'),
   파쇄석: (c) => siteHasFeature(c, '파쇄석'),
   데크: (c) => siteHasFeature(c, '데크'),

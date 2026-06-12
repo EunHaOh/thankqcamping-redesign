@@ -1,4 +1,4 @@
-import { SCENE_FALLBACK, getReviewImageSources } from '../data/images';
+import { REVIEW_IMAGE_FALLBACK, getReviewImageSources } from '../data/images';
 import { getSiteShortName } from '../data/siteHelpers';
 import type { Site, SiteReview } from '../types';
 import { BottomSheet } from './BottomSheet';
@@ -27,7 +27,7 @@ export function SiteReviewsBottomSheet({
     .slice(0, 3)
     .map((r) => ({
       sources: getReviewImageSources(r.photo ?? r.photos?.[0]),
-      fallback: SCENE_FALLBACK.nature,
+      fallback: REVIEW_IMAGE_FALLBACK,
     }));
 
   const reviewPhotos =
@@ -35,8 +35,8 @@ export function SiteReviewsBottomSheet({
       ? reviewPhotosFromReviews
       : [
           {
-            sources: getReviewImageSources(site.image),
-            fallback: SCENE_FALLBACK.tent,
+            sources: getReviewImageSources(undefined),
+            fallback: REVIEW_IMAGE_FALLBACK,
           },
         ];
 

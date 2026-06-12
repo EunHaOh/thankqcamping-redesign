@@ -1,4 +1,4 @@
-import { SCENE_FALLBACK, getReviewImageSources } from '../data/images';
+import { REVIEW_IMAGE_FALLBACK, getReviewImageSources } from '../data/images';
 import type { ReviewDetailData } from '../types';
 import { BottomSheet } from './BottomSheet';
 import { HorizontalGallery } from './CoverImage';
@@ -34,7 +34,7 @@ export function ReviewDetailBottomSheet({
             <HorizontalGallery
               items={photos.slice(0, 3).map((photo) => ({
                 sources: getReviewImageSources(photo),
-                fallback: SCENE_FALLBACK.nature,
+                fallback: REVIEW_IMAGE_FALLBACK,
               }))}
               height={120}
               cardWidth="min(65vw, 240px)"

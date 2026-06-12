@@ -1,0 +1,239 @@
+{
+  "source": "https://m.thankqcamping.com/",
+  "extractedAt": "2026-06-12T02:54:07.346Z",
+  "minDimension": 300,
+  "pagesVisited": [
+    "https://m.thankqcamping.com/"
+  ],
+  "totalCandidates": 10,
+  "downloadedCount": 25,
+  "newDownloadsThisRun": 4,
+  "blockedOrFailedCount": 0,
+  "images": [
+    {
+      "file": "camp-001.jpg",
+      "path": "/images/campgrounds/raw/camp-001.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2026/04/20/thumbM_2026042059223.27.jpg",
+      "width": 640,
+      "height": 360,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-002.jpg",
+      "path": "/images/campgrounds/raw/camp-002.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2023/08/04/thumbM_2023080449281.34.jpg",
+      "width": 640,
+      "height": 640,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-003.jpg",
+      "path": "/images/campgrounds/raw/camp-003.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2025/08/26/thumbM_2025082653424.12.jpg",
+      "width": 640,
+      "height": 638,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-004.jpg",
+      "path": "/images/campgrounds/raw/camp-004.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2024/06/27/thumbM_2024062758286.46.jpg",
+      "width": 640,
+      "height": 427,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-005.jpg",
+      "path": "/images/campgrounds/raw/camp-005.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2026/03/09/cde0202e-7115-4d6a-97b1-65f12867b1d5-m.jpg",
+      "width": 640,
+      "height": 480,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-006.jpg",
+      "path": "/images/campgrounds/raw/camp-006.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2022/08/13/thumbM_2022081324697.39.jpg",
+      "width": 480,
+      "height": 640,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-007.jpg",
+      "path": "/images/campgrounds/raw/camp-007.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/07/10/ea07e564-e114-4465-b8ab-e4cd033b3232.jpg",
+      "width": 1280,
+      "height": 960,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-008.jpg",
+      "path": "/images/campgrounds/raw/camp-008.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2026/01/23/425ef66e-e0e4-4ce3-8a18-6c4acbaf9dc2.jpg",
+      "width": 800,
+      "height": 574,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-009.jpg",
+      "path": "/images/campgrounds/raw/camp-009.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/07/18/42502bfd-8823-412a-8bb8-69f309518beb.jpg",
+      "width": 1003,
+      "height": 560,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-010.jpg",
+      "path": "/images/campgrounds/raw/camp-010.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/08/04/a48a4b1d-1b1f-42fb-b047-f340623a5922.jpg",
+      "width": 1050,
+      "height": 1400,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-011.jpg",
+      "path": "/images/campgrounds/raw/camp-011.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/06/26/2d54b04c-f420-4248-8c7c-b07c177e5d9a.jpg",
+      "width": 3482,
+      "height": 5224,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-012.jpg",
+      "path": "/images/campgrounds/raw/camp-012.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/11/11/c30e2f42-3b07-44a4-bb28-42ff2666dcfb.jpg",
+      "width": 720,
+      "height": 720,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-013.jpg",
+      "path": "/images/campgrounds/raw/camp-013.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/07/11/a1c68b72-bd20-4591-9e73-0c2f526e5002.jpg",
+      "width": 1280,
+      "height": 1280,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-014.jpg",
+      "path": "/images/campgrounds/raw/camp-014.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/07/09/a33e53fc-6df8-4777-8e5a-f5da9c51474e.jpg",
+      "width": 1000,
+      "height": 1000,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-015.jpg",
+      "path": "/images/campgrounds/raw/camp-015.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/08/04/5932897e-de4f-4774-9d40-50c6050f058f.jpg",
+      "width": 1280,
+      "height": 960,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-016.jpg",
+      "path": "/images/campgrounds/raw/camp-016.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/07/18/5f4e509b-901f-4727-8ef2-f82af4c79249.jpg",
+      "width": 960,
+      "height": 1280,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-017.jpg",
+      "path": "/images/campgrounds/raw/camp-017.jpg",
+      "sourceUrl": "https://image.thankqcamping.com/file/2025/11/18/aed9edea-ba55-4581-ae01-d1cce5f10166.jpg",
+      "width": 1280,
+      "height": 853,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-018.png",
+      "path": "/images/campgrounds/raw/camp-018.png",
+      "sourceUrl": "https://m.thankqcamping.com/file/2026/06/11/2026061135186.05.png",
+      "width": 640,
+      "height": 320,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-019.jpg",
+      "path": "/images/campgrounds/raw/camp-019.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2026/06/02/2026060263900.93.jpg",
+      "width": 840,
+      "height": 630,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-020.png",
+      "path": "/images/campgrounds/raw/camp-020.png",
+      "sourceUrl": "https://m.thankqcamping.com/file/2025/08/05/2025080533532.5.png",
+      "width": 960,
+      "height": 480,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-021.jpg",
+      "path": "/images/campgrounds/raw/camp-021.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2026/05/14/2026051458136.9.jpg",
+      "width": 840,
+      "height": 472,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-022.jpg",
+      "path": "/images/campgrounds/raw/camp-022.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2019/04/09/thumbM_2019040970331.45.jpg",
+      "width": 640,
+      "height": 640,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-023.jpg",
+      "path": "/images/campgrounds/raw/camp-023.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2026/06/08/thumbM_2026060852862.18.jpg",
+      "width": 640,
+      "height": 640,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-024.jpg",
+      "path": "/images/campgrounds/raw/camp-024.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2024/10/23/thumbM_2024102365827.16.jpg",
+      "width": 640,
+      "height": 427,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    },
+    {
+      "file": "camp-025.jpg",
+      "path": "/images/campgrounds/raw/camp-025.jpg",
+      "sourceUrl": "https://m.thankqcamping.com/file/2025/06/30/thumbM_2025063081651.01.jpg",
+      "width": 640,
+      "height": 480,
+      "source": "network",
+      "foundOn": "https://m.thankqcamping.com/"
+    }
+  ]
+}
