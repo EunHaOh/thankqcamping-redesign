@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { CoverImage } from './CoverImage';
 import { StarRating } from './StarRating';
+import { TapAction } from './TapAction';
 import { getCampHero } from '../data/images';
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
@@ -18,22 +19,23 @@ export function HomeNewCampCard({ campgroundId, cardIndex }: HomeNewCampCardProp
   if (!campground) return null;
 
   const hero = getCampHero(campground.id);
+  const handleTap = () => {
+    trackEvent('tq_click_home_camp_card', {
+      page_name: 'home',
+      section_name: '신생 캠핑장',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      card_index: cardIndex,
+      test_version: TEST_VERSION,
+    });
+    navigate(ROUTES.campgroundDetail(campground.id));
+  };
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        trackEvent('tq_click_home_camp_card', {
-          page_name: 'home',
-          section_name: '신생 캠핑장',
-          campground_id: campground.id,
-          campground_name: campground.name,
-          card_index: cardIndex,
-          test_version: TEST_VERSION,
-        });
-        navigate(ROUTES.campgroundDetail(campground.id));
-      }}
-      className="flex w-full gap-3 overflow-hidden rounded-xl border border-surface-border bg-white p-3 text-left shadow-sm"
+    <TapAction
+      onTap={handleTap}
+      ariaLabel={`${campground.name} 상세 보기`}
+      className="campground-card flex w-full cursor-pointer gap-3 overflow-hidden rounded-xl border border-surface-border bg-white p-3 text-left shadow-sm"
     >
       <CoverImage
         sources={hero.sources}
@@ -54,6 +56,6 @@ export function HomeNewCampCard({ campgroundId, cardIndex }: HomeNewCampCardProp
           <span className="text-xs font-normal text-ink-muted">~</span>
         </p>
       </div>
-    </button>
+    </TapAction>
   );
 }

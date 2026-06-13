@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { CoverImage } from './CoverImage';
 import { StarRating } from './StarRating';
+import { TapAction } from './TapAction';
 import { getCampHero } from '../data/images';
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
@@ -25,22 +26,23 @@ export function HomeCompactCampCard({
   if (!campground) return null;
 
   const hero = getCampHero(campground.id);
+  const handleTap = () => {
+    trackEvent('tq_click_home_camp_card', {
+      page_name: 'home',
+      section_name: sectionName,
+      campground_id: campground.id,
+      campground_name: campground.name,
+      card_index: cardIndex,
+      test_version: TEST_VERSION,
+    });
+    navigate(ROUTES.campgroundDetail(campground.id));
+  };
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        trackEvent('tq_click_home_camp_card', {
-          page_name: 'home',
-          section_name: sectionName,
-          campground_id: campground.id,
-          campground_name: campground.name,
-          card_index: cardIndex,
-          test_version: TEST_VERSION,
-        });
-        navigate(ROUTES.campgroundDetail(campground.id));
-      }}
-      className="w-[148px] shrink-0 snap-start overflow-hidden rounded-xl border border-surface-border bg-white text-left shadow-sm"
+    <TapAction
+      onTap={handleTap}
+      ariaLabel={`${campground.name} 상세 보기`}
+      className="home-horizontal-card campground-card w-[148px] cursor-pointer snap-start overflow-hidden rounded-xl border border-surface-border bg-white text-left shadow-sm"
       style={{ scrollSnapAlign: 'start' }}
     >
       <CoverImage
@@ -67,6 +69,6 @@ export function HomeCompactCampCard({
           )}
         </div>
       </div>
-    </button>
+    </TapAction>
   );
 }

@@ -3,6 +3,7 @@ import { useSearch } from '../context/SearchContext';
 import type { HomeCategory } from '../data/homeData';
 import { ROUTES } from '../routes/paths';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
+import { TapAction } from './TapAction';
 
 function CategoryIcon({ id }: { id: string }) {
   const common = 'stroke-current';
@@ -80,17 +81,15 @@ export function HomeCategoryRow({ categories }: HomeCategoryRowProps) {
   };
 
   return (
-    <section className="-mx-4">
-      <div
-        className="scrollbar-hide flex gap-4 overflow-x-auto px-4 pb-1"
-        style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}
-      >
+    <section className="home-section">
+      <div className="home-horizontal-viewport">
+      <div className="home-horizontal-list pb-1">
         {categories.map((category) => (
-          <button
+          <TapAction
             key={category.id}
-            type="button"
-            onClick={() => handleClick(category)}
-            className="flex w-[56px] shrink-0 flex-col items-center gap-1.5"
+            onTap={() => handleClick(category)}
+            ariaLabel={`${category.label} 카테고리`}
+            className="home-horizontal-card flex w-[56px] cursor-pointer flex-col items-center gap-1.5"
           >
             <span
               className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
@@ -102,8 +101,9 @@ export function HomeCategoryRow({ categories }: HomeCategoryRowProps) {
             <span className="whitespace-nowrap text-[11px] font-medium text-ink-secondary">
               {category.label}
             </span>
-          </button>
+          </TapAction>
         ))}
+      </div>
       </div>
     </section>
   );

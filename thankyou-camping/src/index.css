@@ -5,18 +5,82 @@
 @tailwind utilities;
 
 @layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   html,
   body,
   #root {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
     @apply min-h-screen bg-white font-sans text-ink antialiased;
   }
 
   body {
     @apply m-0;
+    overscroll-behavior-x: none;
+  }
+
+  img {
+    max-width: 100%;
   }
 }
 
 @layer components {
+  .home-section {
+    width: 100%;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .home-section-header {
+    width: 100%;
+  }
+
+  .home-horizontal-viewport {
+    width: calc(100% + 64px);
+    margin-left: -32px;
+    margin-right: -32px;
+    overflow-x: hidden;
+  }
+
+  .home-horizontal-list {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    padding-left: 32px;
+    padding-right: 32px;
+    scroll-padding-left: 32px;
+    scroll-padding-right: 32px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+    touch-action: pan-x pan-y;
+  }
+
+  .home-horizontal-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .home-horizontal-card {
+    flex: 0 0 auto;
+    min-width: 0;
+    touch-action: auto;
+  }
+
+  .home-page {
+    touch-action: pan-y;
+  }
+
+  .card-image,
+  .campground-card img {
+    touch-action: pan-y;
+  }
+
   .btn-cta {
     @apply h-14 rounded-[14px] bg-[#F26522] text-sm font-semibold text-white;
   }

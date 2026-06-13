@@ -60,7 +60,7 @@ export function CoverImage({
 
   return (
     <div
-      className={`bg-cover bg-center bg-no-repeat ${className}`}
+      className={`card-image bg-cover bg-center bg-no-repeat ${className}`}
       style={{
         height: heightStyle,
         backgroundImage: `url("${url}")`,
@@ -88,7 +88,7 @@ export function HorizontalGallery({
       className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto overscroll-x-contain px-4"
       style={{
         WebkitOverflowScrolling: 'touch',
-        touchAction: 'pan-x',
+        touchAction: 'pan-x pan-y',
         scrollSnapType: 'x proximity',
       }}
     >

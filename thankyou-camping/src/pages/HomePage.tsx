@@ -8,6 +8,7 @@ import { HomeNewCampCard } from '../components/HomeNewCampCard';
 import { HomePopularCampCard } from '../components/HomePopularCampCard';
 import { HomeSearchBar } from '../components/HomeSearchBar';
 import { HomeSectionHeader } from '../components/HomeSectionHeader';
+import { TapAction } from '../components/TapAction';
 import { useSearch } from '../context/SearchContext';
 import {
   HOME_AVAILABLE_CAMPS,
@@ -30,6 +31,30 @@ function matchesNewCampRegion(campgroundId: string, region: NewCampRegion): bool
     return campground.location.includes('서울') || campground.region === '서울';
   }
   return campground.region === region;
+}
+
+function NewCampRegionChip({
+  region,
+  active,
+  onSelect,
+}: {
+  region: NewCampRegion;
+  active: boolean;
+  onSelect: (region: NewCampRegion) => void;
+}) {
+  return (
+    <TapAction
+      onTap={() => onSelect(region)}
+      ariaLabel={`${region} 신생 캠핑장 보기`}
+      className={`home-horizontal-card cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium ${
+        active
+          ? 'border-[#F26522] bg-[#F26522] text-white'
+          : 'border-surface-border bg-white text-ink-secondary'
+      }`}
+    >
+      {region}
+    </TapAction>
+  );
 }
 
 export function HomePage() {
@@ -58,17 +83,21 @@ export function HomePage() {
 
   return (
     <AppShell showBottomNav className="bg-[#F5F5F5]">
-      <header className="sticky top-0 z-30 bg-[#F5F5F5] px-4 pb-3 pt-4">
+      <header className="sticky top-0 z-30 bg-[#F5F5F5] px-8 pb-3 pt-4">
         <HomeSearchBar />
       </header>
 
-      <main className="space-y-6 px-4 pb-4">
-        <HomeHeroBannerCarousel banners={HOME_HERO_BANNERS} />
+      <main className="home-page space-y-6 overflow-x-hidden pb-4">
+        <div className="px-8">
+          <HomeHeroBannerCarousel banners={HOME_HERO_BANNERS} />
+        </div>
 
         <HomeCategoryRow categories={HOME_CATEGORIES} />
 
-        <section>
-          <HomeSectionHeader title="맞춤 캠핑장" />
+        <section className="home-section">
+          <div className="home-section-header">
+            <HomeSectionHeader title="맞춤 캠핑장" />
+          </div>
           <HomeHorizontalScroll>
             {HOME_CUSTOM_CAMPS.map((id, index) => (
               <HomeCompactCampCard
@@ -81,8 +110,10 @@ export function HomePage() {
           </HomeHorizontalScroll>
         </section>
 
-        <section>
-          <HomeSectionHeader title="지금 예약 가능한 캠핑장" />
+        <section className="home-section">
+          <div className="home-section-header">
+            <HomeSectionHeader title="지금 예약 가능한 캠핑장" />
+          </div>
           <HomeHorizontalScroll>
             {HOME_AVAILABLE_CAMPS.map((id, index) => (
               <HomeCompactCampCard
@@ -96,8 +127,10 @@ export function HomePage() {
           </HomeHorizontalScroll>
         </section>
 
-        <section>
-          <HomeSectionHeader title="실시간 인기 캠핑장" />
+        <section className="home-section">
+          <div className="home-section-header">
+            <HomeSectionHeader title="실시간 인기 캠핑장" />
+          </div>
           <HomeHorizontalScroll>
             {HOME_POPULAR_CAMPS.map((item, index) => (
               <HomePopularCampCard
@@ -110,29 +143,21 @@ export function HomePage() {
           </HomeHorizontalScroll>
         </section>
 
-        <section>
-          <HomeSectionHeader title="신생 캠핑장" />
-          <div
-            className="scrollbar-hide -mx-4 mb-3 flex gap-2 overflow-x-auto px-4"
-            style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}
-          >
-            {NEW_CAMP_REGIONS.map((region) => {
-              const active = newCampRegion === region;
-              return (
-                <button
+        <section className="home-section">
+          <div className="home-section-header">
+            <HomeSectionHeader title="신생 캠핑장" />
+          </div>
+          <div className="home-horizontal-viewport">
+            <div className="home-horizontal-list mb-3 gap-2">
+              {NEW_CAMP_REGIONS.map((region) => (
+                <NewCampRegionChip
                   key={region}
-                  type="button"
-                  onClick={() => handleNewCampRegion(region)}
-                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium ${
-                    active
-                      ? 'border-[#F26522] bg-[#F26522] text-white'
-                      : 'border-surface-border bg-white text-ink-secondary'
-                  }`}
-                >
-                  {region}
-                </button>
-              );
-            })}
+                  region={region}
+                  active={newCampRegion === region}
+                  onSelect={handleNewCampRegion}
+                />
+              ))}
+            </div>
           </div>
           <div className="space-y-2.5">
             {filteredNewCamps.map((id, index) => (

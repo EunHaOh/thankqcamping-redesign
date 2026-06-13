@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { CoverImage } from './CoverImage';
+import { TapAction } from './TapAction';
 import { getCampHero } from '../data/images';
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
@@ -22,22 +23,23 @@ export function HomePopularCampCard({
   if (!campground) return null;
 
   const hero = getCampHero(campground.id);
+  const handleTap = () => {
+    trackEvent('tq_click_home_camp_card', {
+      page_name: 'home',
+      section_name: '실시간 인기 캠핑장',
+      campground_id: campground.id,
+      campground_name: campground.name,
+      card_index: cardIndex,
+      test_version: TEST_VERSION,
+    });
+    navigate(ROUTES.campgroundDetail(campground.id));
+  };
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        trackEvent('tq_click_home_camp_card', {
-          page_name: 'home',
-          section_name: '실시간 인기 캠핑장',
-          campground_id: campground.id,
-          campground_name: campground.name,
-          card_index: cardIndex,
-          test_version: TEST_VERSION,
-        });
-        navigate(ROUTES.campgroundDetail(campground.id));
-      }}
-      className="relative w-[280px] shrink-0 snap-start overflow-hidden rounded-2xl text-left shadow-sm"
+    <TapAction
+      onTap={handleTap}
+      ariaLabel={`${campground.name} 상세 보기`}
+      className="home-horizontal-card campground-card relative w-[280px] cursor-pointer snap-start overflow-hidden rounded-2xl text-left shadow-sm"
       style={{ scrollSnapAlign: 'start' }}
     >
       <CoverImage
@@ -56,6 +58,6 @@ export function HomePopularCampCard({
         </p>
         <p className="mt-2 text-[11px] text-white/75">{viewerLabel}</p>
       </div>
-    </button>
+    </TapAction>
   );
 }

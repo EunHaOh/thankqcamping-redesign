@@ -58,7 +58,7 @@ function SiteDetailPhotoScroll({
         className="scrollbar-hide flex w-full gap-3 overflow-x-auto overscroll-x-contain"
         style={{
           WebkitOverflowScrolling: 'touch',
-          touchAction: 'pan-x',
+          touchAction: 'pan-x pan-y',
           scrollSnapType: 'x proximity',
         }}
       >

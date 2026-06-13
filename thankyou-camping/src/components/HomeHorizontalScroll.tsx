@@ -6,15 +6,8 @@ interface HomeHorizontalScrollProps {
 
 export function HomeHorizontalScroll({ children }: HomeHorizontalScrollProps) {
   return (
-    <div
-      className="scrollbar-hide -mx-4 flex gap-3 overflow-x-auto px-4 pb-1"
-      style={{
-        WebkitOverflowScrolling: 'touch',
-        touchAction: 'pan-x',
-        scrollSnapType: 'x proximity',
-      }}
-    >
-      {children}
+    <div className="home-horizontal-viewport">
+      <div className="home-horizontal-list pb-1">{children}</div>
     </div>
   );
 }
