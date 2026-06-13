@@ -52,6 +52,7 @@
     display: flex;
     gap: 14px;
     overflow-x: auto;
+    overflow-y: visible;
     padding-left: 16px;
     padding-right: 16px;
     scroll-padding-left: 16px;
@@ -69,7 +70,7 @@
   .home-horizontal-card {
     flex: 0 0 auto;
     min-width: 0;
-    touch-action: pan-y;
+    touch-action: auto;
   }
 
   .home-page {
@@ -78,7 +79,7 @@
 
   .card-image,
   .campground-card img {
-    touch-action: pan-y;
+    touch-action: auto;
   }
 
   .btn-cta {
