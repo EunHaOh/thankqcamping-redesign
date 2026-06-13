@@ -83,12 +83,12 @@ export function HomePage() {
 
   return (
     <AppShell showBottomNav className="bg-[#F5F5F5]">
-      <header className="sticky top-0 z-30 bg-[#F5F5F5] px-8 pb-3 pt-4">
+      <header className="sticky top-0 z-30 bg-[#F5F5F5] px-4 pb-3 pt-4">
         <HomeSearchBar />
       </header>
 
       <main className="home-page space-y-6 overflow-x-hidden pb-4">
-        <div className="px-8">
+        <div className="px-4">
           <HomeHeroBannerCarousel banners={HOME_HERO_BANNERS} />
         </div>
 
