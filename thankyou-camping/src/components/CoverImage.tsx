@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { IMAGE_FALLBACK } from '../data/images';
 
@@ -44,6 +44,7 @@ interface CoverImageProps {
   className?: string;
   style?: CSSProperties;
   ariaLabel?: string;
+  priority?: boolean;
 }
 
 export function CoverImage({
@@ -53,22 +54,76 @@ export function CoverImage({
   className = '',
   style,
   ariaLabel = '캠핑장 사진',
+  priority = false,
 }: CoverImageProps) {
-  const url = useResolvedImage(sources, fallback);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const candidates = useMemo(() => [...sources, fallback], [sources, fallback]);
+  const [isInView, setIsInView] = useState(priority);
+  const [srcIndex, setSrcIndex] = useState(0);
+  const currentSrc = isInView
+    ? candidates[Math.min(srcIndex, candidates.length - 1)] ?? fallback
+    : null;
   const heightStyle =
     typeof height === 'number' ? `${height}px` : height;
 
+  useEffect(() => {
+    setSrcIndex(0);
+  }, [candidates]);
+
+  useEffect(() => {
+    if (isInView) return;
+
+    if (!('IntersectionObserver' in window)) {
+      setIsInView(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '300px' },
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [isInView]);
+
   return (
     <div
+      ref={containerRef}
       className={`card-image bg-cover bg-center bg-no-repeat ${className}`}
       style={{
         height: heightStyle,
-        backgroundImage: `url("${url}")`,
         ...style,
       }}
-      role="img"
-      aria-label={ariaLabel}
-    />
+      role={currentSrc ? undefined : 'img'}
+      aria-label={currentSrc ? undefined : ariaLabel}
+    >
+      {currentSrc && (
+        <img
+          src={currentSrc}
+          alt={ariaLabel}
+          loading={priority ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchPriority={priority ? 'high' : 'auto'}
+          draggable={false}
+          height={typeof height === 'number' ? height : undefined}
+          onError={() => {
+            setSrcIndex((prev) => (
+              prev < candidates.length - 1 ? prev + 1 : prev
+            ));
+          }}
+          className="h-full w-full object-cover"
+        />
+      )}
+    </div>
   );
 }
 
@@ -116,19 +171,17 @@ function GalleryCard({
   height: number;
   width: string;
 }) {
-  const url = useResolvedImage(sources, fallback);
-
   return (
-    <div
-      className="shrink-0 snap-start rounded-2xl bg-cover bg-center bg-no-repeat"
+    <CoverImage
+      sources={sources}
+      fallback={fallback}
+      height={height}
+      className="shrink-0 snap-start overflow-hidden rounded-2xl"
       style={{
         width,
-        height,
-        backgroundImage: `url("${url}")`,
         scrollSnapAlign: 'start',
       }}
-      role="img"
-      aria-label="사이트 사진"
+      ariaLabel="사이트 사진"
     />
   );
 }

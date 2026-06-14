@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CoverImage } from './CoverImage';
 import { StarRating } from './StarRating';
@@ -12,7 +13,10 @@ interface HomeNewCampCardProps {
   cardIndex: number;
 }
 
-export function HomeNewCampCard({ campgroundId, cardIndex }: HomeNewCampCardProps) {
+export const HomeNewCampCard = memo(function HomeNewCampCard({
+  campgroundId,
+  cardIndex,
+}: HomeNewCampCardProps) {
   const navigate = useNavigate();
   const campground = getCampgroundById(campgroundId);
 
@@ -58,4 +62,4 @@ export function HomeNewCampCard({ campgroundId, cardIndex }: HomeNewCampCardProp
       </div>
     </TapAction>
   );
-}
+});

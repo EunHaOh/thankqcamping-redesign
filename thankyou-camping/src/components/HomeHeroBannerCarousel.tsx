@@ -24,6 +24,7 @@ export function HomeHeroBannerCarousel({ banners }: HomeHeroBannerCarouselProps)
           fallback={banner.fallback}
           height={200}
           className="w-full"
+          priority
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent" />
         <div className="absolute left-4 top-4 right-4">

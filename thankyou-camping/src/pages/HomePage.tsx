@@ -94,7 +94,7 @@ export function HomePage() {
 
         <HomeCategoryRow categories={HOME_CATEGORIES} />
 
-        <section className="home-section">
+        <section className="home-section home-performance-section">
           <div className="home-section-header">
             <HomeSectionHeader title="맞춤 캠핑장" />
           </div>
@@ -110,7 +110,7 @@ export function HomePage() {
           </HomeHorizontalScroll>
         </section>
 
-        <section className="home-section">
+        <section className="home-section home-performance-section">
           <div className="home-section-header">
             <HomeSectionHeader title="지금 예약 가능한 캠핑장" />
           </div>
@@ -127,7 +127,7 @@ export function HomePage() {
           </HomeHorizontalScroll>
         </section>
 
-        <section className="home-section">
+        <section className="home-section home-performance-section">
           <div className="home-section-header">
             <HomeSectionHeader title="실시간 인기 캠핑장" />
           </div>
@@ -143,7 +143,7 @@ export function HomePage() {
           </HomeHorizontalScroll>
         </section>
 
-        <section className="home-section">
+        <section className="home-section home-performance-section">
           <div className="home-section-header">
             <HomeSectionHeader title="신생 캠핑장" />
           </div>

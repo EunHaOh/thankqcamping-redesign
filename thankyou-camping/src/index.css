@@ -37,6 +37,11 @@
     padding-right: 16px;
   }
 
+  .home-performance-section {
+    content-visibility: auto;
+    contain-intrinsic-size: 520px;
+  }
+
   .home-section-header {
     width: 100%;
   }
