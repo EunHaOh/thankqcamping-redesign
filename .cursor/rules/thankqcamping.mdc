@@ -1,0 +1,22 @@
+---
+description: Core working rules for the ThankQCamping Vite React PWA project
+alwaysApply: true
+---
+
+# ThankQCamping Project Rules
+
+- This project is the ThankQCamping Vite React PWA project.
+- The actual application code lives under `thankyou-camping/src`.
+- Before reporting that a code change is complete, verify with `git status`, `git diff`, relevant `Select-String` searches, and `npm.cmd run build`.
+- Do not claim that something was implemented unless the implementation exists in the actual code.
+- If a required search returns no results, do not report the work as complete.
+- Do not commit `dist`, `tsconfig.tsbuildinfo`, or `node_modules`.
+- Do not break existing PWA behavior, GA4/GTM/Clarity event flow, or the home/search/detail/site selection/booking confirmation flows without explicit user approval.
+- Do not run `commit`, `push`, close GitHub issues, or merge PRs without explicit user approval.
+
+## Verification Expectations
+
+- Use PowerShell-compatible commands when verifying on this Windows project.
+- Prefer `Select-String` for requested implementation checks when the issue asks for specific code existence verification.
+- Restore generated build artifacts such as `thankyou-camping/dist/index.html` and `thankyou-camping/tsconfig.tsbuildinfo` after build verification if they changed.
+- Summaries must separate verified facts from remaining manual checks.
