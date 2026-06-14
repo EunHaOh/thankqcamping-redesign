@@ -8,6 +8,7 @@ import { HomeNewCampCard } from '../components/HomeNewCampCard';
 import { HomePopularCampCard } from '../components/HomePopularCampCard';
 import { HomeSearchBar } from '../components/HomeSearchBar';
 import { HomeSectionHeader } from '../components/HomeSectionHeader';
+import { PwaInstallBanner } from '../components/PwaInstallBanner';
 import { TapAction } from '../components/TapAction';
 import { useSearch } from '../context/SearchContext';
 import {
@@ -88,7 +89,8 @@ export function HomePage() {
       </header>
 
       <main className="home-page space-y-6 overflow-x-hidden pb-4">
-        <div className="px-4">
+        <div className="space-y-3 px-4">
+          <PwaInstallBanner />
           <HomeHeroBannerCarousel banners={HOME_HERO_BANNERS} />
         </div>
 
