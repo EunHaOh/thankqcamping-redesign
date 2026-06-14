@@ -48,6 +48,10 @@ export default {
       },
       maxWidth: {
         mobile: '390px',
+        'mobile-wide': '480px',
+      },
+      screens: {
+        foldable: '520px',
       },
     },
   },

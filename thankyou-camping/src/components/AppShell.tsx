@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { MobileShell } from './MobileShell';
-import { BottomNav } from './BottomNav';
+import { BottomNavigation } from './BottomNavigation';
 
 interface AppShellProps {
   children: ReactNode;
@@ -24,7 +24,7 @@ export function AppShell({
       >
         {children}
       </div>
-      {showBottomNav && <BottomNav />}
+      {showBottomNav && <BottomNavigation />}
     </MobileShell>
   );
 }
