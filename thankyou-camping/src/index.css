@@ -15,13 +15,18 @@
   body,
   #root {
     width: 100%;
+    min-height: 100%;
     min-width: 0;
+    margin: 0;
     overflow-x: hidden;
-    @apply min-h-screen bg-white font-sans text-ink antialiased;
+    @apply bg-white font-sans text-ink antialiased;
+  }
+
+  html {
+    overscroll-behavior-x: none;
   }
 
   body {
-    @apply m-0;
     overscroll-behavior-x: none;
   }
 
@@ -31,15 +36,33 @@
 }
 
 @layer components {
-  .home-section {
+  .app-shell {
     width: 100%;
-    padding-left: 16px;
-    padding-right: 16px;
+    min-width: 0;
+    min-height: 100dvh;
+    overflow-x: hidden;
   }
 
-  .home-performance-section {
-    content-visibility: auto;
-    contain-intrinsic-size: 520px;
+  .app-container {
+    @apply w-full min-w-0 max-w-full;
+  }
+
+  @media (min-width: 768px) {
+    .app-container {
+      @apply mx-auto;
+      max-width: 600px;
+    }
+  }
+
+  .app-fixed-bar {
+    @apply fixed inset-x-0 z-[100] w-full max-w-full;
+  }
+
+  .home-section {
+    width: 100%;
+    min-width: 0;
+    padding-left: 32px;
+    padding-right: 32px;
   }
 
   .home-section-header {
@@ -47,25 +70,25 @@
   }
 
   .home-horizontal-viewport {
-    width: calc(100% + 32px);
-    margin-left: -16px;
-    margin-right: -16px;
+    width: calc(100% + 64px);
+    margin-left: -32px;
+    margin-right: -32px;
     overflow-x: hidden;
   }
 
   .home-horizontal-list {
     display: flex;
-    gap: 14px;
+    gap: 24px;
+    min-width: 0;
     overflow-x: auto;
-    overflow-y: visible;
-    padding-left: 16px;
-    padding-right: 16px;
-    scroll-padding-left: 16px;
-    scroll-padding-right: 16px;
+    padding-left: 32px;
+    padding-right: 32px;
+    scroll-padding-left: 32px;
+    scroll-padding-right: 32px;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    scrollbar-width: none;
     touch-action: pan-x pan-y;
+    scrollbar-width: none;
   }
 
   .home-horizontal-list::-webkit-scrollbar {
@@ -75,16 +98,18 @@
   .home-horizontal-card {
     flex: 0 0 auto;
     min-width: 0;
-    touch-action: auto;
   }
 
-  .home-page {
+  .home-card {
     touch-action: pan-y;
   }
 
   .card-image,
-  .campground-card img {
-    touch-action: auto;
+  .card-image img {
+    touch-action: pan-y;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   .btn-cta {
@@ -108,5 +133,21 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .home-scroll-main {
+    width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .home-page {
+    touch-action: pan-y;
+  }
+
+  .home-sticky-header {
+    contain: layout style paint;
   }
 }

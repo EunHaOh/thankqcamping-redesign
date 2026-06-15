@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { HomeCategoryRow } from '../components/HomeCategoryRow';
 import { HomeCompactCampCard } from '../components/HomeCompactCampCard';
@@ -9,8 +9,8 @@ import { HomePopularCampCard } from '../components/HomePopularCampCard';
 import { HomeSearchBar } from '../components/HomeSearchBar';
 import { HomeSectionHeader } from '../components/HomeSectionHeader';
 import { PwaInstallBanner } from '../components/PwaInstallBanner';
-import { TapAction } from '../components/TapAction';
 import { useSearch } from '../context/SearchContext';
+import { useTapOnlyClick } from '../hooks/useTapOnlyClick';
 import {
   HOME_AVAILABLE_CAMPS,
   HOME_CATEGORIES,
@@ -23,6 +23,12 @@ import {
 } from '../data/homeData';
 import { getCampgroundById } from '../data/mockData';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
+import {
+  initHomeLayoutDebug,
+  initHomePerformanceDebug,
+  logHomePerformance,
+  collectHomePerformanceSnapshot,
+} from '../lib/homePerformanceDebug';
 
 function matchesNewCampRegion(campgroundId: string, region: NewCampRegion): boolean {
   if (region === '전체') return true;
@@ -34,6 +40,12 @@ function matchesNewCampRegion(campgroundId: string, region: NewCampRegion): bool
   return campground.region === region;
 }
 
+const HOME_CARD_COUNT =
+  HOME_CUSTOM_CAMPS.length +
+  HOME_AVAILABLE_CAMPS.length +
+  HOME_POPULAR_CAMPS.length +
+  HOME_NEW_CAMPS.length;
+
 function NewCampRegionChip({
   region,
   active,
@@ -43,24 +55,32 @@ function NewCampRegionChip({
   active: boolean;
   onSelect: (region: NewCampRegion) => void;
 }) {
+  const handleTap = useCallback(() => onSelect(region), [onSelect, region]);
+  const handlers = useTapOnlyClick(handleTap);
+
   return (
-    <TapAction
-      onTap={() => onSelect(region)}
-      ariaLabel={`${region} 신생 캠핑장 보기`}
-      className={`home-horizontal-card cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium ${
+    <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={active}
+      className={`home-card home-horizontal-card shrink-0 cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium ${
         active
           ? 'border-[#F26522] bg-[#F26522] text-white'
           : 'border-surface-border bg-white text-ink-secondary'
       }`}
+      {...handlers}
     >
       {region}
-    </TapAction>
+    </div>
   );
 }
 
 export function HomePage() {
   const { setRegionLabel } = useSearch();
   const [newCampRegion, setNewCampRegion] = useState<NewCampRegion>('전체');
+  const renderCountRef = useRef(0);
+  const mainRef = useRef<HTMLElement>(null);
+  renderCountRef.current += 1;
 
   useEffect(() => {
     trackEvent('tq_view_home', {
@@ -70,33 +90,49 @@ export function HomePage() {
     });
   }, []);
 
+  useEffect(() => {
+    return initHomePerformanceDebug(() => renderCountRef.current);
+  }, []);
+
+  useEffect(() => {
+    return initHomeLayoutDebug(() => mainRef.current);
+  }, []);
+
   const filteredNewCamps = useMemo(
     () => HOME_NEW_CAMPS.filter((id) => matchesNewCampRegion(id, newCampRegion)),
     [newCampRegion],
   );
 
-  const handleNewCampRegion = (region: NewCampRegion) => {
-    setNewCampRegion(region);
-    if (region !== '전체') {
-      setRegionLabel(region);
-    }
-  };
+  const handleNewCampRegion = useCallback(
+    (region: NewCampRegion) => {
+      setNewCampRegion(region);
+      if (region !== '전체') {
+        setRegionLabel(region);
+      }
+      if (import.meta.env.DEV) {
+        window.setTimeout(() => {
+          logHomePerformance(collectHomePerformanceSnapshot(renderCountRef.current));
+        }, 300);
+      }
+    },
+    [setRegionLabel],
+  );
 
   return (
     <AppShell showBottomNav className="bg-[#F5F5F5]">
-      <header className="sticky top-0 z-30 bg-[#F5F5F5] px-4 pb-3 pt-4">
+      <header className="home-sticky-header sticky top-0 z-30 w-full bg-[#F5F5F5] px-8 pb-3 pt-4">
         <HomeSearchBar />
       </header>
 
-      <main className="home-page space-y-6 overflow-x-hidden pb-4">
-        <div className="space-y-3 px-4">
+      <main ref={mainRef} className="home-page home-scroll-main w-full min-w-0 touch-pan-y space-y-6 pb-4">
+        <div className="w-full min-w-0 space-y-6 px-8">
           <PwaInstallBanner />
           <HomeHeroBannerCarousel banners={HOME_HERO_BANNERS} />
         </div>
 
         <HomeCategoryRow categories={HOME_CATEGORIES} />
 
-        <section className="home-section home-performance-section">
+        <section className="home-section">
           <div className="home-section-header">
             <HomeSectionHeader title="맞춤 캠핑장" />
           </div>
@@ -112,7 +148,7 @@ export function HomePage() {
           </HomeHorizontalScroll>
         </section>
 
-        <section className="home-section home-performance-section">
+        <section className="home-section">
           <div className="home-section-header">
             <HomeSectionHeader title="지금 예약 가능한 캠핑장" />
           </div>
@@ -129,7 +165,7 @@ export function HomePage() {
           </HomeHorizontalScroll>
         </section>
 
-        <section className="home-section home-performance-section">
+        <section className="home-section">
           <div className="home-section-header">
             <HomeSectionHeader title="실시간 인기 캠핑장" />
           </div>
@@ -145,7 +181,7 @@ export function HomePage() {
           </HomeHorizontalScroll>
         </section>
 
-        <section className="home-section home-performance-section">
+        <section className="home-section">
           <div className="home-section-header">
             <HomeSectionHeader title="신생 캠핑장" />
           </div>
@@ -161,13 +197,17 @@ export function HomePage() {
               ))}
             </div>
           </div>
-          <div className="space-y-2.5">
+          <div className="w-full min-w-0 space-y-2.5">
             {filteredNewCamps.map((id, index) => (
               <HomeNewCampCard key={id} campgroundId={id} cardIndex={index} />
             ))}
           </div>
         </section>
       </main>
+
+      {import.meta.env.DEV && (
+        <span className="sr-only" data-home-card-count={HOME_CARD_COUNT} />
+      )}
     </AppShell>
   );
 }

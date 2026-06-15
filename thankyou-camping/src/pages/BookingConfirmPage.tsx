@@ -26,6 +26,7 @@ export function BookingConfirmPage() {
     if (!campground || !site) return;
     trackEvent('tq_view_reservation_confirm', {
       page_name: 'reservation_confirm',
+      page_path: `/campgrounds/${campground.id}/confirm`,
       campground_id: campground.id,
       campground_name: campground.name,
       site_id: site.id,

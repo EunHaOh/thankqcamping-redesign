@@ -50,24 +50,26 @@ export function BottomSheet({
         aria-label="닫기"
         onClick={onClose}
       />
-      {footer ? (
-        <div className="relative z-10 flex max-h-[85vh] w-full max-w-mobile flex-col overflow-hidden rounded-t-2xl bg-white">
-          <div className="shrink-0 px-6 pt-4">
-            <SheetHeader title={title} onClose={onClose} />
+      <div className="app-container relative z-10 w-full">
+        {footer ? (
+          <div className="flex max-h-[85vh] w-full flex-col overflow-hidden rounded-t-2xl bg-white">
+            <div className="shrink-0 px-6 pt-4">
+              <SheetHeader title={title} onClose={onClose} />
+            </div>
+            <div className="scrollbar-hide min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-6">
+              {children}
+            </div>
+            <div className="shrink-0 border-t border-surface-border bg-white px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
+              {footer}
+            </div>
           </div>
-          <div className="scrollbar-hide min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-6">
+        ) : (
+          <div className="max-h-[85vh] w-full overflow-y-auto rounded-t-2xl bg-white px-4 pb-8 pt-4">
+            <SheetHeader title={title} onClose={onClose} />
             {children}
           </div>
-          <div className="shrink-0 border-t border-surface-border bg-white px-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
-            {footer}
-          </div>
-        </div>
-      ) : (
-        <div className="relative z-10 max-h-[85vh] w-full max-w-mobile overflow-y-auto rounded-t-2xl bg-white px-4 pb-8 pt-4">
-          <SheetHeader title={title} onClose={onClose} />
-          {children}
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

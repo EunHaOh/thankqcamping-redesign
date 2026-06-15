@@ -16,8 +16,8 @@ export function FixedCTA({
   leftContent,
 }: FixedCTAProps) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[100] mx-auto w-full max-w-mobile border-t border-surface-border bg-white shadow-cta">
-      <div className="flex items-center gap-3 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
+    <div className="app-fixed-bar bottom-0 border-t border-surface-border bg-white shadow-cta">
+      <div className="flex w-full min-w-0 max-w-full items-center gap-3 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
         {leftContent && <div className="shrink-0">{leftContent}</div>}
         <button
           type="button"
@@ -29,7 +29,9 @@ export function FixedCTA({
         </button>
       </div>
       {sublabel && (
-        <p className="-mt-2 px-4 pb-3 text-center text-xs text-ink-muted">{sublabel}</p>
+        <div className="w-full min-w-0 max-w-full">
+          <p className="-mt-2 px-4 pb-3 text-center text-xs text-ink-muted">{sublabel}</p>
+        </div>
       )}
     </div>
   );

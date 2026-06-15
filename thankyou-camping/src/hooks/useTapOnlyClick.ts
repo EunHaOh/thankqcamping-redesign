@@ -2,6 +2,27 @@ import { useCallback, useRef, type KeyboardEvent, type PointerEvent } from 'reac
 
 const TAP_THRESHOLD_PX = 10;
 
+export type TouchIntent = 'tap' | 'scroll';
+
+export interface TouchDebugInfo {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  dx: number;
+  dy: number;
+  intent: TouchIntent;
+}
+
+function logTouchDebug(info: TouchDebugInfo) {
+  if (!import.meta.env.DEV) return;
+
+  console.log('[home-touch] touchstart:', { x: info.startX, y: info.startY });
+  console.log('[home-touch] touchend:', { x: info.endX, y: info.endY });
+  console.log('[home-touch] dx/dy:', { dx: info.dx, dy: info.dy });
+  console.log('[home-touch] intent:', info.intent);
+}
+
 export function useTapOnlyClick(onTap: () => void, threshold = TAP_THRESHOLD_PX) {
   const startRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -18,18 +39,20 @@ export function useTapOnlyClick(onTap: () => void, threshold = TAP_THRESHOLD_PX)
 
       const dx = Math.abs(event.clientX - start.x);
       const dy = Math.abs(event.clientY - start.y);
+      const intent: TouchIntent =
+        dx <= threshold && dy <= threshold ? 'tap' : 'scroll';
 
-      if (import.meta.env.DEV) {
-        console.log('[home-touch]', {
-          start,
-          end: { x: event.clientX, y: event.clientY },
-          dx,
-          dy,
-          intent: dx <= threshold && dy <= threshold ? 'tap' : 'scroll',
-        });
-      }
+      logTouchDebug({
+        startX: start.x,
+        startY: start.y,
+        endX: event.clientX,
+        endY: event.clientY,
+        dx,
+        dy,
+        intent,
+      });
 
-      if (dx <= threshold && dy <= threshold) {
+      if (intent === 'tap') {
         onTap();
       }
     },
@@ -42,9 +65,10 @@ export function useTapOnlyClick(onTap: () => void, threshold = TAP_THRESHOLD_PX)
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
-      if (event.key !== 'Enter' && event.key !== ' ') return;
-      event.preventDefault();
-      onTap();
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        onTap();
+      }
     },
     [onTap],
   );

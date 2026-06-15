@@ -3,11 +3,7 @@ import { TEST_VERSION, trackEvent } from '../lib/analytics';
 
 const DISMISS_STORAGE_KEY = 'tq_pwa_install_banner_dismissed';
 
-export type BrowserType =
-  | 'android_chrome'
-  | 'ios_safari'
-  | 'desktop_chrome'
-  | 'other';
+export type BrowserType = 'android_chrome' | 'ios_safari' | 'desktop_chrome' | 'other';
 
 export type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -24,35 +20,13 @@ declare global {
   }
 }
 
-function getStoredDismissed() {
-  if (typeof window === 'undefined') return false;
-  try {
-    return window.localStorage.getItem(DISMISS_STORAGE_KEY) === '1';
-  } catch {
-    return false;
+function devLog(message: string, payload?: unknown) {
+  if (!import.meta.env.DEV) return;
+  if (payload !== undefined) {
+    console.log(`[PWA] ${message}`, payload);
+  } else {
+    console.log(`[PWA] ${message}`);
   }
-}
-
-function setStoredDismissed(value: boolean) {
-  if (typeof window === 'undefined') return;
-  try {
-    if (value) {
-      window.localStorage.setItem(DISMISS_STORAGE_KEY, '1');
-    } else {
-      window.localStorage.removeItem(DISMISS_STORAGE_KEY);
-    }
-  } catch {
-    // Storage can be unavailable in private or restricted browser modes.
-  }
-}
-
-export function isStandaloneMode() {
-  if (typeof window === 'undefined') return false;
-  return (
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.matchMedia('(display-mode: fullscreen)').matches ||
-    navigator.standalone === true
-  );
 }
 
 export function getBrowserType(): BrowserType {
@@ -63,38 +37,103 @@ export function getBrowserType(): BrowserType {
     /iPad|iPhone|iPod/.test(ua) ||
     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isAndroid = /Android/i.test(ua);
-  const isChrome = /Chrome|CriOS/i.test(ua) && !/Edg|OPR|SamsungBrowser/i.test(ua);
+  const isChrome = /Chrome/i.test(ua) && !/Edg|OPR|Brave/i.test(ua);
   const isSafari = /Safari/i.test(ua) && !/Chrome|CriOS|FxiOS|Edg/i.test(ua);
 
   if (isIOS && isSafari) return 'ios_safari';
   if (isAndroid && isChrome) return 'android_chrome';
-  if (!isAndroid && !isIOS && isChrome) return 'desktop_chrome';
+  if (isChrome && !isAndroid && !isIOS) return 'desktop_chrome';
   return 'other';
+}
+
+export function isAppInstalled(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    navigator.standalone === true
+  );
+}
+
+function isBannerDismissed(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(DISMISS_STORAGE_KEY) === '1';
+}
+
+function getInstallGuide(browserType: BrowserType, hasDeferredPrompt: boolean): string {
+  if (browserType === 'ios_safari') {
+    return "Safari 공유 버튼을 누른 뒤 '홈 화면에 추가'를 선택해주세요.";
+  }
+  if (browserType === 'android_chrome' && !hasDeferredPrompt) {
+    return "Chrome 메뉴에서 '앱 설치' 또는 '홈 화면에 추가'를 선택해주세요.";
+  }
+  if (browserType === 'desktop_chrome') {
+    return "주소창 오른쪽 설치 아이콘 또는 Chrome 메뉴의 '저장 및 공유 > 앱 설치'를 확인해주세요.";
+  }
+  return '홈 화면에서 바로 열 수 있어요.';
 }
 
 export function usePwaInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
-  const [isStandalone, setIsStandalone] = useState(isStandaloneMode);
-  const [isInstalled, setIsInstalled] = useState(isStandaloneMode);
-  const [isDismissed, setIsDismissed] = useState(getStoredDismissed);
+  const [installed, setInstalled] = useState(isAppInstalled);
+  const [dismissed, setDismissed] = useState(isBannerDismissed);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const browserType = useMemo(() => getBrowserType(), []);
   const installPromptAvailable = deferredPrompt !== null;
-  const isIosSafari = browserType === 'ios_safari';
-  const isAndroidChrome = browserType === 'android_chrome';
-  const isDesktopChrome = browserType === 'desktop_chrome';
-  const canInstall = !isInstalled && !isStandalone && !isDismissed;
+
+  const supportedBrowser =
+    browserType === 'android_chrome' ||
+    browserType === 'ios_safari' ||
+    browserType === 'desktop_chrome';
+
+  const shouldShowBanner =
+    supportedBrowser && !installed && !dismissed;
+
+  const helperText = useMemo(
+    () =>
+      installPromptAvailable
+        ? '홈 화면에서 바로 열 수 있어요.'
+        : getInstallGuide(browserType, installPromptAvailable),
+    [browserType, installPromptAvailable],
+  );
+
+  const logDiagnostics = useCallback(async () => {
+    if (!import.meta.env.DEV) return;
+
+    const manifestLinked = Boolean(
+      document.querySelector('link[rel="manifest"]'),
+    );
+    let serviceWorkerRegistered = false;
+
+    if ('serviceWorker' in navigator) {
+      const registration = await navigator.serviceWorker.getRegistration();
+      serviceWorkerRegistered = Boolean(registration);
+    }
+
+    devLog('manifest linked', manifestLinked);
+    devLog('service worker registered', serviceWorkerRegistered);
+    devLog('beforeinstallprompt available', installPromptAvailable);
+    devLog('standalone mode', isAppInstalled());
+    devLog('browser_type', browserType);
+    devLog('banner visible', shouldShowBanner);
+  }, [browserType, installPromptAvailable, shouldShowBanner]);
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (event: BeforeInstallPromptEvent) => {
+    const onBeforeInstallPrompt = (event: BeforeInstallPromptEvent) => {
       event.preventDefault();
       setDeferredPrompt(event);
+      devLog('beforeinstallprompt fired');
     };
 
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
+    const onAppInstalled = () => {
+      setInstalled(true);
       setDeferredPrompt(null);
+      setGuideOpen(false);
+      devLog('appinstalled fired');
+
       trackEvent('tq_app_installed', {
         page_name: 'home',
         browser_type: browserType,
@@ -102,81 +141,69 @@ export function usePwaInstallPrompt() {
       });
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
+    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+    window.addEventListener('appinstalled', onAppInstalled);
+
+    void logDiagnostics();
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', onAppInstalled);
     };
-  }, [browserType]);
+  }, [browserType, logDiagnostics]);
 
   useEffect(() => {
-    const updateStandaloneState = () => {
-      const nextStandalone = isStandaloneMode();
-      setIsStandalone(nextStandalone);
-      setIsInstalled(nextStandalone);
-    };
+    void logDiagnostics();
+  }, [deferredPrompt, installed, dismissed, shouldShowBanner, logDiagnostics]);
 
-    updateStandaloneState();
-    window.addEventListener('focus', updateStandaloneState);
-
-    return () => window.removeEventListener('focus', updateStandaloneState);
+  const dismissBanner = useCallback(() => {
+    localStorage.setItem(DISMISS_STORAGE_KEY, '1');
+    setDismissed(true);
+    setGuideOpen(false);
   }, []);
 
-  const promptInstall = useCallback(async () => {
-    if (!deferredPrompt) return false;
+  const openInstallGuide = useCallback(() => {
+    trackEvent('tq_click_pwa_install', {
+      page_name: 'home',
+      browser_type: browserType,
+      test_version: TEST_VERSION,
+    });
 
-    await deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    setDeferredPrompt(null);
-
-    if (choice.outcome === 'accepted') {
-      trackEvent('tq_accept_pwa_install', {
-        page_name: 'home',
-        browser_type: browserType,
-        test_version: TEST_VERSION,
+    if (deferredPrompt) {
+      void deferredPrompt.prompt().then(() => deferredPrompt.userChoice).then((choice) => {
+        if (choice.outcome === 'accepted') {
+          trackEvent('tq_accept_pwa_install', {
+            page_name: 'home',
+            browser_type: browserType,
+            test_version: TEST_VERSION,
+          });
+        } else {
+          trackEvent('tq_dismiss_pwa_install', {
+            page_name: 'home',
+            browser_type: browserType,
+            test_version: TEST_VERSION,
+          });
+        }
+        setDeferredPrompt(null);
       });
-      return true;
+      return;
     }
 
-    trackEvent('tq_dismiss_pwa_install', {
-      page_name: 'home',
-      browser_type: browserType,
-      reason: 'prompt_dismissed',
-      test_version: TEST_VERSION,
-    });
-    return false;
+    setGuideOpen(true);
   }, [browserType, deferredPrompt]);
 
-  const dismissInstallBanner = useCallback((reason = 'banner_close') => {
-    setStoredDismissed(true);
-    setIsDismissed(true);
-    trackEvent('tq_dismiss_pwa_install', {
-      page_name: 'home',
-      browser_type: browserType,
-      reason,
-      test_version: TEST_VERSION,
-    });
-  }, [browserType]);
-
-  const resetInstallDismiss = useCallback(() => {
-    setStoredDismissed(false);
-    setIsDismissed(false);
+  const closeInstallGuide = useCallback(() => {
+    setGuideOpen(false);
   }, []);
 
   return {
-    canInstall,
-    isStandalone,
-    isInstalled,
-    isIosSafari,
-    isAndroidChrome,
-    isDesktopChrome,
-    isDismissed,
     browserType,
     installPromptAvailable,
-    promptInstall,
-    dismissInstallBanner,
-    resetInstallDismiss,
+    shouldShowBanner,
+    helperText,
+    guideOpen,
+    openInstallGuide,
+    closeInstallGuide,
+    dismissBanner,
   };
 }

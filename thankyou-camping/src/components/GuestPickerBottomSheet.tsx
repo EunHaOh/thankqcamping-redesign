@@ -94,14 +94,15 @@ export function GuestPickerBottomSheet({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center">
+    <div className="fixed inset-0 z-50 flex items-end justify-center overflow-hidden">
       <button
         type="button"
         className="absolute inset-0 bg-black/40"
         aria-label="닫기"
         onClick={onClose}
       />
-      <div className="relative z-10 flex max-h-[85vh] w-full max-w-mobile flex-col rounded-t-2xl bg-white">
+      <div className="app-container relative z-10 w-full">
+        <div className="flex max-h-[85vh] w-full flex-col rounded-t-2xl bg-white">
         <div className="shrink-0 px-4 pt-4">
           <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-surface-border" />
           <div className="mb-4 flex items-center justify-between">
@@ -163,6 +164,7 @@ export function GuestPickerBottomSheet({
               적용하기
             </button>
           </div>
+        </div>
         </div>
       </div>
     </div>

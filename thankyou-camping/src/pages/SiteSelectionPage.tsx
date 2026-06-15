@@ -45,6 +45,7 @@ export function SiteSelectionPage() {
     if (!campground) return;
     trackEvent('tq_view_site_select', {
       page_name: 'site_select',
+      page_path: `/campgrounds/${campground.id}/sites`,
       campground_id: campground.id,
       campground_name: campground.name,
       test_version: TEST_VERSION,

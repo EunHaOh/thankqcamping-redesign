@@ -32,6 +32,7 @@ export function CampCard({ campground, cardIndex, resultCount }: CampCardProps) 
       ...campgroundAnalyticsFields(campground),
       card_index: cardIndex,
       result_count: resultCount,
+      destination_page: 'camp_detail',
       test_version: TEST_VERSION,
     });
     navigate(ROUTES.campgroundDetail(campground.id));

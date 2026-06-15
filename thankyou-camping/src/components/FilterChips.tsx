@@ -31,7 +31,8 @@ export function FilterChips({
   onFullFilterClick,
 }: FilterChipsProps) {
   return (
-    <div className="scrollbar-hide -mx-4 flex items-center gap-2 overflow-x-auto px-4">
+    <div className="overflow-x-hidden">
+      <div className="scrollbar-hide -mx-4 flex items-center gap-2 overflow-x-auto px-4">
       <button
         type="button"
         onClick={onFullFilterClick}
@@ -57,6 +58,7 @@ export function FilterChips({
           </button>
         );
       })}
+    </div>
     </div>
   );
 }

@@ -46,6 +46,7 @@ export function AllReviewsPage() {
     if (!campground) return;
     trackEvent('tq_view_all_reviews', {
       page_name: 'all_reviews',
+      page_path: `/campgrounds/${campground.id}/reviews`,
       campground_id: campground.id,
       campground_name: campground.name,
       test_version: TEST_VERSION,
@@ -114,11 +115,13 @@ export function AllReviewsPage() {
                 review={review}
                 onDetail={() => {
                   trackEvent('tq_click_review_detail', {
-                    page_name: 'camp_detail',
+                    page_name: 'all_reviews',
+                    page_path: `/campgrounds/${campground.id}/reviews`,
                     campground_id: campground.id,
                     campground_name: campground.name,
                     review_id: review.id,
                     site_name: review.siteName,
+                    destination_page: 'review_detail',
                     test_version: TEST_VERSION,
                   });
                   navigate(ROUTES.reviewDetailPage(campground.id, review.id));

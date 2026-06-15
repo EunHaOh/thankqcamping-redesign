@@ -1,10 +1,10 @@
+import { memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSearch } from '../context/SearchContext';
 import type { HomeCategory } from '../data/homeData';
 import { ROUTES } from '../routes/paths';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
-import { TapAction } from './TapAction';
-
+import { useTapOnlyClick } from '../hooks/useTapOnlyClick';
 function CategoryIcon({ id }: { id: string }) {
   const common = 'stroke-current';
   switch (id) {
@@ -69,42 +69,60 @@ export function HomeCategoryRow({ categories }: HomeCategoryRowProps) {
   const navigate = useNavigate();
   const { applyTheme } = useSearch();
 
-  const handleClick = (category: HomeCategory) => {
-    trackEvent('tq_click_home_category', {
-      page_name: 'home',
-      category_name: category.label,
-      destination_page: 'search_results',
-      test_version: TEST_VERSION,
-    });
-    applyTheme(category);
-    navigate(ROUTES.searchResultList);
-  };
-
   return (
     <section className="home-section">
       <div className="home-horizontal-viewport">
-      <div className="home-horizontal-list pb-1">
-        {categories.map((category) => (
-          <TapAction
-            key={category.id}
-            onTap={() => handleClick(category)}
-            ariaLabel={`${category.label} 카테고리`}
-            className="home-horizontal-card flex w-[56px] cursor-pointer flex-col items-center gap-1.5"
-          >
-            <span
-              className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
-                CATEGORY_COLORS[category.id] ?? 'bg-white text-ink'
-              }`}
-            >
-              <CategoryIcon id={category.id} />
-            </span>
-            <span className="whitespace-nowrap text-[11px] font-medium text-ink-secondary">
-              {category.label}
-            </span>
-          </TapAction>
-        ))}
-      </div>
+        <div className="home-horizontal-list pb-1">
+          {categories.map((category) => (
+            <CategoryItem
+              key={category.id}
+              category={category}
+              onSelect={(selected) => {
+                trackEvent('tq_click_home_category', {
+                  page_name: 'home',
+                  category_name: selected.label,
+                  destination_page: 'search_results',
+                  test_version: TEST_VERSION,
+                });
+                applyTheme(selected);
+                navigate(ROUTES.searchResultList);
+              }}
+            />
+          ))}
+        </div>
       </div>
     </section>
   );
 }
+
+const CategoryItem = memo(function CategoryItem({
+  category,
+  onSelect,
+}: {
+  category: HomeCategory;
+  onSelect: (category: HomeCategory) => void;
+}) {
+  const handleTap = useCallback(() => onSelect(category), [category, onSelect]);
+  const handlers = useTapOnlyClick(handleTap);
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`${category.label} 카테고리`}
+      className="home-card home-horizontal-card flex w-[56px] cursor-pointer flex-col items-center gap-1.5"
+      {...handlers}
+    >
+      <span
+        className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+          CATEGORY_COLORS[category.id] ?? 'bg-white text-ink'
+        }`}
+      >
+        <CategoryIcon id={category.id} />
+      </span>
+      <span className="whitespace-nowrap text-[11px] font-medium text-ink-secondary">
+        {category.label}
+      </span>
+    </div>
+  );
+});

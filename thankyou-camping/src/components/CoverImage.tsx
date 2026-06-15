@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { IMAGE_FALLBACK } from '../data/images';
 
@@ -41,91 +41,61 @@ interface CoverImageProps {
   sources: string[];
   fallback?: string;
   height?: number | string;
+  width?: number | string;
   className?: string;
   style?: CSSProperties;
   ariaLabel?: string;
+  /** Hero / above-the-fold images */
   priority?: boolean;
 }
 
-export function CoverImage({
+export const CoverImage = memo(function CoverImage({
   sources,
   fallback = IMAGE_FALLBACK,
   height = 200,
+  width,
   className = '',
   style,
   ariaLabel = '캠핑장 사진',
   priority = false,
 }: CoverImageProps) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const candidates = useMemo(() => [...sources, fallback], [sources, fallback]);
-  const [isInView, setIsInView] = useState(priority);
   const [srcIndex, setSrcIndex] = useState(0);
-  const currentSrc = isInView
-    ? candidates[Math.min(srcIndex, candidates.length - 1)] ?? fallback
-    : null;
-  const heightStyle =
-    typeof height === 'number' ? `${height}px` : height;
+  const currentSrc = candidates[Math.min(srcIndex, candidates.length - 1)] ?? fallback;
 
-  useEffect(() => {
-    setSrcIndex(0);
-  }, [candidates]);
+  const handleError = useCallback(() => {
+    setSrcIndex((prev) => (prev < candidates.length - 1 ? prev + 1 : prev));
+  }, [candidates.length]);
 
-  useEffect(() => {
-    if (isInView) return;
-
-    if (!('IntersectionObserver' in window)) {
-      setIsInView(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsInView(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '300px' },
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, [isInView]);
+  const heightValue = typeof height === 'number' ? height : undefined;
+  const widthValue = typeof width === 'number' ? width : undefined;
+  const heightStyle = typeof height === 'number' ? `${height}px` : height;
+  const widthStyle = typeof width === 'number' ? `${width}px` : width;
 
   return (
     <div
-      ref={containerRef}
-      className={`card-image bg-cover bg-center bg-no-repeat ${className}`}
+      className={`overflow-hidden bg-[#E5E7EB] ${className}`}
       style={{
         height: heightStyle,
+        width: widthStyle,
         ...style,
       }}
-      role={currentSrc ? undefined : 'img'}
-      aria-label={currentSrc ? undefined : ariaLabel}
     >
-      {currentSrc && (
-        <img
-          src={currentSrc}
-          alt={ariaLabel}
-          loading={priority ? 'eager' : 'lazy'}
-          decoding="async"
-          fetchPriority={priority ? 'high' : 'auto'}
-          draggable={false}
-          height={typeof height === 'number' ? height : undefined}
-          onError={() => {
-            setSrcIndex((prev) => (
-              prev < candidates.length - 1 ? prev + 1 : prev
-            ));
-          }}
-          className="h-full w-full object-cover"
-        />
-      )}
+      <img
+        src={currentSrc}
+        alt={ariaLabel}
+        loading={priority ? 'eager' : 'lazy'}
+        fetchPriority={priority ? 'high' : 'auto'}
+        decoding="async"
+        draggable={false}
+        width={widthValue ?? undefined}
+        height={heightValue ?? undefined}
+        onError={handleError}
+        className="card-image block h-full w-full object-cover"
+      />
     </div>
   );
-}
+});
 
 interface HorizontalGalleryProps {
   items: { sources: string[]; fallback: string }[];
@@ -160,7 +130,7 @@ export function HorizontalGallery({
   );
 }
 
-function GalleryCard({
+const GalleryCard = memo(function GalleryCard({
   sources,
   fallback,
   height,
@@ -171,17 +141,32 @@ function GalleryCard({
   height: number;
   width: string;
 }) {
+  const candidates = useMemo(() => [...sources, fallback], [sources, fallback]);
+  const [srcIndex, setSrcIndex] = useState(0);
+  const currentSrc = candidates[Math.min(srcIndex, candidates.length - 1)] ?? fallback;
+
+  const handleError = useCallback(() => {
+    setSrcIndex((prev) => (prev < candidates.length - 1 ? prev + 1 : prev));
+  }, [candidates.length]);
+
   return (
-    <CoverImage
-      sources={sources}
-      fallback={fallback}
-      height={height}
-      className="shrink-0 snap-start overflow-hidden rounded-2xl"
+    <div
+      className="shrink-0 snap-start overflow-hidden rounded-2xl bg-[#E5E7EB]"
       style={{
         width,
+        height,
         scrollSnapAlign: 'start',
       }}
-      ariaLabel="사이트 사진"
-    />
+    >
+      <img
+        src={currentSrc}
+        alt="사이트 사진"
+        loading="lazy"
+        decoding="async"
+        height={height}
+        onError={handleError}
+        className="h-full w-full object-cover"
+      />
+    </div>
   );
-}
+});

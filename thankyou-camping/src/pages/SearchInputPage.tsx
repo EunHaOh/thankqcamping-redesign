@@ -43,6 +43,7 @@ export function SearchInputPage() {
     setSearchQuery(trimmed);
     trackEvent('tq_submit_search', {
       page_name: 'search_input',
+      page_path: '/search-input',
       search_term: trimmed,
       test_version: TEST_VERSION,
     });

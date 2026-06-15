@@ -16,11 +16,11 @@ export function AppShell({
   return (
     <MobileShell className={className}>
       <div
-        className={
+        className={`w-full min-w-0 overflow-x-hidden ${
           showBottomNav
             ? 'pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]'
-            : undefined
-        }
+            : ''
+        }`}
       >
         {children}
       </div>

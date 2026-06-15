@@ -4,6 +4,12 @@ export const GTM_CONTAINER_ID = 'GTM-KR93LNS7';
 /** GA4 측정 ID — GTM Google tag 설정용 (앱에서 gtag 설치/호출하지 않음) */
 export const GA4_MEASUREMENT_ID = 'G-C7J6MV88Y7';
 
+/**
+ * Microsoft Clarity 프로젝트 ID — GTM Custom HTML 태그에 설정.
+ * ID가 없으면 앱은 정상 동작하며, Clarity는 GTM에서 설치합니다.
+ */
+export const CLARITY_PROJECT_ID = 'CLARITY_PROJECT_ID_HERE';
+
 export const TEST_VERSION = 'tobe';
 
 const RETURN_FROM_DETAIL_KEY = 'tq_return_from_detail';
@@ -18,6 +24,25 @@ declare global {
 
 export type AnalyticsParams = Record<string, string | number | boolean | undefined>;
 
+export function isClarityAvailable(): boolean {
+  return typeof window !== 'undefined' && typeof window.clarity === 'function';
+}
+
+function pushToClarity(eventName: string, params: AnalyticsParams) {
+  if (!isClarityAvailable()) return;
+
+  try {
+    window.clarity!('event', eventName);
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        window.clarity!('set', key, String(value));
+      }
+    });
+  } catch {
+    // Clarity 미설치 또는 스크립트 오류 시 앱 동작에 영향 없음
+  }
+}
+
 export function trackEvent(eventName: string, params: AnalyticsParams = {}) {
   if (typeof window === 'undefined') return;
 
@@ -27,18 +52,40 @@ export function trackEvent(eventName: string, params: AnalyticsParams = {}) {
     ...params,
   });
 
-  if (typeof window.clarity === 'function') {
-    window.clarity('event', eventName);
-    Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined) {
-        window.clarity!('set', key, String(value));
-      }
-    });
-  }
+  pushToClarity(eventName, params);
 
   if (import.meta.env.DEV) {
     console.log('[analytics]', eventName, params);
   }
+}
+
+export function getDataLayerSnapshot(): {
+  exists: boolean;
+  totalLength: number;
+  tqEventCount: number;
+  recentTqEvents: Array<Record<string, unknown>>;
+} {
+  if (typeof window === 'undefined' || !window.dataLayer) {
+    return {
+      exists: false,
+      totalLength: 0,
+      tqEventCount: 0,
+      recentTqEvents: [],
+    };
+  }
+
+  const tqEvents = window.dataLayer.filter(
+    (item) =>
+      typeof item.event === 'string' &&
+      (item.event as string).startsWith('tq_'),
+  );
+
+  return {
+    exists: true,
+    totalLength: window.dataLayer.length,
+    tqEventCount: tqEvents.length,
+    recentTqEvents: tqEvents.slice(-10).reverse(),
+  };
 }
 
 export function markDetailBackToList(campgroundId: string, campgroundName: string) {

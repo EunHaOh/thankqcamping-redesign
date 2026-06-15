@@ -13,6 +13,7 @@ export function HomeSearchBar() {
         onClick={() => {
           trackEvent('tq_click_home_search', {
             page_name: 'home',
+            destination_page: 'search_input',
             test_version: TEST_VERSION,
           });
           navigate(ROUTES.searchInput);

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CoverImage } from './CoverImage';
 import { TapAction } from './TapAction';
@@ -20,11 +20,13 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
 }: HomePopularCampCardProps) {
   const navigate = useNavigate();
   const campground = getCampgroundById(campgroundId);
+  const hero = useMemo(
+    () => (campground ? getCampHero(campground.id) : null),
+    [campground],
+  );
 
-  if (!campground) return null;
-
-  const hero = getCampHero(campground.id);
-  const handleTap = () => {
+  const handleTap = useCallback(() => {
+    if (!campground) return;
     trackEvent('tq_click_home_camp_card', {
       page_name: 'home',
       section_name: '실시간 인기 캠핑장',
@@ -34,23 +36,26 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
       test_version: TEST_VERSION,
     });
     navigate(ROUTES.campgroundDetail(campground.id));
-  };
+  }, [campground, cardIndex, navigate]);
+
+  if (!campground || !hero) return null;
 
   return (
     <TapAction
       onTap={handleTap}
-      ariaLabel={`${campground.name} 상세 보기`}
-      className="home-horizontal-card campground-card relative w-[280px] cursor-pointer snap-start overflow-hidden rounded-2xl text-left shadow-sm"
+      aria-label={`${campground.name} 상세 보기`}
+      className="home-card home-horizontal-card relative w-[280px] cursor-pointer snap-start overflow-hidden rounded-2xl border border-surface-border text-left"
       style={{ scrollSnapAlign: 'start' }}
     >
       <CoverImage
         sources={hero.sources}
         fallback={hero.fallback}
         height={200}
+        width={280}
         className="w-full"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-      <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 p-4 text-white">
         <p className="text-base font-bold leading-snug">{campground.name}</p>
         <p className="mt-0.5 text-xs text-white/85">{campground.location}</p>
         <p className="mt-2 text-sm font-bold">

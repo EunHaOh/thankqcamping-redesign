@@ -183,13 +183,14 @@ export function CampgroundListPage() {
 
   return (
     <AppShell showBottomNav>
-      <div className="sticky top-0 z-30 bg-white">
+      <div className="sticky top-0 z-30 overflow-x-hidden bg-white">
         <BackHeader
           title={headerTitle}
           backTo={ROUTES.home}
           onBack={() => {
             trackEvent('tq_click_back_to_home', {
               page_name: 'search_results',
+              page_path: '/search',
               destination_page: 'home',
               test_version: TEST_VERSION,
             });

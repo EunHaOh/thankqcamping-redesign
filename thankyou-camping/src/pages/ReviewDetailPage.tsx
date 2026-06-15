@@ -24,6 +24,7 @@ export function ReviewDetailPage() {
     if (!campground || !review) return;
     trackEvent('tq_view_review_detail', {
       page_name: 'review_detail',
+      page_path: `/campgrounds/${campground.id}/reviews/${review.id}`,
       campground_id: campground.id,
       campground_name: campground.name,
       review_id: review.id,

@@ -275,7 +275,7 @@ export function CampgroundDetailPage() {
           <SiteSummaryCard campground={campground} />
         </div>
 
-        <section ref={sitePhotosRef} className="-mx-4">
+        <section ref={sitePhotosRef} className="-mx-4 overflow-x-hidden">
           <h2 className="mb-3 px-4 text-base font-bold text-ink">실제 자리 사진</h2>
           <SitePhotoScroll
             items={gallery}

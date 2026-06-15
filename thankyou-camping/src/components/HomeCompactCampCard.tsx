@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CoverImage } from './CoverImage';
 import { StarRating } from './StarRating';
@@ -23,11 +23,13 @@ export const HomeCompactCampCard = memo(function HomeCompactCampCard({
 }: HomeCompactCampCardProps) {
   const navigate = useNavigate();
   const campground = getCampgroundById(campgroundId);
+  const hero = useMemo(
+    () => (campground ? getCampHero(campground.id) : null),
+    [campground],
+  );
 
-  if (!campground) return null;
-
-  const hero = getCampHero(campground.id);
-  const handleTap = () => {
+  const handleTap = useCallback(() => {
+    if (!campground) return;
     trackEvent('tq_click_home_camp_card', {
       page_name: 'home',
       section_name: sectionName,
@@ -37,19 +39,22 @@ export const HomeCompactCampCard = memo(function HomeCompactCampCard({
       test_version: TEST_VERSION,
     });
     navigate(ROUTES.campgroundDetail(campground.id));
-  };
+  }, [campground, cardIndex, navigate, sectionName]);
+
+  if (!campground || !hero) return null;
 
   return (
     <TapAction
       onTap={handleTap}
-      ariaLabel={`${campground.name} 상세 보기`}
-      className="home-horizontal-card campground-card w-[148px] cursor-pointer snap-start overflow-hidden rounded-xl border border-surface-border bg-white text-left shadow-sm"
+      aria-label={`${campground.name} 상세 보기`}
+      className="home-card home-horizontal-card w-[148px] cursor-pointer snap-start overflow-hidden rounded-xl border border-surface-border bg-white text-left"
       style={{ scrollSnapAlign: 'start' }}
     >
       <CoverImage
         sources={hero.sources}
         fallback={hero.fallback}
         height={112}
+        width={148}
         className="w-full"
       />
       <div className="space-y-1 p-2.5">

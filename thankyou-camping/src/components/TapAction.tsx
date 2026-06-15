@@ -1,20 +1,20 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode, CSSProperties } from 'react';
 import { useTapOnlyClick } from '../hooks/useTapOnlyClick';
 
 interface TapActionProps {
   onTap: () => void;
-  children: ReactNode;
   className?: string;
   style?: CSSProperties;
-  ariaLabel?: string;
+  children: ReactNode;
+  'aria-label'?: string;
 }
 
 export function TapAction({
   onTap,
-  children,
   className = '',
   style,
-  ariaLabel,
+  children,
+  'aria-label': ariaLabel,
 }: TapActionProps) {
   const handlers = useTapOnlyClick(onTap);
 

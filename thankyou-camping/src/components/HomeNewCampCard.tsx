@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CoverImage } from './CoverImage';
 import { StarRating } from './StarRating';
@@ -19,11 +19,13 @@ export const HomeNewCampCard = memo(function HomeNewCampCard({
 }: HomeNewCampCardProps) {
   const navigate = useNavigate();
   const campground = getCampgroundById(campgroundId);
+  const hero = useMemo(
+    () => (campground ? getCampHero(campground.id) : null),
+    [campground],
+  );
 
-  if (!campground) return null;
-
-  const hero = getCampHero(campground.id);
-  const handleTap = () => {
+  const handleTap = useCallback(() => {
+    if (!campground) return;
     trackEvent('tq_click_home_camp_card', {
       page_name: 'home',
       section_name: '신생 캠핑장',
@@ -33,18 +35,21 @@ export const HomeNewCampCard = memo(function HomeNewCampCard({
       test_version: TEST_VERSION,
     });
     navigate(ROUTES.campgroundDetail(campground.id));
-  };
+  }, [campground, cardIndex, navigate]);
+
+  if (!campground || !hero) return null;
 
   return (
     <TapAction
       onTap={handleTap}
-      ariaLabel={`${campground.name} 상세 보기`}
-      className="campground-card flex w-full cursor-pointer gap-3 overflow-hidden rounded-xl border border-surface-border bg-white p-3 text-left shadow-sm"
+      aria-label={`${campground.name} 상세 보기`}
+      className="home-card flex w-full cursor-pointer gap-3 overflow-hidden rounded-xl border border-surface-border bg-white p-3 text-left"
     >
       <CoverImage
         sources={hero.sources}
         fallback={hero.fallback}
         height={88}
+        width={88}
         className="h-[88px] w-[88px] shrink-0 rounded-lg"
       />
       <div className="min-w-0 flex-1 space-y-1">

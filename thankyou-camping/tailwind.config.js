@@ -3,6 +3,10 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      screens: {
+        fold: '600px',
+        tablet: '768px',
+      },
       colors: {
         primary: {
           DEFAULT: '#F26522',
@@ -47,11 +51,7 @@ export default {
         cta: '0 -2px 12px rgba(0, 0, 0, 0.06)',
       },
       maxWidth: {
-        mobile: '390px',
-        'mobile-wide': '480px',
-      },
-      screens: {
-        foldable: '520px',
+        app: '600px',
       },
     },
   },
