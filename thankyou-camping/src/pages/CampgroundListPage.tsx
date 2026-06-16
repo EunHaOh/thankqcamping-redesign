@@ -8,10 +8,6 @@ import {
   type FullFilterState,
 } from '../components/FullFilterBottomSheet';
 import {
-  CHIP_TO_QUICK_FILTER,
-  matchesFullFilterChips,
-} from '../data/filterData';
-import {
   DatePickerBottomSheet,
   formatDateRangeLabel,
 } from '../components/DatePickerBottomSheet';
@@ -19,6 +15,17 @@ import { GuestPickerBottomSheet } from '../components/GuestPickerBottomSheet';
 import { RegionPickerBottomSheet } from '../components/RegionPickerBottomSheet';
 import { SearchConditionBar } from '../components/SearchConditionBar';
 import { useSearch } from '../context/SearchContext';
+import {
+  QUICK_FILTER_OPTIONS,
+  applySelectedFilters,
+  buildSelectedFilterChips,
+  getActiveQuickFilters,
+  getFullFilterChipsFromSelected,
+  mergeFullFilterApply,
+  removeSelectedFilter,
+  toggleQuickFilter,
+  type SelectedFilterChip,
+} from '../data/filterData';
 import { formatGuestLabel } from '../data/guestData';
 import { matchesRegion } from '../data/regionData';
 import { matchesSearchQuery } from '../data/searchData';
@@ -27,143 +34,116 @@ import { TEST_VERSION, trackEvent } from '../lib/analytics';
 import { searchContextFields } from '../lib/analyticsHelpers';
 import { ROUTES } from '../routes/paths';
 
-const FILTER_OPTIONS = [
-  '예약 가능',
-  '반려견 가능',
-  '사이트 크기',
-  '후기 사진 있음',
-  '텐트 설치 가능',
-  '가족 추천',
-];
-
-function applyChipBarFilters(
-  list: typeof campgrounds,
-  activeFilters: string[],
-) {
-  let result = list;
-  if (activeFilters.includes('예약 가능')) {
-    result = result.filter((c) => c.available);
-  }
-  if (activeFilters.includes('반려견 가능')) {
-    result = result.filter((c) => c.petFriendly);
-  }
-  if (activeFilters.includes('후기 사진 있음')) {
-    result = result.filter((c) => c.hasReviewPhotos);
-  }
-  if (activeFilters.includes('텐트 설치 가능')) {
-    result = result.filter((c) => c.tentFit === 'fit');
-  }
-  if (activeFilters.includes('사이트 크기')) {
-    result = result.filter(
-      (c) =>
-        c.siteSizeSummary.includes('8m') ||
-        c.siteSizeSummary.includes('9m') ||
-        c.siteSizeSummary.includes('10m') ||
-        c.listTags.includes('사이트 넓음'),
-    );
-  }
-  if (activeFilters.includes('가족 추천')) {
-    result = result.filter(
-      (c) =>
-        c.listTags.includes('가족 추천') ||
-        c.tags.includes('가족 추천') ||
-        c.tags.includes('키즈존'),
-    );
-  }
-  return result;
-}
-
 export function CampgroundListPage() {
   const {
     checkIn,
     checkOut,
     regionLabel,
     guestCounts,
-    activeFilters,
-    fullFilter,
+    selectedFilters,
     searchQuery,
     setCheckIn,
     setCheckOut,
     setRegionLabel,
     setGuestCounts,
-    setActiveFilters,
-    setFullFilter,
+    setSelectedFilters,
   } = useSearch();
 
-  const [fullFilterDraft, setFullFilterDraft] = useState<FullFilterState>(fullFilter);
+  const [fullFilterDraft, setFullFilterDraft] = useState<FullFilterState>(
+    getFullFilterChipsFromSelected(selectedFilters),
+  );
   const [sortBy, setSortBy] = useState<'추천순' | '가격순' | '평점순'>('추천순');
 
   const dateLabel = formatDateRangeLabel(checkIn, checkOut);
+  const activeQuickFilters = useMemo(
+    () => getActiveQuickFilters(selectedFilters),
+    [selectedFilters],
+  );
+  const selectedFilterChips = useMemo(
+    () => buildSelectedFilterChips(selectedFilters),
+    [selectedFilters],
+  );
 
   const [dateSheetOpen, setDateSheetOpen] = useState(false);
   const [regionSheetOpen, setRegionSheetOpen] = useState(false);
   const [guestSheetOpen, setGuestSheetOpen] = useState(false);
   const [fullFilterOpen, setFullFilterOpen] = useState(false);
 
+  const countWithFilters = (filters: typeof selectedFilters) => {
+    let list = campgrounds.filter((camp) => matchesRegion(camp, regionLabel));
+    list = applySelectedFilters(list, filters);
+    list = list.filter((camp) => matchesSearchQuery(camp, searchQuery));
+    return list.length;
+  };
+
   const toggleFilter = (filter: string) => {
-    const nextFilters = activeFilters.includes(filter)
-      ? activeFilters.filter((f) => f !== filter)
-      : [...activeFilters, filter];
-
-    setActiveFilters(nextFilters);
-
-    const previewList = applyChipBarFilters(
-      campgrounds
-        .filter((c) => matchesRegion(c, regionLabel))
-        .filter((c) => matchesFullFilterChips(c, fullFilter))
-        .filter((c) => matchesSearchQuery(c, searchQuery)),
-      nextFilters,
-    );
+    const nextFilters = toggleQuickFilter(selectedFilters, filter);
+    setSelectedFilters(nextFilters);
 
     trackEvent('tq_click_filter_chip', {
       page_name: 'search_results',
       filter_name: 'quick_filter',
       filter_value: filter,
-      result_count: previewList.length,
+      selected_filters: nextFilters.join('|'),
+      result_count: countWithFilters(nextFilters),
       test_version: TEST_VERSION,
     });
   };
 
-  const applyFullFilter = () => {
-    const next = fullFilter
-      .map((chip) => CHIP_TO_QUICK_FILTER[chip])
-      .filter((chip): chip is string => Boolean(chip));
-    setActiveFilters(next);
+  const removeFilterChip = (chip: SelectedFilterChip) => {
+    const nextFilters = removeSelectedFilter(selectedFilters, chip.value);
+    setSelectedFilters(nextFilters);
+
+    trackEvent('tq_remove_filter_chip', {
+      page_name: 'search_results',
+      filter_name: chip.group,
+      filter_value: chip.label,
+      selected_filters: nextFilters.join('|'),
+      result_count: countWithFilters(nextFilters),
+      test_version: TEST_VERSION,
+    });
+  };
+
+  const applyFullFilter = (
+    draftFullChips: FullFilterState,
+    options: { resetAll: boolean },
+  ) => {
+    const nextFilters = mergeFullFilterApply(
+      draftFullChips,
+      selectedFilters,
+      options.resetAll,
+    );
+    setSelectedFilters(nextFilters);
 
     trackEvent('tq_apply_filter', {
       page_name: 'search_results',
-      selected_filters: fullFilter.join('|'),
-      result_count: countWithFilters(fullFilter),
+      selected_filters: nextFilters.join('|'),
+      result_count: countWithFilters(nextFilters),
       test_version: TEST_VERSION,
     });
   };
 
-  const countWithFilters = (chips: FullFilterState) => {
-    let list = campgrounds.filter((c) => matchesRegion(c, regionLabel));
-    list = list.filter((c) => matchesFullFilterChips(c, chips));
-    list = applyChipBarFilters(list, activeFilters);
-    return list.length;
-  };
-
   const filtered = useMemo(() => {
-    let list = campgrounds.filter((c) => matchesRegion(c, regionLabel));
-    list = list.filter((c) => matchesFullFilterChips(c, fullFilter));
-    list = applyChipBarFilters(list, activeFilters);
-    list = list.filter((c) => matchesSearchQuery(c, searchQuery));
+    let list = campgrounds.filter((camp) => matchesRegion(camp, regionLabel));
+    list = applySelectedFilters(list, selectedFilters);
+    list = list.filter((camp) => matchesSearchQuery(camp, searchQuery));
 
     if (sortBy === '가격순') list.sort((a, b) => a.priceFrom - b.priceFrom);
     if (sortBy === '평점순') list.sort((a, b) => b.rating - a.rating);
 
     return list;
-  }, [activeFilters, fullFilter, sortBy, regionLabel, searchQuery]);
+  }, [selectedFilters, sortBy, regionLabel, searchQuery]);
 
   const headerTitle = searchQuery.trim()
     ? `${searchQuery.trim()} 검색결과`
     : '검색결과';
 
   const fullFilterPreviewCount = useMemo(
-    () => countWithFilters(fullFilterDraft),
-    [fullFilterDraft, activeFilters, regionLabel],
+    () =>
+      countWithFilters(
+        mergeFullFilterApply(fullFilterDraft, selectedFilters, false),
+      ),
+    [fullFilterDraft, selectedFilters, regionLabel, searchQuery],
   );
 
   useEffect(() => {
@@ -207,15 +187,20 @@ export function CampgroundListPage() {
           />
 
           <FilterChips
-            filters={FILTER_OPTIONS}
-            activeFilters={activeFilters}
+            filters={[...QUICK_FILTER_OPTIONS]}
+            activeFilters={activeQuickFilters}
+            selectedFilterChips={selectedFilterChips}
+            fullFilterCount={selectedFilterChips.length}
             onToggle={toggleFilter}
+            onRemoveSelectedFilter={removeFilterChip}
             onFullFilterClick={() => {
+              const fullChips = getFullFilterChipsFromSelected(selectedFilters);
               trackEvent('tq_open_full_filter', {
                 page_name: 'search_results',
+                selected_filters: selectedFilters.join('|'),
                 test_version: TEST_VERSION,
               });
-              setFullFilterDraft(fullFilter);
+              setFullFilterDraft(fullChips);
               setFullFilterOpen(true);
             }}
           />
@@ -300,11 +285,7 @@ export function CampgroundListPage() {
       />
       <FullFilterBottomSheet
         open={fullFilterOpen}
-        filters={fullFilter}
-        onChange={(chips) => {
-          setFullFilter(chips);
-          setFullFilterDraft(chips);
-        }}
+        filters={getFullFilterChipsFromSelected(selectedFilters)}
         onDraftChange={setFullFilterDraft}
         onApply={applyFullFilter}
         onClose={() => setFullFilterOpen(false)}

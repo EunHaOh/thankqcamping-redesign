@@ -6,8 +6,12 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { FullFilterState } from '../components/FullFilterBottomSheet';
-import { DEFAULT_FULL_FILTER_CHIPS } from '../data/filterData';
+import {
+  DEFAULT_SELECTED_FILTERS,
+  QUICK_ONLY_FILTERS,
+  QUICK_TO_FULL_CHIP,
+  type SelectedFilters,
+} from '../data/filterData';
 import { DEFAULT_GUEST_COUNTS, type GuestCounts } from '../data/guestData';
 import type { HomeCategory } from '../data/homeData';
 
@@ -16,15 +20,13 @@ interface SearchContextValue {
   checkOut: Date;
   regionLabel: string;
   guestCounts: GuestCounts;
-  activeFilters: string[];
-  fullFilter: FullFilterState;
+  selectedFilters: SelectedFilters;
   searchQuery: string;
   setCheckIn: (date: Date) => void;
   setCheckOut: (date: Date) => void;
   setRegionLabel: (region: string) => void;
   setGuestCounts: (counts: GuestCounts) => void;
-  setActiveFilters: (filters: string[]) => void;
-  setFullFilter: (filters: FullFilterState) => void;
+  setSelectedFilters: (filters: SelectedFilters) => void;
   setSearchQuery: (query: string) => void;
   applyTheme: (theme: HomeCategory) => void;
   resetFilters: () => void;
@@ -35,24 +37,41 @@ const defaultCheckOut = new Date(2026, 5, 21);
 
 const SearchContext = createContext<SearchContextValue | null>(null);
 
+function buildSelectedFiltersFromTheme(theme: HomeCategory): SelectedFilters {
+  const chips = [...theme.fullFilterChips];
+
+  for (const quick of theme.quickFilters) {
+    if (QUICK_ONLY_FILTERS.includes(quick)) {
+      if (!chips.includes(quick)) chips.push(quick);
+      continue;
+    }
+
+    const fullChip = QUICK_TO_FULL_CHIP[quick];
+    if (fullChip && !chips.includes(fullChip)) {
+      chips.push(fullChip);
+    }
+  }
+
+  return chips;
+}
+
 export function SearchProvider({ children }: { children: ReactNode }) {
   const [checkIn, setCheckIn] = useState(defaultCheckIn);
   const [checkOut, setCheckOut] = useState(defaultCheckOut);
   const [regionLabel, setRegionLabel] = useState('전국');
   const [guestCounts, setGuestCounts] = useState<GuestCounts>(DEFAULT_GUEST_COUNTS);
-  const [activeFilters, setActiveFilters] = useState<string[]>([]);
-  const [fullFilter, setFullFilter] = useState<FullFilterState>(DEFAULT_FULL_FILTER_CHIPS);
+  const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>(
+    DEFAULT_SELECTED_FILTERS,
+  );
   const [searchQuery, setSearchQuery] = useState('');
 
   const applyTheme = useCallback((theme: HomeCategory) => {
-    setFullFilter(theme.fullFilterChips);
-    setActiveFilters(theme.quickFilters);
+    setSelectedFilters(buildSelectedFiltersFromTheme(theme));
     setSearchQuery('');
   }, []);
 
   const resetFilters = useCallback(() => {
-    setActiveFilters([]);
-    setFullFilter(DEFAULT_FULL_FILTER_CHIPS);
+    setSelectedFilters(DEFAULT_SELECTED_FILTERS);
   }, []);
 
   const value = useMemo(
@@ -61,15 +80,13 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       checkOut,
       regionLabel,
       guestCounts,
-      activeFilters,
-      fullFilter,
+      selectedFilters,
       searchQuery,
       setCheckIn,
       setCheckOut,
       setRegionLabel,
       setGuestCounts,
-      setActiveFilters,
-      setFullFilter,
+      setSelectedFilters,
       setSearchQuery,
       applyTheme,
       resetFilters,
@@ -79,8 +96,7 @@ export function SearchProvider({ children }: { children: ReactNode }) {
       checkOut,
       regionLabel,
       guestCounts,
-      activeFilters,
-      fullFilter,
+      selectedFilters,
       searchQuery,
       applyTheme,
       resetFilters,

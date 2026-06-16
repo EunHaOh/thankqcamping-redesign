@@ -11,9 +11,8 @@ export type FullFilterState = string[];
 interface FullFilterBottomSheetProps {
   open: boolean;
   filters: FullFilterState;
-  onChange: (filters: FullFilterState) => void;
   onDraftChange?: (filters: FullFilterState) => void;
-  onApply: () => void;
+  onApply: (filters: FullFilterState, options: { resetAll: boolean }) => void;
   onClose: () => void;
   resultCount: number;
 }
@@ -45,25 +44,29 @@ function FilterChip({
 export function FullFilterBottomSheet({
   open,
   filters,
-  onChange,
   onDraftChange,
   onApply,
   onClose,
   resultCount,
 }: FullFilterBottomSheetProps) {
   const [draft, setDraft] = useState<FullFilterState>(filters);
+  const [resetAllOnApply, setResetAllOnApply] = useState(false);
   const [activeTab, setActiveTab] = useState<FilterTabId>('type');
   const sectionRefs = useRef<Partial<Record<FilterTabId, HTMLElement | null>>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+  const wasOpenRef = useRef(false);
 
   useEffect(() => {
-    if (open) {
+    if (open && !wasOpenRef.current) {
       setDraft(filters);
+      setResetAllOnApply(false);
       onDraftChange?.(filters);
     }
-  }, [open, filters]);
+    wasOpenRef.current = open;
+  }, [open, filters, onDraftChange]);
 
   const updateDraft = (next: FullFilterState) => {
+    setResetAllOnApply(false);
     setDraft(next);
     onDraftChange?.(next);
   };
@@ -75,12 +78,13 @@ export function FullFilterBottomSheet({
   };
 
   const handleReset = () => {
-    updateDraft([]);
+    setResetAllOnApply(true);
+    setDraft([]);
+    onDraftChange?.([]);
   };
 
   const handleApply = () => {
-    onChange(draft);
-    onApply();
+    onApply(draft, { resetAll: resetAllOnApply });
     onClose();
   };
 

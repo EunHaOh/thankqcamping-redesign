@@ -86,12 +86,189 @@ export const FILTER_SECTIONS: FilterSection[] = [
 ];
 
 export const DEFAULT_FULL_FILTER_CHIPS: string[] = [];
+export const DEFAULT_SELECTED_FILTERS: SelectedFilters = [];
+
+/** Unified chip selection — full-filter chips + quick-only chips */
+export type SelectedFilters = string[];
+
+export const QUICK_FILTER_OPTIONS = [
+  '예약 가능',
+  '반려견 가능',
+  '사이트 크기',
+  '후기 사진 있음',
+  '텐트 설치 가능',
+  '가족 추천',
+] as const;
+
+/** Quick filters with no matching chip in the full-filter sheet */
+export const QUICK_ONLY_FILTERS: string[] = [
+  '사이트 크기',
+  '후기 사진 있음',
+  '텐트 설치 가능',
+];
 
 export const CHIP_TO_QUICK_FILTER: Partial<Record<string, string>> = {
   예약가능: '예약 가능',
   '반려견 동반': '반려견 가능',
   '가족 추천': '가족 추천',
 };
+
+export const QUICK_TO_FULL_CHIP: Partial<Record<string, string>> = {
+  '예약 가능': '예약가능',
+  '반려견 가능': '반려견 동반',
+  '가족 추천': '가족 추천',
+};
+
+const ALL_FULL_FILTER_CHIPS = new Set(
+  FILTER_SECTIONS.flatMap((section) => section.chips),
+);
+
+const CHIP_TO_SECTION = new Map<string, string>(
+  FILTER_SECTIONS.flatMap((section) =>
+    section.chips.map((chip) => [chip, section.id] as const),
+  ),
+);
+
+export type SelectedFilterChipGroup =
+  | 'category'
+  | 'theme'
+  | 'facility'
+  | 'environment'
+  | 'pet'
+  | 'parking'
+  | 'sort';
+
+export type SelectedFilterChip = {
+  key: string;
+  label: string;
+  value: string;
+  group: SelectedFilterChipGroup;
+};
+
+function getChipGroup(chip: string, sectionId: string | undefined): SelectedFilterChipGroup {
+  if (chip === '반려견 동반') return 'pet';
+  if (QUICK_ONLY_FILTERS.includes(chip)) return 'theme';
+
+  switch (sectionId) {
+    case 'sort':
+      return 'sort';
+    case 'type':
+      return 'category';
+    case 'site':
+    case 'nature':
+      return 'environment';
+    case 'parking':
+      return 'parking';
+    case 'facility':
+    case 'play':
+      return 'facility';
+    default:
+      return 'theme';
+  }
+}
+
+export function getSelectedFilterLabel(chip: string): string {
+  return CHIP_TO_QUICK_FILTER[chip] ?? chip;
+}
+
+export function getFullFilterChipsFromSelected(selected: SelectedFilters): string[] {
+  return selected.filter((chip) => ALL_FULL_FILTER_CHIPS.has(chip));
+}
+
+export function getQuickOnlyFiltersFromSelected(selected: SelectedFilters): string[] {
+  return selected.filter((chip) => QUICK_ONLY_FILTERS.includes(chip));
+}
+
+export function getActiveQuickFilters(selected: SelectedFilters): string[] {
+  return QUICK_FILTER_OPTIONS.filter((quick) => {
+    if (QUICK_ONLY_FILTERS.includes(quick)) {
+      return selected.includes(quick);
+    }
+    const fullChip = QUICK_TO_FULL_CHIP[quick];
+    return fullChip ? selected.includes(fullChip) : false;
+  });
+}
+
+export function buildSelectedFilterChips(selected: SelectedFilters): SelectedFilterChip[] {
+  const seen = new Set<string>();
+
+  return selected.reduce<SelectedFilterChip[]>((chips, chip) => {
+    if (seen.has(chip)) return chips;
+    seen.add(chip);
+
+    chips.push({
+      key: `chip:${chip}`,
+      label: getSelectedFilterLabel(chip),
+      value: chip,
+      group: getChipGroup(chip, CHIP_TO_SECTION.get(chip)),
+    });
+    return chips;
+  }, []);
+}
+
+export function toggleQuickFilter(
+  selected: SelectedFilters,
+  quickFilter: string,
+): SelectedFilters {
+  const isActive = getActiveQuickFilters(selected).includes(quickFilter);
+
+  if (QUICK_ONLY_FILTERS.includes(quickFilter)) {
+    return isActive
+      ? selected.filter((chip) => chip !== quickFilter)
+      : [...selected, quickFilter];
+  }
+
+  const fullChip = QUICK_TO_FULL_CHIP[quickFilter];
+  if (!fullChip) return selected;
+
+  return isActive
+    ? selected.filter((chip) => chip !== fullChip)
+    : [...selected, fullChip];
+}
+
+export function removeSelectedFilter(
+  selected: SelectedFilters,
+  chipValue: string,
+): SelectedFilters {
+  return selected.filter((chip) => chip !== chipValue);
+}
+
+export function mergeFullFilterApply(
+  draftFullChips: SelectedFilters,
+  currentSelected: SelectedFilters,
+  resetAll: boolean,
+): SelectedFilters {
+  if (resetAll) return [];
+  return [...draftFullChips, ...getQuickOnlyFiltersFromSelected(currentSelected)];
+}
+
+export function applySelectedFilters(
+  list: Campground[],
+  selected: SelectedFilters,
+): Campground[] {
+  let result = list.filter((camp) =>
+    matchesFullFilterChips(camp, getFullFilterChipsFromSelected(selected)),
+  );
+
+  const quickOnly = getQuickOnlyFiltersFromSelected(selected);
+  if (quickOnly.includes('후기 사진 있음')) {
+    result = result.filter((camp) => camp.hasReviewPhotos);
+  }
+  if (quickOnly.includes('텐트 설치 가능')) {
+    result = result.filter((camp) => camp.tentFit === 'fit');
+  }
+  if (quickOnly.includes('사이트 크기')) {
+    result = result.filter(
+      (camp) =>
+        camp.siteSizeSummary.includes('8m') ||
+        camp.siteSizeSummary.includes('9m') ||
+        camp.siteSizeSummary.includes('10m') ||
+        camp.listTags.includes('사이트 넓음'),
+    );
+  }
+
+  return result;
+}
 
 function siteHasFeature(camp: Campground, keyword: string) {
   return camp.sites.some(
