@@ -17,7 +17,7 @@ export function ReviewSummaryCard({
       <ul className="space-y-2">
         {items.map((item) => (
           <li key={item} className="flex gap-2 text-sm text-ink-secondary">
-            <span className="shrink-0 text-[#F26522]" aria-hidden="true">
+            <span className="shrink-0 text-brand-accessible" aria-hidden="true">
               ·
             </span>
             <span>{item}</span>

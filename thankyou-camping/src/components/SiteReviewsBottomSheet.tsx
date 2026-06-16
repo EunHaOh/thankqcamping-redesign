@@ -54,7 +54,7 @@ export function SiteReviewsBottomSheet({
             <ul className="space-y-1">
               {site.siteReviewSummary.map((item) => (
                 <li key={item} className="flex gap-2 text-sm text-ink-secondary">
-                  <span className="text-[#F26522]">·</span>
+                  <span className="text-brand-accessible">·</span>
                   <span>{item}</span>
                 </li>
               ))}

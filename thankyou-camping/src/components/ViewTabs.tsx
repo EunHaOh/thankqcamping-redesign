@@ -18,7 +18,7 @@ export function ViewTabs({ active, onChange }: ViewTabsProps) {
           onClick={() => onChange(tab.id)}
           className={`flex-1 border-b-2 pb-2.5 text-sm font-semibold transition-colors ${
             active === tab.id
-              ? 'border-primary text-primary'
+              ? 'border-primary text-brand-accessible'
               : 'border-transparent text-ink-muted'
           }`}
         >

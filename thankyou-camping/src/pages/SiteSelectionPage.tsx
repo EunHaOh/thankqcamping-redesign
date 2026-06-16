@@ -10,6 +10,7 @@ import { SiteMapView } from '../components/SiteMapView';
 import { SiteReviewsBottomSheet } from '../components/SiteReviewsBottomSheet';
 import { ViewTabs } from '../components/ViewTabs';
 import { useBooking } from '../context/BookingContext';
+import { formatBookingDateWithWeekday } from '../lib/dateDefaults';
 import { getCampgroundById } from '../data/mockData';
 import { campgroundTentLabels } from '../data/siteHelpers';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
@@ -23,7 +24,7 @@ export function SiteSelectionPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { siteId, setSite } = useBooking();
+  const { siteId, setSite, checkIn, checkOut } = useBooking();
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(siteId);
   const [viewTab, setViewTab] = useState<'list' | 'map'>('list');
   const [detailSiteId, setDetailSiteId] = useState<string | null>(null);
@@ -171,12 +172,12 @@ export function SiteSelectionPage() {
           <div className="flex items-center gap-3 text-sm">
             <div className="min-w-0 flex-1 rounded-xl border border-surface-border px-3 py-2.5">
               <p className="text-xs text-ink-muted">체크인</p>
-              <p className="font-semibold text-ink">2026.06.20 (금)</p>
+              <p className="font-semibold text-ink">{formatBookingDateWithWeekday(checkIn)}</p>
             </div>
             <span className="shrink-0 text-ink-muted">→</span>
             <div className="min-w-0 flex-1 rounded-xl border border-surface-border px-3 py-2.5">
               <p className="text-xs text-ink-muted">체크아웃</p>
-              <p className="font-semibold text-ink">2026.06.21 (토)</p>
+              <p className="font-semibold text-ink">{formatBookingDateWithWeekday(checkOut)}</p>
             </div>
           </div>
         </section>

@@ -10,6 +10,7 @@ import { HomePage } from './pages/HomePage';
 import { AnalyticsCheckPage } from './pages/AnalyticsCheckPage';
 import { PwaCheckPage } from './pages/PwaCheckPage';
 import { PerformanceCheckPage } from './pages/PerformanceCheckPage';
+import { ReservationPage } from './pages/ReservationPage';
 import { ReviewDetailPage } from './pages/ReviewDetailPage';
 import { SearchInputPage } from './pages/SearchInputPage';
 import { SiteSelectionPage } from './pages/SiteSelectionPage';
@@ -25,6 +26,7 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/search-input" element={<SearchInputPage />} />
             <Route path="/search" element={<CampgroundListPage />} />
+            <Route path="/reservations" element={<ReservationPage />} />
             <Route
               path="/campgrounds/:id/reviews/:reviewId"
               element={<ReviewDetailPage />}

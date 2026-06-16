@@ -53,7 +53,7 @@ function CategoryIcon({ id }: { id: string }) {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  auto: 'bg-[#FFF4EE] text-[#F26522]',
+  auto: 'bg-[#FFF4EE] text-brand-accessible',
   glamping: 'bg-[#F3E8FF] text-[#7C3AED]',
   caravan: 'bg-[#E8F4FD] text-[#2563EB]',
   pension: 'bg-[#F0FDF4] text-[#16A34A]',
@@ -120,7 +120,7 @@ const CategoryItem = memo(function CategoryItem({
       >
         <CategoryIcon id={category.id} />
       </span>
-      <span className="whitespace-nowrap text-[11px] font-medium text-ink-secondary">
+      <span className="whitespace-nowrap text-xs font-medium text-ink-secondary">
         {category.label}
       </span>
     </div>

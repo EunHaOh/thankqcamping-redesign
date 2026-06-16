@@ -67,7 +67,7 @@ export function FilterChips({
           onClick={onFullFilterClick}
           className={`flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1.5 text-xs font-medium ${
             fullFilterCount > 0
-              ? 'border-[#F26522] bg-[#FFF4ED] text-[#F26522]'
+              ? 'border-[#F26522] bg-[#FFF4ED] text-brand-accessible'
               : 'border-surface-border bg-white text-ink-secondary'
           }`}
         >
@@ -101,7 +101,7 @@ export function FilterChips({
               type="button"
               onClick={() => onRemoveSelectedFilter(chip)}
               aria-label={`${chip.label} 필터 해제`}
-              className="flex shrink-0 items-center gap-1 rounded-full border border-[#F26522] bg-[#FFF4ED] px-3 py-1.5 text-xs font-medium text-[#F26522]"
+              className="flex shrink-0 items-center gap-1 rounded-full border border-[#F26522] bg-[#FFF4ED] px-3 py-1.5 text-xs font-medium text-brand-accessible"
             >
               <span>{chip.label}</span>
               <span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#F26522]/10">

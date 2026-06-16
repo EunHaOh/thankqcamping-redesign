@@ -6,6 +6,7 @@ import { FixedCTA } from '../components/FixedCTA';
 import { MobileShell } from '../components/MobileShell';
 import { StarIcons } from '../components/StarIcons';
 import { useBooking } from '../context/BookingContext';
+import { useSearch, formatDateForBooking } from '../context/SearchContext';
 import { REVIEW_IMAGE_FALLBACK, getReviewImageSources } from '../data/images';
 import { getCampgroundById, getReviewById } from '../data/mockData';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
@@ -14,7 +15,8 @@ import { ROUTES } from '../routes/paths';
 export function ReviewDetailPage() {
   const { id, reviewId } = useParams<{ id: string; reviewId: string }>();
   const navigate = useNavigate();
-  const { setCampground } = useBooking();
+  const { setCampground, setDates } = useBooking();
+  const { checkIn, checkOut } = useSearch();
 
   const campground = id ? getCampgroundById(id) : undefined;
   const review =
@@ -52,6 +54,7 @@ export function ReviewDetailPage() {
   const handleViewSite = () => {
     if (!review.siteId) return;
     setCampground(campground.id);
+    setDates(formatDateForBooking(checkIn), formatDateForBooking(checkOut));
     navigate(`/campgrounds/${campground.id}/sites`, {
       state: { openSiteId: review.siteId },
     });

@@ -11,6 +11,7 @@ import { formatGuestSummary } from '../data/guestData';
 import { formatPrice, getCampgroundById, getSiteById } from '../data/mockData';
 import { tentFitLabels } from '../data/siteHelpers';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
+import { formatBookingDateWithWeekday } from '../lib/dateDefaults';
 import { ROUTES } from '../routes/paths';
 
 export function BookingConfirmPage() {
@@ -58,7 +59,7 @@ export function BookingConfirmPage() {
           <button
             type="button"
             onClick={() => navigate(ROUTES.home)}
-            className="text-sm font-medium text-[#F26522]"
+            className="text-sm font-medium text-brand-accessible"
           >
             캠핑장 목록으로
           </button>
@@ -131,11 +132,15 @@ export function BookingConfirmPage() {
           <dl className="space-y-3 text-sm">
             <div className="flex justify-between gap-4">
               <dt className="shrink-0 text-ink-secondary">체크인</dt>
-              <dd className="text-right font-semibold text-ink">{checkIn} (금) 15:00</dd>
+              <dd className="text-right font-semibold text-ink">
+                {formatBookingDateWithWeekday(checkIn)} 15:00
+              </dd>
             </div>
             <div className="flex justify-between gap-4">
               <dt className="shrink-0 text-ink-secondary">체크아웃</dt>
-              <dd className="text-right font-semibold text-ink">{checkOut} (토) 11:00</dd>
+              <dd className="text-right font-semibold text-ink">
+                {formatBookingDateWithWeekday(checkOut)} 11:00
+              </dd>
             </div>
             <div className="flex justify-between gap-4">
               <dt className="shrink-0 text-ink-secondary">인원</dt>

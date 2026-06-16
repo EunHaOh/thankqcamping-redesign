@@ -17,12 +17,23 @@ const TABS: TabItem[] = [
   { id: 'my', label: '마이' },
 ];
 
+function navIconClass(active: boolean) {
+  return active ? 'text-brand-accessible' : 'text-ink-secondary';
+}
+
 function HomeIcon({ active }: { active: boolean }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={navIconClass(active)}
+    >
       <path
         d="M4 10.5L12 4l8 6.5V20a1 1 0 01-1 1h-5v-6H10v6H5a1 1 0 01-1-1v-9.5z"
-        stroke={active ? '#F26522' : '#999999'}
+        stroke="currentColor"
         strokeWidth="1.8"
         strokeLinejoin="round"
       />
@@ -32,28 +43,49 @@ function HomeIcon({ active }: { active: boolean }) {
 
 function SearchIcon({ active }: { active: boolean }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="11" cy="11" r="6.5" stroke={active ? '#F26522' : '#999999'} strokeWidth="1.8" />
-      <path d="M16 16l4 4" stroke={active ? '#F26522' : '#999999'} strokeWidth="1.8" strokeLinecap="round" />
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={navIconClass(active)}
+    >
+      <circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M16 16l4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
 function CalendarIcon({ active }: { active: boolean }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <rect x="4" y="5" width="16" height="15" rx="2" stroke={active ? '#F26522' : '#999999'} strokeWidth="1.8" />
-      <path d="M4 9h16M8 3v4M16 3v4" stroke={active ? '#F26522' : '#999999'} strokeWidth="1.8" strokeLinecap="round" />
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={navIconClass(active)}
+    >
+      <rect x="4" y="5" width="16" height="15" rx="2" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M4 9h16M8 3v4M16 3v4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
     </svg>
   );
 }
 
 function HeartIcon({ active }: { active: boolean }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={navIconClass(active)}
+    >
       <path
         d="M12 20s-7-4.6-7-9.5a4 4 0 017-2.6A4 4 0 0119 10.5C19 15.4 12 20 12 20z"
-        stroke={active ? '#F26522' : '#999999'}
+        stroke="currentColor"
         strokeWidth="1.8"
         strokeLinejoin="round"
       />
@@ -63,11 +95,18 @@ function HeartIcon({ active }: { active: boolean }) {
 
 function UserIcon({ active }: { active: boolean }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <circle cx="12" cy="8" r="3.5" stroke={active ? '#F26522' : '#999999'} strokeWidth="1.8" />
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+      className={navIconClass(active)}
+    >
+      <circle cx="12" cy="8" r="3.5" stroke="currentColor" strokeWidth="1.8" />
       <path
         d="M5 20c1.2-3 3.8-4.5 7-4.5s5.8 1.5 7 4.5"
-        stroke={active ? '#F26522' : '#999999'}
+        stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
       />
@@ -93,9 +132,8 @@ function TabIcon({ id, active }: { id: TabId; active: boolean }) {
 }
 
 function isTabActive(tab: TabItem, pathname: string): boolean {
-  if (tab.id === 'home') return pathname === ROUTES.home;
-  if (tab.id === 'search') return pathname === ROUTES.searchResultList;
-  return false;
+  if (!tab.path) return false;
+  return pathname === tab.path;
 }
 
 export function BottomNav() {
@@ -113,8 +151,8 @@ export function BottomNav() {
             <>
               <TabIcon id={tab.id} active={active} />
               <span
-                className={`mt-0.5 text-[10px] font-medium ${
-                  active ? 'text-[#F26522]' : 'text-ink-muted'
+                className={`mt-0.5 text-xs font-medium ${
+                  active ? 'text-brand-accessible' : 'text-ink-secondary'
                 }`}
               >
                 {tab.label}
@@ -140,6 +178,7 @@ export function BottomNav() {
               type="button"
               disabled
               aria-disabled="true"
+              aria-label={`${tab.label} (준비 중)`}
               className="flex min-w-0 flex-1 flex-col items-center justify-center py-1.5 opacity-60"
             >
               {content}

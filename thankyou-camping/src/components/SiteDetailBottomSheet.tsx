@@ -126,10 +126,10 @@ function SiteMiniMap({
           style={{ left: `${landmark.x}%`, top: `${landmark.y}%` }}
         >
           <div className="flex flex-col items-center gap-0.5">
-            <span className="flex h-5 w-5 items-center justify-center rounded-md border border-white/80 bg-white/90 text-[8px] font-bold text-ink-secondary shadow-sm">
+            <span className="flex h-6 w-6 items-center justify-center rounded-md border border-white/80 bg-white/90 text-xs font-bold text-ink-secondary shadow-sm">
               {landmark.label.slice(0, 1)}
             </span>
-            <span className="whitespace-nowrap rounded bg-white/85 px-1 py-0.5 text-[9px] font-medium text-ink-muted shadow-sm">
+            <span className="whitespace-nowrap rounded bg-white/85 px-1 py-0.5 text-xs font-medium text-ink-secondary shadow-sm">
               {landmark.label}
             </span>
           </div>
@@ -143,7 +143,7 @@ function SiteMiniMap({
         return (
           <div
             key={mapSite.id}
-            className={`absolute flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[10px] font-bold ${
+            className={`absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-xs font-bold ${
               isActive
                 ? 'bg-[#F26522] text-white shadow-md ring-2 ring-[#F26522] ring-offset-1'
                 : 'border-2 border-[#B2DFB4] bg-white/90 text-ink-secondary'
@@ -281,7 +281,7 @@ export function SiteDetailBottomSheet({
                   key={note}
                   className="flex gap-2 text-sm text-ink-secondary"
                 >
-                  <span className="shrink-0 text-[#F26522]" aria-hidden="true">
+                  <span className="shrink-0 text-brand-accessible" aria-hidden="true">
                     ·
                   </span>
                   <span>{note}</span>

@@ -87,7 +87,7 @@ export function AnalyticsCheckPage() {
             <button
               type="button"
               onClick={refresh}
-              className="text-xs font-medium text-[#F26522]"
+              className="text-xs font-medium text-brand-accessible"
             >
               새로고침
             </button>
@@ -116,7 +116,7 @@ export function AnalyticsCheckPage() {
           테스트 이벤트 보내기
         </button>
         {testSent && (
-          <p className="text-center text-xs text-[#F26522]">
+          <p className="text-center text-xs text-brand-accessible">
             tq_test_analytics_event 전송됨 — Tag Assistant / GA4 DebugView에서 확인하세요.
           </p>
         )}

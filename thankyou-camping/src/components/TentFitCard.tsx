@@ -19,7 +19,7 @@ const statusConfig: Record<
   tight: {
     label: '빡빡함',
     bg: 'bg-accent-soft',
-    text: 'text-accent',
+    text: 'text-brand-accessible',
     icon: '!',
   },
   not_fit: {

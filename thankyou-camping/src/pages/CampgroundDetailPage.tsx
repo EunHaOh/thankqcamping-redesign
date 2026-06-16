@@ -9,6 +9,7 @@ import { ReviewSummaryCard } from '../components/ReviewSummaryCard';
 import { SiteSummaryCard } from '../components/SiteSummaryCard';
 import { StarRating } from '../components/StarRating';
 import { useBooking } from '../context/BookingContext';
+import { useSearch, formatDateForBooking } from '../context/SearchContext';
 import { getCampGallery, getCampHero, type GalleryItem } from '../data/images';
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { TEST_VERSION, markDetailBackToList, trackEvent } from '../lib/analytics';
@@ -117,7 +118,8 @@ function SitePhotoScroll({
 export function CampgroundDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setCampground } = useBooking();
+  const { setCampground, setDates } = useBooking();
+  const { checkIn, checkOut } = useSearch();
   const campground = id ? getCampgroundById(id) : undefined;
 
   const siteSummaryRef = useRef<HTMLDivElement>(null);
@@ -210,6 +212,7 @@ export function CampgroundDetailPage() {
       test_version: TEST_VERSION,
     });
     setCampground(campground.id);
+    setDates(formatDateForBooking(checkIn), formatDateForBooking(checkOut));
     navigate(`/campgrounds/${campground.id}/sites`);
   };
 

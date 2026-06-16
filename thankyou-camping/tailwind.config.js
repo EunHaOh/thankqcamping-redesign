@@ -14,10 +14,13 @@ export default {
           soft: '#FFF4EE',
         },
         brand: {
+          DEFAULT: '#F26522',
+          accessible: '#B84A00',
           50: '#F5F5F5',
           100: '#EEEEEE',
-          500: '#888888',
-          600: '#666666',
+          500: '#666666',
+          600: '#B84A00',
+          700: '#9A3E00',
         },
         surface: {
           DEFAULT: '#FFFFFF',
@@ -26,7 +29,7 @@ export default {
         ink: {
           DEFAULT: '#222222',
           secondary: '#666666',
-          muted: '#999999',
+          muted: '#666666',
         },
         accent: {
           DEFAULT: '#F26522',

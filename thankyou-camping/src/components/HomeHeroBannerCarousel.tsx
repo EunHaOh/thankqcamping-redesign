@@ -42,7 +42,7 @@ export const HomeHeroBannerCarousel = memo(function HomeHeroBannerCarousel({
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent" />
         <div className="absolute left-4 top-4 right-4">
-          <span className="inline-block rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-[#F26522]">
+          <span className="inline-block rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-brand-accessible">
             {banner.badge}
           </span>
           <p className="mt-3 text-2xl font-bold leading-tight text-white">{banner.title}</p>

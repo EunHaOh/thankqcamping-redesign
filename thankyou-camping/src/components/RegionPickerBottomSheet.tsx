@@ -133,12 +133,12 @@ export function RegionPickerBottomSheet({
                         onClick={() => handleSearchResult(broad, sub)}
                         className={`flex h-11 w-full items-center justify-between rounded-lg px-3 text-sm ${
                           isSelected
-                            ? 'bg-[#FFF4EE] font-semibold text-[#F26522]'
+                            ? 'bg-[#FFF4EE] font-semibold text-brand-accessible'
                             : 'text-ink-secondary'
                         }`}
                       >
                         <span className="truncate">{label}</span>
-                        {isSelected && <span className="shrink-0 text-[#F26522]">✓</span>}
+                        {isSelected && <span className="shrink-0 text-brand-accessible">✓</span>}
                       </button>
                     </li>
                   );
@@ -158,7 +158,7 @@ export function RegionPickerBottomSheet({
                       onClick={() => handleBroadSelect(broad)}
                       className={`flex h-11 w-full items-center px-3 text-left text-sm ${
                         active
-                          ? 'bg-[#FFF4EE] font-semibold text-[#F26522]'
+                          ? 'bg-[#FFF4EE] font-semibold text-brand-accessible'
                           : 'text-ink-secondary'
                       }`}
                     >
@@ -184,13 +184,13 @@ export function RegionPickerBottomSheet({
                         onClick={() => handleSubSelect(sub)}
                         className={`flex h-11 w-full items-center justify-between rounded-lg px-3 text-sm ${
                           isSelected
-                            ? 'font-semibold text-[#F26522]'
+                            ? 'font-semibold text-brand-accessible'
                             : 'text-ink-secondary'
                         }`}
                       >
                         <span className="truncate">{sub}</span>
                         {isSelected && (
-                          <span className="shrink-0 text-[#F26522]">✓</span>
+                          <span className="shrink-0 text-brand-accessible">✓</span>
                         )}
                       </button>
                     </li>

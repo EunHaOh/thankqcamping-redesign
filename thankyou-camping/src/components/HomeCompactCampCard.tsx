@@ -71,7 +71,7 @@ export const HomeCompactCampCard = memo(function HomeCompactCampCard({
             <span className="text-xs font-normal text-ink-muted">~</span>
           </p>
           {showAvailable && campground.available && (
-            <span className="shrink-0 text-[10px] font-medium text-[#F26522]">예약 가능</span>
+            <span className="shrink-0 text-xs font-medium text-brand-accessible">예약 가능</span>
           )}
         </div>
       </div>

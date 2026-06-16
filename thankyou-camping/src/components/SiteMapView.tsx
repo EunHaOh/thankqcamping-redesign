@@ -24,7 +24,7 @@ export function SiteMapView({ sites, selectedSiteId, onSelect }: SiteMapViewProp
               type="button"
               disabled={!site.available}
               onClick={() => onSelect(site.id)}
-              className={`absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-[10px] font-bold transition-all ${
+              className={`absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-xs font-bold transition-all ${
                 !site.available
                   ? 'bg-[#D1D5DB] text-white'
                   : isSelected

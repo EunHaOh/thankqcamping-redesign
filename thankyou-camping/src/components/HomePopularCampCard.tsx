@@ -62,7 +62,7 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
           {formatPrice(campground.priceFrom)}
           <span className="text-xs font-normal text-white/80">~</span>
         </p>
-        <p className="mt-2 text-[11px] text-white/75">{viewerLabel}</p>
+        <p className="mt-2 text-xs text-white/80">{viewerLabel}</p>
       </div>
     </TapAction>
   );

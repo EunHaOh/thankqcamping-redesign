@@ -40,7 +40,7 @@ export function SiteListCard({
         <span
           className={`shrink-0 rounded px-2 py-0.5 text-xs font-medium ${
             site.available
-              ? 'bg-[#FFF4EE] text-[#F26522]'
+              ? 'bg-[#FFF4EE] text-brand-accessible'
               : 'bg-red-50 text-red-500'
           }`}
         >
@@ -65,7 +65,7 @@ export function SiteListCard({
           {conditionTags.map((tag) => (
             <span
               key={tag}
-              className="rounded border border-surface-border bg-white px-1.5 py-0.5 text-[11px] text-ink-secondary"
+              className="rounded border border-surface-border bg-white px-1.5 py-0.5 text-xs text-ink-secondary"
             >
               {tag}
             </span>
@@ -82,7 +82,7 @@ export function SiteListCard({
           <button
             type="button"
             onClick={onReviews}
-            className="shrink-0 rounded border border-surface-border bg-white px-2 py-1 text-xs font-medium text-[#F26522]"
+            className="shrink-0 rounded border border-surface-border bg-white px-2 py-1 text-xs font-medium text-brand-accessible"
           >
             후기 보기
           </button>

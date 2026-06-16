@@ -12,7 +12,7 @@ export function SectionTitle({ title, action, onAction }: SectionTitleProps) {
         <button
           type="button"
           onClick={onAction}
-          className="text-sm font-medium text-brand-500"
+          className="text-sm font-medium text-brand-accessible"
         >
           {action}
         </button>

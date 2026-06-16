@@ -14,6 +14,7 @@ import {
 } from '../data/filterData';
 import { DEFAULT_GUEST_COUNTS, type GuestCounts } from '../data/guestData';
 import type { HomeCategory } from '../data/homeData';
+import { getDefaultCheckIn, getDefaultCheckOut } from '../lib/dateDefaults';
 
 interface SearchContextValue {
   checkIn: Date;
@@ -31,9 +32,6 @@ interface SearchContextValue {
   applyTheme: (theme: HomeCategory) => void;
   resetFilters: () => void;
 }
-
-const defaultCheckIn = new Date(2026, 5, 20);
-const defaultCheckOut = new Date(2026, 5, 21);
 
 const SearchContext = createContext<SearchContextValue | null>(null);
 
@@ -56,8 +54,8 @@ function buildSelectedFiltersFromTheme(theme: HomeCategory): SelectedFilters {
 }
 
 export function SearchProvider({ children }: { children: ReactNode }) {
-  const [checkIn, setCheckIn] = useState(defaultCheckIn);
-  const [checkOut, setCheckOut] = useState(defaultCheckOut);
+  const [checkIn, setCheckIn] = useState(() => getDefaultCheckIn());
+  const [checkOut, setCheckOut] = useState(() => getDefaultCheckOut());
   const [regionLabel, setRegionLabel] = useState('전국');
   const [guestCounts, setGuestCounts] = useState<GuestCounts>(DEFAULT_GUEST_COUNTS);
   const [selectedFilters, setSelectedFilters] = useState<SelectedFilters>(
@@ -114,15 +112,11 @@ export function useSearch() {
   return context;
 }
 
-export function formatDateForBooking(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${date.getFullYear()}.${month}.${day}`;
-}
-
 export function formatDateShortLabel(date: Date): string {
   return `${date.getMonth() + 1}.${String(date.getDate()).padStart(2, '0')}`;
 }
+
+export { formatDateForBooking } from '../lib/dateDefaults';
 
 export function formatHomeDateRange(checkIn: Date, checkOut: Date): string {
   return `${formatDateShortLabel(checkIn)} ~ ${formatDateShortLabel(checkOut)}`;

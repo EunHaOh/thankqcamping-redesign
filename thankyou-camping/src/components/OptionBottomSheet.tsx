@@ -30,7 +30,7 @@ export function OptionBottomSheet({
             }}
             className={`flex h-11 w-full items-center justify-between rounded-lg border px-4 text-sm ${
               selected === option
-                ? 'border-primary bg-primary-soft font-semibold text-primary'
+                ? 'border-primary bg-primary-soft font-semibold text-brand-accessible'
                 : 'border-surface-border text-ink'
             }`}
           >
