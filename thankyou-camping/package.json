@@ -8,7 +8,11 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "extract:images": "node scripts/extract-thankq-images.mjs",
-    "extract:review-images": "node scripts/extract-thankq-review-images.mjs"
+    "extract:review-images": "node scripts/extract-thankq-review-images.mjs",
+    "download:pexels-images": "node scripts/download-pexels-campground-images.mjs",
+    "validate:pexels-images": "node scripts/validate-pexels-image-sets.mjs",
+    "validate:campground-images": "node scripts/validate-campground-image-consistency.mjs",
+    "prebuild": "node scripts/validate-pexels-image-sets.mjs && node scripts/validate-campground-image-consistency.mjs"
   },
   "dependencies": {
     "react": "^19.0.0",

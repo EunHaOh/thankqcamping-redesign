@@ -1,3 +1,5 @@
+import { pexelsCampgroundImages } from './pexelsCampgroundImages';
+
 const REVIEWS = '/images/campgrounds/reviews';
 const RAW = '/images/campgrounds/raw';
 
@@ -103,16 +105,23 @@ export function getExcludedReviewReason(path: string): string | undefined {
   return excludedReviewImages.find((item) => item.path === path)?.reason;
 }
 
-export function ensureReviewImage(path?: string): ReviewImagePath {
-  if (path && isCuratedReviewImage(path)) return path;
+export function isPexelsReviewImage(path?: string): boolean {
+  return Boolean(path?.startsWith('/images/campgrounds/pexels-sets/'));
+}
+
+export function ensureReviewImage(path?: string): string {
+  if (path && (isCuratedReviewImage(path) || isPexelsReviewImage(path))) return path;
   return REVIEW_IMAGE_FALLBACK;
 }
 
-export function getReviewImagesForCamp(campId: string): ReviewImagePath[] {
+export function getReviewImagesForCamp(campId: string): string[] {
+  const pexelsReviews = pexelsCampgroundImages[campId]?.reviewImages;
+  if (pexelsReviews?.length) return pexelsReviews;
+
   return campgroundReviewImages[campId] ?? curatedReviewImages.slice(0, 3);
 }
 
-export function pickReviewImage(campId: string, index: number): ReviewImagePath {
+export function pickReviewImage(campId: string, index: number): string {
   const pool = getReviewImagesForCamp(campId);
   return pool[index % pool.length] ?? REVIEW_IMAGE_FALLBACK;
 }
@@ -121,9 +130,9 @@ export function pickReviewPhotos(
   campId: string,
   startIndex: number,
   count = 3,
-): ReviewImagePath[] {
+): string[] {
   const pool = getReviewImagesForCamp(campId);
-  const photos: ReviewImagePath[] = [];
+  const photos: string[] = [];
   for (let i = 0; i < count; i += 1) {
     const candidate = pool[(startIndex + i) % pool.length] ?? REVIEW_IMAGE_FALLBACK;
     if (!photos.includes(candidate)) photos.push(candidate);
@@ -139,6 +148,6 @@ export function getReviewImageSources(photo?: string): string[] {
   return [ensureReviewImage(photo)];
 }
 
-export function getReviewPhoto(photo?: string): ReviewImagePath {
+export function getReviewPhoto(photo?: string): string {
   return ensureReviewImage(photo);
 }

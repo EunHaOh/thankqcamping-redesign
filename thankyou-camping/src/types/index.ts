@@ -82,6 +82,11 @@ export interface Campground {
   mapLandmarks?: MapLandmark[];
   /** false면 전국 검색 리스트에서 제외 (지역 필터에서만 노출) */
   showInNationwide?: boolean;
+  /** Pexels 프로토타입 이미지 세트 — listImages와 detailImages는 동일 배열 */
+  listImages?: string[];
+  detailImages?: string[];
+  reviewImages?: string[];
+  concept?: string;
 }
 
 export interface BookingState {

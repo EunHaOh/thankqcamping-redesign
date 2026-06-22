@@ -152,6 +152,16 @@ export function getCampDetailImages(campId: string): string[] {
 
 
 
+export function getCampListImages(campId: string): string[] {
+
+  const set = getCampgroundImageSet(campId);
+
+  return set.listImages ?? set.detailImages;
+
+}
+
+
+
 export function getCampSiteImages(campId: string): string[] {
 
   return getCampgroundImageSet(campId).siteImages;
@@ -182,13 +192,7 @@ export function getCampGallery(campId: string): GalleryItem[] {
 
   const set = getCampgroundImageSet(campId);
 
-  const merged = [...set.detailImages, ...set.siteImages].filter(
-
-    (url, index, list) => list.indexOf(url) === index,
-
-  );
-
-  return merged.slice(0, 4).map(toGallery);
+  return set.detailImages.map(toGallery);
 
 }
 

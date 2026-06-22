@@ -1,3 +1,5 @@
+import { pexelsCampgroundImages } from './pexelsCampgroundImages';
+
 const RAW = '/images/campgrounds/raw';
 
 /** 캠핑장·사이트·자연 환경에 적합한 이미지만 포함 */
@@ -41,9 +43,10 @@ export const homeBannerImages: CuratedImagePath[] = [
 ];
 
 export interface CampgroundImageSet {
-  mainImage: CuratedImagePath;
-  detailImages: CuratedImagePath[];
-  siteImages: CuratedImagePath[];
+  mainImage: string;
+  listImages?: string[];
+  detailImages: string[];
+  siteImages: string[];
 }
 
 /** 캠핑장별 고유 대표·상세·사이트·후기 이미지 (선별 목록만 사용) */
@@ -160,6 +163,10 @@ export const IMAGE_FALLBACK: CuratedImagePath = curatedCampgroundImages[0];
 const curatedSet = new Set<string>(curatedCampgroundImages);
 const excludedSet = new Set<string>(excludedImageNotes.map((item) => item.path));
 
+export function isPexelsPrototypeImage(path?: string): boolean {
+  return Boolean(path?.startsWith('/images/campgrounds/pexels-sets/'));
+}
+
 export function isCuratedImage(path?: string): path is CuratedImagePath {
   if (!path) return false;
   return curatedSet.has(path);
@@ -174,14 +181,37 @@ export function getExcludedReason(path: string): string | undefined {
   return excludedImageNotes.find((item) => item.path === path)?.reason;
 }
 
-/** 선별 목록에 없거나 제외 목록이면 fallback 반환 */
-export function ensureCuratedImage(path?: string): CuratedImagePath {
-  if (path && isCuratedImage(path)) return path;
+/** 선별 목록 또는 Pexels 프로토타입 이미지면 그대로 사용, 아니면 fallback */
+export function ensureCuratedImage(path?: string): string {
+  if (path && (isCuratedImage(path) || isPexelsPrototypeImage(path))) return path;
   return IMAGE_FALLBACK;
 }
 
 export function getCampgroundImageSet(campId: string): CampgroundImageSet {
-  return campgroundImageSets[campId] ?? campgroundImageSets['camp-1'];
+  const pexels = pexelsCampgroundImages[campId];
+  if (pexels?.detailImages?.length) {
+    const detailImages = pexels.detailImages;
+
+    return {
+      mainImage: detailImages[0],
+      listImages: detailImages,
+      detailImages,
+      siteImages: detailImages.slice(1, 4).length > 0 ? detailImages.slice(1, 4) : [detailImages[0]],
+    };
+  }
+
+  const fallback = campgroundImageSets[campId] ?? campgroundImageSets['camp-1'];
+  const listImages = [
+    fallback.mainImage,
+    ...fallback.detailImages,
+    ...fallback.siteImages,
+  ].filter((path, index, list) => list.indexOf(path) === index);
+
+  return {
+    ...fallback,
+    listImages,
+    detailImages: listImages,
+  };
 }
 
 /** 이미지 검수 페이지용 — camp-001 ~ camp-025 */

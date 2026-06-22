@@ -69,7 +69,7 @@ function SitePhotoScroll({
   onSwipe: (photoIndex: number) => void;
   onPhotoClick: (photoIndex: number) => void;
 }) {
-  const photos = items.slice(0, 4);
+  const photos = items;
   const scrollRef = useRef<HTMLDivElement>(null);
   const lastIndexRef = useRef(0);
 

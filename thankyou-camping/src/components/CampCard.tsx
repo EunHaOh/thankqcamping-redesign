@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import type { Campground } from '../types';
-import { getCampHero } from '../data/images';
+import { getCampListImages } from '../data/images';
 import { formatPrice } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
 import {
@@ -9,7 +9,7 @@ import {
   trackEvent,
 } from '../lib/analytics';
 import { campgroundAnalyticsFields } from '../lib/analyticsHelpers';
-import { CoverImage } from './CoverImage';
+import { HorizontalPhotoScroll } from './HorizontalPhotoScroll';
 import { StarRating } from './StarRating';
 
 interface CampCardProps {
@@ -20,7 +20,10 @@ interface CampCardProps {
 
 export function CampCard({ campground, cardIndex, resultCount }: CampCardProps) {
   const navigate = useNavigate();
-  const hero = getCampHero(campground.id);
+  const listPhotos =
+    campground.photos?.length >= 10
+      ? campground.photos
+      : getCampListImages(campground.id);
 
   const handleClick = () => {
     trackAnotherCampAfterReturnIfNeeded({
@@ -44,12 +47,9 @@ export function CampCard({ campground, cardIndex, resultCount }: CampCardProps) 
       onClick={handleClick}
       className="w-full overflow-hidden rounded-lg border border-surface-border bg-white text-left shadow-card"
     >
-      <CoverImage
-        sources={hero.sources}
-        fallback={hero.fallback}
-        height={200}
-        className="w-full"
-      />
+      <div className="pointer-events-none">
+        <HorizontalPhotoScroll photos={listPhotos} height={200} cardWidth={280} />
+      </div>
 
       <div className="p-3">
         <h3 className="mb-0.5 text-base font-bold text-ink">{campground.name}</h3>

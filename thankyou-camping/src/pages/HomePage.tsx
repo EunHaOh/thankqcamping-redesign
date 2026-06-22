@@ -24,11 +24,8 @@ import {
   getHomeNewCampsForRegion,
   type NewCampRegion,
 } from '../data/homeData';
-import { getCampMainImage } from '../data/images';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
 
-/** 홈 맞춤/예약가능 섹션 시각 통일용 대표 캠핑 이미지 */
-const HOME_FEATURE_IMAGE = getCampMainImage('camp-1');
 
 function chunkNewCampPairs(campIds: string[]): string[][] {
   const pairs: string[][] = [];
@@ -126,7 +123,6 @@ export function HomePage() {
                 campgroundId={id}
                 sectionName="맞춤 캠핑장"
                 cardIndex={index}
-                imageOverride={HOME_FEATURE_IMAGE}
               />
             ))}
           </HomeHorizontalScroll>
@@ -140,7 +136,6 @@ export function HomePage() {
                 campgroundId={id}
                 sectionName="지금 예약 가능한 캠핑장"
                 cardIndex={index}
-                imageOverride={HOME_FEATURE_IMAGE}
               />
             ))}
           </HomeHorizontalScroll>
