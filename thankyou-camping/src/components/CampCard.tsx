@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import type { Campground } from '../types';
-import { getCampListImages } from '../data/images';
+import { getCampgroundSummary } from '../data/campgroundSummaries';
+import { getCampDetailImages } from '../data/images';
 import { formatPrice } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
 import {
@@ -9,8 +10,8 @@ import {
   trackEvent,
 } from '../lib/analytics';
 import { campgroundAnalyticsFields } from '../lib/analyticsHelpers';
-import { HorizontalPhotoScroll } from './HorizontalPhotoScroll';
-import { StarRating } from './StarRating';
+import { CampCardPhotoStrip } from './CampCardPhotoStrip';
+import { TapAction } from './TapAction';
 
 interface CampCardProps {
   campground: Campground;
@@ -23,7 +24,8 @@ export function CampCard({ campground, cardIndex, resultCount }: CampCardProps) 
   const listPhotos =
     campground.photos?.length >= 10
       ? campground.photos
-      : getCampListImages(campground.id);
+      : getCampDetailImages(campground.id);
+  const summary = getCampgroundSummary(campground);
 
   const handleClick = () => {
     trackAnotherCampAfterReturnIfNeeded({
@@ -42,48 +44,32 @@ export function CampCard({ campground, cardIndex, resultCount }: CampCardProps) 
   };
 
   return (
-    <button
-      type="button"
-      onClick={handleClick}
-      className="w-full overflow-hidden rounded-lg border border-surface-border bg-white text-left shadow-card"
-    >
-      <div className="pointer-events-none">
-        <HorizontalPhotoScroll photos={listPhotos} height={200} cardWidth={280} />
-      </div>
+    <article className="w-full overflow-hidden rounded-lg border border-surface-border bg-white text-left shadow-card">
+      <CampCardPhotoStrip photos={listPhotos} />
 
-      <div className="p-3">
-        <h3 className="mb-0.5 text-base font-bold text-ink">{campground.name}</h3>
-        <p className="mb-2 text-sm text-ink-secondary">{campground.location}</p>
+      <TapAction
+        onTap={handleClick}
+        aria-label={`${campground.name} 상세 보기`}
+        className="cursor-pointer px-4 pb-4 pt-3"
+      >
+        <h3 className="text-[20px] font-bold leading-snug text-ink">{campground.name}</h3>
 
-        <div className="mb-2">
-          <StarRating
-            rating={campground.rating}
-            reviewCount={campground.reviewCount}
-            size="sm"
-          />
-        </div>
+        <p className="mt-1 line-clamp-1 text-[15px] leading-[1.45] text-ink">{summary}</p>
 
-        <div className="mb-2 flex items-center justify-between">
-          <span className="text-base font-bold text-ink">
+        <p className="mt-1 text-[15px] leading-[1.4] text-ink-secondary">
+          리뷰 {campground.reviewCount.toLocaleString('ko-KR')} · {campground.location}
+        </p>
+
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <span className="text-[22px] font-bold text-ink">
             {formatPrice(campground.priceFrom)}
-            <span className="text-sm font-normal text-ink-muted">~</span>
+            <span className="text-base font-normal text-ink-muted">~</span>
           </span>
           {campground.available && (
-            <span className="text-xs font-medium text-[#F26522]">예약 가능</span>
+            <span className="shrink-0 text-[15px] font-semibold text-[#F26522]">예약 가능</span>
           )}
         </div>
-
-        <div className="flex flex-wrap gap-1">
-          {campground.listTags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded border border-surface-border bg-white px-1.5 py-0.5 text-[11px] text-ink-secondary"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      </div>
-    </button>
+      </TapAction>
+    </article>
   );
 }

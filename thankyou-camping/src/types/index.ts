@@ -75,6 +75,8 @@ export interface Campground {
   distance: string;
   tags: string[];
   listTags: string[];
+  /** 검색결과 리스트 카드용 한 줄 소개 */
+  summary?: string;
   available: boolean;
   hasReviewPhotos: boolean;
   reviews: Review[];

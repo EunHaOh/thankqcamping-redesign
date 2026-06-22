@@ -1,4 +1,5 @@
 import type { Campground, Review } from '../types';
+import { getCampgroundSummary } from './campgroundSummaries';
 import { getCatalogEntry, getConceptForCamp } from './campgroundCatalog';
 import { pexelsCampgroundImages } from './pexelsCampgroundImages';
 import { pickReviewImage, pickReviewPhotos } from './reviewImages';
@@ -113,6 +114,7 @@ export function applyCampgroundPexelsImages(camp: Campground): Campground {
     detailImages: images.detailImages,
     reviewImages,
     hasReviewPhotos: reviewImages.length >= MIN_REVIEW_IMAGES,
+    summary: camp.summary ?? getCampgroundSummary(camp),
     reviews,
   };
 }
