@@ -937,7 +937,73 @@ export const campgrounds: Campground[] = [
       { label: '주차장', x: 20, y: 80 },
     ],
   },
+  ...createNewCampStubs(),
 ];
+
+function createNewCampStub(
+  id: string,
+  name: string,
+  location: string,
+  region: string,
+  priceFrom: number,
+  tag: string,
+): Campground {
+  const campNumber = Number.parseInt(id.replace('camp-', ''), 10);
+
+  return {
+    id,
+    name,
+    location,
+    region,
+    rating: 4.4 + (campNumber % 4) * 0.1,
+    reviewCount: 42 + campNumber * 7,
+    priceFrom,
+    heroImage: getCampMainImage(id),
+    photos: buildCampPhotos(id),
+    available: true,
+    hasReviewPhotos: false,
+    showInNationwide: false,
+    listTags: [tag, '신규 오픈'],
+    siteSizeSummary: '평균 8m × 10m',
+    tentFit: 'fit',
+    tentFitMessage: '내 텐트 기준 설치 가능',
+    petFriendly: true,
+    conditionChips: [tag, '신규 오픈'],
+    reviewSummary: ['새로 오픈한 캠핑장이에요'],
+    facilities: ['전기', '온수 샤워장', '주차장'],
+    address: location,
+    distance: '서울에서 약 2시간',
+    tags: ['오토캠핑'],
+    reviews: [],
+    sites: [
+      createMinimalSite(`site-${id}-1`, 'A-1 사이트', priceFrom, {
+        image: getCampSiteImages(id)[0] ?? getCampMainImage(id),
+        photos: sitePhotoSet(id),
+      }),
+    ],
+    mapLandmarks: [
+      { label: '입구', x: 12, y: 16 },
+      { label: '화장실', x: 78, y: 55 },
+    ],
+  };
+}
+
+function createNewCampStubs(): Campground[] {
+  return [
+    createNewCampStub('camp-10', '한강 노을 캠핑장', '서울 마포구 상암동', '서울', 62000, '도심 캠핑'),
+    createNewCampStub('camp-11', '북한산 입구 캠핑파크', '서울 강북구 수유동', '서울', 58000, '오토캠핑'),
+    createNewCampStub('camp-12', '서울숲 차박 캠핑장', '서울 성동구 성수동', '서울', 54000, '차박'),
+    createNewCampStub('camp-13', '안양천 캠핑 빌리지', '서울 영등포구 신길동', '서울', 49000, '가족 추천'),
+    createNewCampStub('camp-14', '속리산 오토캠핑장', '충북 보은군 속리산면', '충북', 47000, '산·숲'),
+    createNewCampStub('camp-15', '단양 라이트 캠핑장', '충북 단양군 적성면', '충북', 51000, '계곡'),
+    createNewCampStub('camp-16', '충주 호수 캠핑장', '충북 충주시 동량면', '충북', 53000, '호수'),
+    createNewCampStub('camp-17', '속초 해변 캠핑장', '강원 속초시 장사항', '강원', 72000, '해변'),
+    createNewCampStub('camp-18', '제주 바당 캠핑장', '제주 제주시 애월읍', '제주', 88000, '오션뷰'),
+    createNewCampStub('camp-19', '한라 숲 캠핑파크', '제주 제주시 구좌읍', '제주', 76000, '숲 캠핑'),
+    createNewCampStub('camp-20', '표선 해변 캠핑장', '제주 서귀포시 표선면', '제주', 92000, '해변'),
+    createNewCampStub('camp-21', '남원 오름 캠핑장', '제주 서귀포시 남원읍', '제주', 84000, '오름'),
+  ];
+}
 
 export function getCampgroundById(id: string): Campground | undefined {
   return campgrounds.find((camp) => camp.id === id);

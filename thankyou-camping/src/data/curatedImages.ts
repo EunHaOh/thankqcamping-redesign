@@ -93,6 +93,66 @@ export const campgroundImageSets: Record<string, CampgroundImageSet> = {
     detailImages: [`${RAW}/camp-025.jpg`, `${RAW}/camp-005.jpg`, `${RAW}/camp-006.jpg`],
     siteImages: [`${RAW}/camp-024.jpg`, `${RAW}/camp-025.jpg`],
   },
+  'camp-10': {
+    mainImage: `${RAW}/camp-002.jpg`,
+    detailImages: [`${RAW}/camp-003.jpg`, `${RAW}/camp-004.jpg`, `${RAW}/camp-019.jpg`],
+    siteImages: [`${RAW}/camp-021.jpg`, `${RAW}/camp-022.jpg`],
+  },
+  'camp-11': {
+    mainImage: `${RAW}/camp-019.jpg`,
+    detailImages: [`${RAW}/camp-002.jpg`, `${RAW}/camp-003.jpg`, `${RAW}/camp-021.jpg`],
+    siteImages: [`${RAW}/camp-004.jpg`, `${RAW}/camp-005.jpg`],
+  },
+  'camp-12': {
+    mainImage: `${RAW}/camp-003.jpg`,
+    detailImages: [`${RAW}/camp-002.jpg`, `${RAW}/camp-025.jpg`, `${RAW}/camp-024.jpg`],
+    siteImages: [`${RAW}/camp-006.jpg`, `${RAW}/camp-001.jpg`],
+  },
+  'camp-13': {
+    mainImage: `${RAW}/camp-004.jpg`,
+    detailImages: [`${RAW}/camp-019.jpg`, `${RAW}/camp-002.jpg`, `${RAW}/camp-022.jpg`],
+    siteImages: [`${RAW}/camp-005.jpg`, `${RAW}/camp-006.jpg`],
+  },
+  'camp-14': {
+    mainImage: `${RAW}/camp-005.jpg`,
+    detailImages: [`${RAW}/camp-006.jpg`, `${RAW}/camp-024.jpg`, `${RAW}/camp-001.jpg`],
+    siteImages: [`${RAW}/camp-002.jpg`, `${RAW}/camp-019.jpg`],
+  },
+  'camp-15': {
+    mainImage: `${RAW}/camp-006.jpg`,
+    detailImages: [`${RAW}/camp-024.jpg`, `${RAW}/camp-025.jpg`, `${RAW}/camp-002.jpg`],
+    siteImages: [`${RAW}/camp-003.jpg`, `${RAW}/camp-004.jpg`],
+  },
+  'camp-16': {
+    mainImage: `${RAW}/camp-024.jpg`,
+    detailImages: [`${RAW}/camp-025.jpg`, `${RAW}/camp-001.jpg`, `${RAW}/camp-019.jpg`],
+    siteImages: [`${RAW}/camp-021.jpg`, `${RAW}/camp-005.jpg`],
+  },
+  'camp-17': {
+    mainImage: `${RAW}/camp-025.jpg`,
+    detailImages: [`${RAW}/camp-001.jpg`, `${RAW}/camp-002.jpg`, `${RAW}/camp-003.jpg`],
+    siteImages: [`${RAW}/camp-022.jpg`, `${RAW}/camp-006.jpg`],
+  },
+  'camp-18': {
+    mainImage: `${RAW}/camp-021.jpg`,
+    detailImages: [`${RAW}/camp-022.jpg`, `${RAW}/camp-004.jpg`, `${RAW}/camp-019.jpg`],
+    siteImages: [`${RAW}/camp-024.jpg`, `${RAW}/camp-002.jpg`],
+  },
+  'camp-19': {
+    mainImage: `${RAW}/camp-022.jpg`,
+    detailImages: [`${RAW}/camp-021.jpg`, `${RAW}/camp-005.jpg`, `${RAW}/camp-006.jpg`],
+    siteImages: [`${RAW}/camp-003.jpg`, `${RAW}/camp-025.jpg`],
+  },
+  'camp-20': {
+    mainImage: `${RAW}/camp-001.jpg`,
+    detailImages: [`${RAW}/camp-002.jpg`, `${RAW}/camp-019.jpg`, `${RAW}/camp-004.jpg`],
+    siteImages: [`${RAW}/camp-005.jpg`, `${RAW}/camp-024.jpg`],
+  },
+  'camp-21': {
+    mainImage: `${RAW}/camp-002.jpg`,
+    detailImages: [`${RAW}/camp-025.jpg`, `${RAW}/camp-021.jpg`, `${RAW}/camp-006.jpg`],
+    siteImages: [`${RAW}/camp-019.jpg`, `${RAW}/camp-004.jpg`],
+  },
 };
 
 export const IMAGE_FALLBACK: CuratedImagePath = curatedCampgroundImages[0];

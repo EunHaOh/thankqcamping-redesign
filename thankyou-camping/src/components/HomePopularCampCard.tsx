@@ -15,20 +15,6 @@ interface HomePopularCampCardProps {
 
 const AVATARS = ['🧑', '👩', '🧔'];
 
-function PinIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
-      <path
-        d="M12 21s7-5.7 7-11a7 7 0 10-14 0c0 5.3 7 11 7 11z"
-        stroke="rgba(255,255,255,0.9)"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
-      />
-      <circle cx="12" cy="10" r="2.4" fill="rgba(255,255,255,0.9)" />
-    </svg>
-  );
-}
-
 export const HomePopularCampCard = memo(function HomePopularCampCard({
   campgroundId,
   viewerCount,
@@ -41,7 +27,7 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
 
   const hero = getCampHero(campground.id);
   const rank = cardIndex + 1;
-  const isTopRank = rank <= 3;
+
   const handleTap = () => {
     trackEvent('tq_click_home_camp_card', {
       page_name: 'home',
@@ -60,52 +46,43 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
   return (
     <TapAction
       onTap={handleTap}
-      ariaLabel={`${campground.name} 상세 보기`}
-      className="home-horizontal-card campground-card w-[300px] cursor-pointer snap-start overflow-hidden rounded-[18px] bg-white text-left shadow-soft"
-      style={{ scrollSnapAlign: 'start' }}
+      ariaLabel={`${rank}위 ${campground.name} 상세 보기`}
+      className="home-horizontal-card campground-card w-[272px] shrink-0 snap-start cursor-pointer overflow-hidden rounded-[16px] border border-[#EEF0F2] bg-white text-left shadow-[0_2px_10px_rgba(15,23,42,0.05)]"
     >
       <div className="relative">
         <CoverImage
           sources={hero.sources}
           fallback={hero.fallback}
-          height={172}
+          height={162}
           className="w-full"
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-        <div
-          className={`pointer-events-none absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-full text-[15px] font-extrabold leading-none text-white ring-2 ring-white/90 ${
-            isTopRank
-              ? 'bg-[#F26522] shadow-[0_4px_12px_rgba(242,101,34,0.38)]'
-              : 'bg-[#F47B3A] shadow-[0_3px_9px_rgba(244,123,58,0.28)]'
-          }`}
-        >
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+        <div className="pointer-events-none absolute left-2.5 top-2.5 flex h-[26px] min-w-[26px] items-center justify-center rounded-full bg-[#F26522] px-1.5 text-[12px] font-bold leading-none text-white shadow-[0_2px_6px_rgba(242,101,34,0.32)]">
           {rank}
         </div>
-        <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-          <p className="flex items-center gap-0.5 text-[11px] text-white/85">
-            <PinIcon />
-            <span className="line-clamp-1">{campground.location}</span>
+        <div className="absolute bottom-0 left-0 right-0 px-3 pb-3 pt-10">
+          <p className="line-clamp-1 text-[11px] text-white/90">{campground.region}</p>
+          <p className="mt-0.5 line-clamp-1 text-[14px] font-bold leading-snug text-white">
+            {campground.name}
           </p>
-          <p className="line-clamp-1 text-[15px] font-bold leading-snug">{campground.name}</p>
-          <p className="mt-0.5 text-sm font-bold">
+          <p className="mt-1 text-[13px] font-bold leading-none text-white">
             {formatPrice(campground.priceFrom)}
-            <span className="text-xs font-normal text-white/80">~</span>
+            <span className="text-[11px] font-normal text-white/85">~</span>
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-2 px-3 py-2.5">
-        <span className="min-w-0 flex-1 truncate text-xs text-ink-secondary">
+      <div className="flex items-center gap-2 border-t border-[#F0F1F3] bg-white px-3 py-2">
+        <p className="min-w-0 flex-1 truncate text-[11px] leading-snug text-ink-secondary">
           <span className="font-bold text-[#F26522]">
             {viewerCount.toLocaleString('ko-KR')}명
           </span>
           의 캠퍼들이 보고 있어요!
-        </span>
-        <span className="flex shrink-0 items-center -space-x-1.5">
+        </p>
+        <span className="flex shrink-0 items-center -space-x-1.5" aria-hidden="true">
           {AVATARS.map((face, index) => (
             <span
               key={index}
-              className="flex h-5 w-5 items-center justify-center rounded-full border border-white bg-[#FFF1E9] text-[11px]"
-              aria-hidden="true"
+              className="flex h-[18px] w-[18px] items-center justify-center rounded-full border border-white bg-[#FFF1E9] text-[9px]"
             >
               {face}
             </span>

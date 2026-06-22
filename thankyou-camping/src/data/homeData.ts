@@ -76,16 +76,29 @@ export interface HomePopularCamp {
 export const HOME_POPULAR_CAMPS: HomePopularCamp[] = [
   { id: 'camp-8', viewerCount: 152 },
   { id: 'camp-9', viewerCount: 138 },
-  { id: 'camp-1', viewerCount: 126 },
+  { id: 'camp-2', viewerCount: 126 },
   { id: 'camp-4', viewerCount: 119 },
-  { id: 'camp-2', viewerCount: 104 },
+  { id: 'camp-3', viewerCount: 104 },
   { id: 'camp-6', viewerCount: 97 },
 ];
 
-export const NEW_CAMP_REGIONS = ['전체', '경기', '서울', '충북', '강원', '제주', '경북'] as const;
+export const NEW_CAMP_REGIONS = ['전체', '경기', '서울', '충북', '강원', '제주'] as const;
 
 export type NewCampRegion = (typeof NEW_CAMP_REGIONS)[number];
 
-export const HOME_NEW_CAMPS = ['camp-8', 'camp-7', 'camp-5', 'camp-9'];
+const HOME_NEW_CAMP_BY_REGION: Record<NewCampRegion, string[]> = {
+  전체: ['camp-10', 'camp-8', 'camp-7', 'camp-18', 'camp-9', 'camp-14'],
+  경기: ['camp-1', 'camp-4', 'camp-5', 'camp-7'],
+  서울: ['camp-10', 'camp-11', 'camp-12', 'camp-13'],
+  충북: ['camp-8', 'camp-14', 'camp-15', 'camp-16'],
+  강원: ['camp-2', 'camp-6', 'camp-9', 'camp-17'],
+  제주: ['camp-18', 'camp-19', 'camp-20', 'camp-21'],
+};
+
+export function getHomeNewCampsForRegion(region: NewCampRegion): string[] {
+  return HOME_NEW_CAMP_BY_REGION[region];
+}
+
+export const HOME_NEW_CAMPS = HOME_NEW_CAMP_BY_REGION.전체;
 
 export const HOME_SEARCH_PLACEHOLDER = '이번주는 벚꽃캠핑 어때요?';

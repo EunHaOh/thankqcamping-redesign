@@ -12,6 +12,14 @@ interface HomeHeroBannerCarouselProps {
   displayTotal?: number;
 }
 
+const FALLBACK_BANNER_COPY = [
+  { badge: '2026 벚꽃 맛집', subtitle: '캠핑시즌 활-짝', title: '벚꽃캠핑' },
+  { badge: '봄맞이 추천', subtitle: '따뜻한 주말엔', title: '감성캠핑' },
+  { badge: '가족 캠핑', subtitle: '아이와 함께', title: '봄나들이' },
+  { badge: '이번 주 인기', subtitle: '지금 떠나는', title: '힐링캠핑' },
+  { badge: '예약 찬스', subtitle: '초록 숲속', title: '숲캠핑' },
+] as const;
+
 export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBannerCarouselProps) {
   const navigate = useNavigate();
   const carouselRef = useRef<HTMLDivElement | null>(null);
@@ -29,11 +37,21 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
 
   const total = displayTotal ?? Math.max(banners.length, 5);
   const slides = useMemo(
-    () => Array.from({ length: total }, (_, index) => ({
-      ...banner,
-      id: `${banner.id}-${index + 1}`,
-    })),
-    [banner, total],
+    () => Array.from({ length: total }, (_, index) => {
+      const source = banners[index % banners.length] ?? banner;
+      const copy = FALLBACK_BANNER_COPY[index % FALLBACK_BANNER_COPY.length];
+      const shouldUseGeneratedCopy = banners.length === 1;
+
+      return {
+        ...source,
+        id: `${source.id}-${index + 1}`,
+        badge: shouldUseGeneratedCopy ? copy.badge : source.badge,
+        subtitle: shouldUseGeneratedCopy ? copy.subtitle : source.subtitle,
+        title: shouldUseGeneratedCopy ? copy.title : source.title,
+        ctaLabel: source.ctaLabel || banner.ctaLabel,
+      };
+    }),
+    [banner, banners, total],
   );
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
@@ -106,7 +124,7 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
           <div
             className={`flex ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
             style={{
-              transform: `translateX(calc(-${(activeIndex * 100) / total}% + ${dragOffset}px))`,
+              transform: `translateX(calc(-${activeIndex * 100}% + ${dragOffset}px))`,
             }}
           >
             {slides.map((slide, index) => (
