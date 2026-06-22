@@ -61,6 +61,9 @@ export const HomeCompactCampCard = memo(function HomeCompactCampCard({
       test_version: TEST_VERSION,
     });
     navigate(ROUTES.campgroundDetail(campground.id));
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
   };
 
   return (

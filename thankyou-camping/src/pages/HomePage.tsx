@@ -87,7 +87,12 @@ export function HomePage() {
   }, []);
 
   const filteredNewCamps = useMemo(
-    () => HOME_NEW_CAMPS.filter((id) => matchesNewCampRegion(id, newCampRegion)),
+    () => {
+      const matched = HOME_NEW_CAMPS.filter((id) => matchesNewCampRegion(id, newCampRegion));
+      const fallback = HOME_NEW_CAMPS.filter((id) => !matched.includes(id));
+
+      return [...matched, ...fallback].slice(0, HOME_NEW_CAMPS.length);
+    },
     [newCampRegion],
   );
 
@@ -170,7 +175,7 @@ export function HomePage() {
                 ))}
               </div>
             </div>
-            <div className="space-y-2.5">
+            <div className="space-y-2">
               {filteredNewCamps.map((id, index) => (
                 <HomeNewCampCard key={id} campgroundId={id} cardIndex={index} />
               ))}

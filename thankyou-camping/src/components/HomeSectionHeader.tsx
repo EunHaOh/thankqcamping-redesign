@@ -9,12 +9,20 @@ interface HomeSectionHeaderProps {
 export function HomeSectionHeader({ title, onMore }: HomeSectionHeaderProps) {
   const navigate = useNavigate();
 
+  const scrollToPageTop = () => {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
+  };
+
   const handleMore = () => {
     if (onMore) {
       onMore();
+      scrollToPageTop();
       return;
     }
     navigate(ROUTES.searchResultList);
+    scrollToPageTop();
   };
 
   return (

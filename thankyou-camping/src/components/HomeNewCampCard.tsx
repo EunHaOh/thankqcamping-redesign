@@ -55,34 +55,37 @@ export const HomeNewCampCard = memo(function HomeNewCampCard({
       test_version: TEST_VERSION,
     });
     navigate(ROUTES.campgroundDetail(campground.id));
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
   };
 
   return (
     <TapAction
       onTap={handleTap}
       ariaLabel={`${campground.name} 상세 보기`}
-      className="campground-card flex w-full cursor-pointer items-center gap-3 rounded-[17px] border border-[#EEF0F2] bg-white p-[11px] text-left shadow-[0_2px_8px_rgba(15,23,42,0.03)]"
+      className="campground-card flex w-full cursor-pointer items-center gap-2.5 rounded-[16px] border border-[#EEF0F2] bg-white p-2 text-left shadow-[0_2px_8px_rgba(15,23,42,0.03)]"
     >
       <CoverImage
         sources={hero.sources}
         fallback={hero.fallback}
-        height={96}
-        className="h-[96px] w-[96px] shrink-0 overflow-hidden rounded-[15px]"
+        height={84}
+        className="h-[84px] w-[84px] shrink-0 overflow-hidden rounded-[14px]"
       />
       <div className="min-w-0 flex-1 space-y-0.5">
         <p className="flex items-center gap-0.5 text-[11px] text-ink-muted">
           <PinIcon />
           <span className="line-clamp-1">{campground.location}</span>
         </p>
-        <p className="line-clamp-1 text-[14px] font-bold text-ink">{campground.name}</p>
-        <p className="text-[16px] font-bold text-ink">
+        <p className="line-clamp-1 text-[13px] font-bold text-ink">{campground.name}</p>
+        <p className="text-[15px] font-bold text-ink">
           {formatPrice(campground.priceFrom)}
-          <span className="text-[12px] font-normal text-ink-muted">~</span>
+          <span className="text-[11px] font-normal text-ink-muted">~</span>
         </p>
         <div className="flex items-center gap-1">
           <StarMini />
-          <span className="text-[12px] font-semibold text-ink">{campground.rating.toFixed(1)}</span>
-          <span className="text-[12px] text-ink-muted">({campground.reviewCount})</span>
+          <span className="text-[11px] font-semibold text-ink">{campground.rating.toFixed(1)}</span>
+          <span className="text-[11px] text-ink-muted">({campground.reviewCount})</span>
         </div>
       </div>
     </TapAction>

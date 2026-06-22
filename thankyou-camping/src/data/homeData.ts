@@ -76,6 +76,10 @@ export interface HomePopularCamp {
 export const HOME_POPULAR_CAMPS: HomePopularCamp[] = [
   { id: 'camp-8', viewerCount: 152 },
   { id: 'camp-9', viewerCount: 138 },
+  { id: 'camp-1', viewerCount: 126 },
+  { id: 'camp-4', viewerCount: 119 },
+  { id: 'camp-2', viewerCount: 104 },
+  { id: 'camp-6', viewerCount: 97 },
 ];
 
 export const NEW_CAMP_REGIONS = ['전체', '경기', '서울', '충북', '강원', '제주', '경북'] as const;

@@ -50,6 +50,9 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
       test_version: TEST_VERSION,
     });
     navigate(ROUTES.campgroundDetail(campground.id));
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
   };
 
   return (
@@ -67,6 +70,9 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
           className="w-full"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+        <div className="pointer-events-none absolute left-3 top-3 flex h-10 min-w-10 items-center justify-center rounded-2xl bg-black/55 px-3 text-[22px] font-extrabold leading-none text-white shadow-[0_3px_10px_rgba(0,0,0,0.18)]">
+          {cardIndex + 1}
+        </div>
         <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
           <p className="flex items-center gap-0.5 text-[11px] text-white/85">
             <PinIcon />
