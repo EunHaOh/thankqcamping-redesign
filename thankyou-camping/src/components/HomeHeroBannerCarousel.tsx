@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 import type { HomeHeroBanner } from '../data/homeData';
 import { ROUTES } from '../routes/paths';
@@ -31,28 +31,50 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  const [slideWidth, setSlideWidth] = useState(0);
   const banner = banners[0];
 
   if (!banner) return null;
 
   const total = displayTotal ?? Math.max(banners.length, 5);
   const slides = useMemo(
-    () => Array.from({ length: total }, (_, index) => {
-      const source = banners[index % banners.length] ?? banner;
-      const copy = FALLBACK_BANNER_COPY[index % FALLBACK_BANNER_COPY.length];
-      const shouldUseGeneratedCopy = banners.length === 1;
+    () =>
+      Array.from({ length: total }, (_, index) => {
+        const source = banners[index % banners.length] ?? banner;
+        const copy = FALLBACK_BANNER_COPY[index % FALLBACK_BANNER_COPY.length];
+        const shouldUseGeneratedCopy = banners.length === 1;
 
-      return {
-        ...source,
-        id: `${source.id}-${index + 1}`,
-        badge: shouldUseGeneratedCopy ? copy.badge : source.badge,
-        subtitle: shouldUseGeneratedCopy ? copy.subtitle : source.subtitle,
-        title: shouldUseGeneratedCopy ? copy.title : source.title,
-        ctaLabel: source.ctaLabel || banner.ctaLabel,
-      };
-    }),
+        return {
+          ...source,
+          id: `${source.id}-${index + 1}`,
+          badge: shouldUseGeneratedCopy ? copy.badge : source.badge,
+          subtitle: shouldUseGeneratedCopy ? copy.subtitle : source.subtitle,
+          title: shouldUseGeneratedCopy ? copy.title : source.title,
+          ctaLabel: source.ctaLabel || banner.ctaLabel,
+        };
+      }),
     [banner, banners, total],
   );
+
+  useEffect(() => {
+    const viewport = carouselRef.current;
+    if (!viewport) return;
+
+    const updateSlideWidth = () => {
+      setSlideWidth(viewport.clientWidth);
+    };
+
+    updateSlideWidth();
+    const observer = new ResizeObserver(updateSlideWidth);
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, []);
+
+  const clampDragOffset = (offset: number) => {
+    if (offset > 0 && activeIndex === 0) return 0;
+    if (offset < 0 && activeIndex >= total - 1) return 0;
+    return offset;
+  };
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const carousel = carouselRef.current;
@@ -75,8 +97,7 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
 
     const deltaX = event.clientX - dragState.startX;
     if (Math.abs(deltaX) > 5) suppressClickRef.current = true;
-    const maxOffset = carousel.clientWidth;
-    setDragOffset(Math.max(Math.min(deltaX, maxOffset), -maxOffset));
+    setDragOffset(clampDragOffset(deltaX));
   };
 
   const endPointerDrag = (event: PointerEvent<HTMLDivElement>) => {
@@ -107,6 +128,11 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
     }
   };
 
+  const trackTranslateX =
+    slideWidth > 0
+      ? -activeIndex * slideWidth + dragOffset
+      : -activeIndex * 100;
+
   return (
     <section>
       <div className="relative overflow-hidden rounded-[24px] border border-[#EEF0F2] bg-white shadow-section">
@@ -116,33 +142,38 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
           onPointerMove={handlePointerMove}
           onPointerUp={endPointerDrag}
           onPointerCancel={endPointerDrag}
-          className="overflow-hidden"
-          style={{
-            touchAction: 'pan-y',
-          }}
+          className="h-[288px] w-full overflow-hidden"
+          style={{ touchAction: 'pan-y' }}
         >
           <div
-            className={`flex ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
+            className={`flex h-full ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
             style={{
-              transform: `translateX(calc(-${activeIndex * 100}% + ${dragOffset}px))`,
+              transform:
+                slideWidth > 0
+                  ? `translateX(${trackTranslateX}px)`
+                  : `translateX(calc(-${activeIndex * 100}% + ${dragOffset}px))`,
             }}
           >
             {slides.map((slide, index) => (
               <div
                 key={slide.id}
-                className="relative min-w-full shrink-0 overflow-hidden"
+                className="relative h-full shrink-0 grow-0 overflow-hidden"
+                style={{
+                  flex: '0 0 100%',
+                  width: slideWidth > 0 ? slideWidth : '100%',
+                }}
                 aria-label={`${index + 1}번째 메인 배너`}
               >
                 <CoverImage
                   sources={[slide.image]}
                   fallback={slide.fallback}
-                  height={288}
-                  className="w-full"
+                  height="100%"
+                  className="h-full w-full"
                   priority={index === 0}
                   ariaLabel={`${slide.title} 배너`}
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4">
+                <div className="absolute bottom-4 left-4 right-4 px-0">
                   <span className="inline-block rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-[#F26522]">
                     {slide.badge}
                   </span>
@@ -180,7 +211,7 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
           </div>
         </div>
         {total > 1 && (
-          <div className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-black/45 px-2.5 py-1 text-[12px] font-medium text-white">
+          <div className="pointer-events-none absolute bottom-3 right-3 z-10 rounded-full bg-black/45 px-2.5 py-1 text-[12px] font-medium text-white">
             {activeIndex + 1} | {total}
           </div>
         )}

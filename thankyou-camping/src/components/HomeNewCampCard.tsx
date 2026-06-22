@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CoverImage } from './CoverImage';
 import { TapAction } from './TapAction';
-import { getCampHero } from '../data/images';
+import { IMAGE_FALLBACK, getCampMainImage } from '../data/images';
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { ROUTES } from '../routes/paths';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
@@ -11,6 +11,8 @@ interface HomeNewCampCardProps {
   campgroundId: string;
   cardIndex: number;
 }
+
+const THUMB_SIZE = 110;
 
 function StarMini() {
   return (
@@ -29,7 +31,7 @@ export const HomeNewCampCard = memo(function HomeNewCampCard({
 
   if (!campground) return null;
 
-  const hero = getCampHero(campground.id);
+  const thumbnail = getCampMainImage(campground.id);
   const displayTag = campground.listTags.find((tag) => tag !== '신규 오픈') ?? campground.listTags[0];
 
   const handleTap = () => {
@@ -51,15 +53,19 @@ export const HomeNewCampCard = memo(function HomeNewCampCard({
     <TapAction
       onTap={handleTap}
       ariaLabel={`${campground.name} 상세 보기`}
-      className="campground-card box-border flex w-full max-w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-[14px] border border-[#EEF0F2] bg-white p-2.5 text-left shadow-[0_1px_6px_rgba(15,23,42,0.03)]"
+      className="campground-card box-border flex w-full max-w-full min-w-0 cursor-pointer items-center gap-2.5 overflow-hidden rounded-[14px] border border-[#EEF0F2] bg-white p-2 text-left shadow-[0_1px_6px_rgba(15,23,42,0.03)]"
     >
-      <CoverImage
-        sources={hero.sources}
-        fallback={hero.fallback}
-        height={104}
-        className="h-[104px] w-[104px] shrink-0 overflow-hidden rounded-[12px] object-cover"
-      />
-      <div className="min-w-0 flex-1">
+      <div className="h-[110px] w-[110px] shrink-0 overflow-hidden rounded-[12px] bg-[#E5E7EB]">
+        <CoverImage
+          sources={[thumbnail]}
+          fallback={IMAGE_FALLBACK}
+          width={THUMB_SIZE}
+          height={THUMB_SIZE}
+          className="h-full w-full"
+          ariaLabel={`${campground.name} 대표 사진`}
+        />
+      </div>
+      <div className="min-w-0 flex-1 overflow-hidden">
         <p className="line-clamp-1 text-[11px] text-ink-muted">{campground.region}</p>
         <p className="mt-0.5 line-clamp-1 text-[13px] font-bold leading-snug text-ink">
           {campground.name}
@@ -68,7 +74,7 @@ export const HomeNewCampCard = memo(function HomeNewCampCard({
           {formatPrice(campground.priceFrom)}
           <span className="text-[11px] font-normal text-ink-muted">~</span>
         </p>
-        <div className="mt-1 flex flex-wrap items-center gap-1">
+        <div className="mt-1 flex min-w-0 flex-wrap items-center gap-1">
           <StarMini />
           <span className="text-[11px] font-semibold text-ink">{campground.rating.toFixed(1)}</span>
           <span className="text-[11px] text-ink-muted">({campground.reviewCount})</span>

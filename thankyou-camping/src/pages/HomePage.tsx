@@ -146,10 +146,10 @@ export function HomePage() {
         </HomeSectionCard>
 
         <section className="home-performance-section px-3">
-          <div className="rounded-[23px] border border-[#EEF0F2] bg-white p-[14px] shadow-section">
+          <div className="overflow-x-hidden rounded-[23px] border border-[#EEF0F2] bg-white p-[14px] shadow-section">
             <HomeSectionHeader title="신생 캠핑장" />
-            <div className="mb-3 overflow-x-auto">
-              <div className="flex gap-2 pb-0.5">
+            <div className="scrollbar-hide mb-2.5 overflow-x-auto overscroll-x-contain">
+              <div className="flex gap-2">
                 {NEW_CAMP_REGIONS.map((region) => (
                   <NewCampRegionChip
                     key={region}
@@ -160,13 +160,11 @@ export function HomePage() {
                 ))}
               </div>
             </div>
-            <ul className="flex w-full min-w-0 flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 overflow-x-hidden">
               {filteredNewCamps.map((id, index) => (
-                <li key={id} className="w-full min-w-0">
-                  <HomeNewCampCard campgroundId={id} cardIndex={index} />
-                </li>
+                <HomeNewCampCard key={id} campgroundId={id} cardIndex={index} />
               ))}
-            </ul>
+            </div>
           </div>
         </section>
 
