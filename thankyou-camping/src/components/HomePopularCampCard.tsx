@@ -58,10 +58,11 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
         <div
-          className="pointer-events-none absolute left-3 top-3 origin-top-left text-[52px] font-black leading-none text-white"
+          className="pointer-events-none absolute left-3.5 top-2.5 origin-top-left select-none font-sans text-[68px] font-black italic leading-none tracking-tighter text-white"
           style={{
-            textShadow: '0 4px 12px rgba(0, 0, 0, 0.55), 0 2px 4px rgba(0, 0, 0, 0.4)',
-            transform: 'rotate(-6deg)',
+            textShadow:
+              '0 6px 20px rgba(0, 0, 0, 0.7), 0 3px 10px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.85)',
+            transform: 'rotate(-10deg) skewX(-5deg)',
           }}
           aria-hidden="true"
         >
