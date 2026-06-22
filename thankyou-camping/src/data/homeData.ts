@@ -86,6 +86,21 @@ export const NEW_CAMP_REGIONS = ['전체', '경기', '서울', '충북', '강원
 
 export type NewCampRegion = (typeof NEW_CAMP_REGIONS)[number];
 
+const HOME_NEW_CAMP_FALLBACK_POOL = [
+  'camp-10',
+  'camp-8',
+  'camp-7',
+  'camp-18',
+  'camp-9',
+  'camp-14',
+  'camp-11',
+  'camp-12',
+  'camp-15',
+  'camp-16',
+  'camp-17',
+  'camp-19',
+] as const;
+
 const HOME_NEW_CAMP_BY_REGION: Record<NewCampRegion, string[]> = {
   전체: ['camp-10', 'camp-8', 'camp-7', 'camp-18', 'camp-9', 'camp-14'],
   경기: ['camp-1', 'camp-4', 'camp-5', 'camp-7'],
@@ -96,7 +111,20 @@ const HOME_NEW_CAMP_BY_REGION: Record<NewCampRegion, string[]> = {
 };
 
 export function getHomeNewCampsForRegion(region: NewCampRegion): string[] {
-  return HOME_NEW_CAMP_BY_REGION[region];
+  const regionIds = [...HOME_NEW_CAMP_BY_REGION[region]];
+  const result = [...regionIds];
+
+  for (const id of HOME_NEW_CAMP_FALLBACK_POOL) {
+    if (result.length >= 6) break;
+    if (!result.includes(id)) result.push(id);
+  }
+
+  if (result.length % 2 !== 0) {
+    const extra = HOME_NEW_CAMP_FALLBACK_POOL.find((id) => !result.includes(id));
+    if (extra) result.push(extra);
+  }
+
+  return result.slice(0, 6);
 }
 
 export const HOME_NEW_CAMPS = HOME_NEW_CAMP_BY_REGION.전체;

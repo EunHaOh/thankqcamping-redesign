@@ -12,7 +12,7 @@ interface HomeNewCampCardProps {
   cardIndex: number;
 }
 
-const THUMB_SIZE = 110;
+const THUMB_SIZE = 120;
 
 function StarMini() {
   return (
@@ -55,7 +55,7 @@ export const HomeNewCampCard = memo(function HomeNewCampCard({
       ariaLabel={`${campground.name} 상세 보기`}
       className="campground-card box-border flex w-full max-w-full min-w-0 cursor-pointer items-center gap-2.5 overflow-hidden rounded-[14px] border border-[#EEF0F2] bg-white p-2 text-left shadow-[0_1px_6px_rgba(15,23,42,0.03)]"
     >
-      <div className="h-[110px] w-[110px] shrink-0 overflow-hidden rounded-[12px] bg-[#E5E7EB]">
+      <div className="h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[12px] bg-[#E5E7EB]">
         <CoverImage
           sources={[thumbnail]}
           fallback={IMAGE_FALLBACK}
@@ -66,7 +66,7 @@ export const HomeNewCampCard = memo(function HomeNewCampCard({
         />
       </div>
       <div className="min-w-0 flex-1 overflow-hidden">
-        <p className="line-clamp-1 text-[11px] text-ink-muted">{campground.region}</p>
+        <p className="line-clamp-1 text-[11px] text-ink-muted">{campground.location}</p>
         <p className="mt-0.5 line-clamp-1 text-[13px] font-bold leading-snug text-ink">
           {campground.name}
         </p>

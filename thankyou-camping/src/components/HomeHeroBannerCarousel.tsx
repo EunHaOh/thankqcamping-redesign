@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 import type { HomeHeroBanner } from '../data/homeData';
 import { ROUTES } from '../routes/paths';
@@ -29,52 +29,30 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
   });
   const suppressClickRef = useRef(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [slideWidth, setSlideWidth] = useState(0);
+
   const banner = banners[0];
-
-  if (!banner) return null;
-
   const total = displayTotal ?? Math.max(banners.length, 5);
-  const slides = useMemo(
-    () =>
-      Array.from({ length: total }, (_, index) => {
-        const source = banners[index % banners.length] ?? banner;
-        const copy = FALLBACK_BANNER_COPY[index % FALLBACK_BANNER_COPY.length];
-        const shouldUseGeneratedCopy = banners.length === 1;
 
-        return {
-          ...source,
-          id: `${source.id}-${index + 1}`,
-          badge: shouldUseGeneratedCopy ? copy.badge : source.badge,
-          subtitle: shouldUseGeneratedCopy ? copy.subtitle : source.subtitle,
-          title: shouldUseGeneratedCopy ? copy.title : source.title,
-          ctaLabel: source.ctaLabel || banner.ctaLabel,
-        };
-      }),
-    [banner, banners, total],
-  );
+  const slides = useMemo(() => {
+    if (!banner) return [];
 
-  useEffect(() => {
-    const viewport = carouselRef.current;
-    if (!viewport) return;
+    return Array.from({ length: total }, (_, index) => {
+      const source = banners[index % banners.length] ?? banner;
+      const copy = FALLBACK_BANNER_COPY[index % FALLBACK_BANNER_COPY.length];
+      const shouldUseGeneratedCopy = banners.length === 1;
 
-    const updateSlideWidth = () => {
-      setSlideWidth(viewport.clientWidth);
-    };
+      return {
+        ...source,
+        id: `${source.id}-${index + 1}`,
+        badge: shouldUseGeneratedCopy ? copy.badge : source.badge,
+        subtitle: shouldUseGeneratedCopy ? copy.subtitle : source.subtitle,
+        title: shouldUseGeneratedCopy ? copy.title : source.title,
+        ctaLabel: source.ctaLabel || banner.ctaLabel,
+      };
+    });
+  }, [banner, banners, total]);
 
-    updateSlideWidth();
-    const observer = new ResizeObserver(updateSlideWidth);
-    observer.observe(viewport);
-    return () => observer.disconnect();
-  }, []);
-
-  const clampDragOffset = (offset: number) => {
-    if (offset > 0 && activeIndex === 0) return 0;
-    if (offset < 0 && activeIndex >= total - 1) return 0;
-    return offset;
-  };
+  const currentSlide = slides[activeIndex];
 
   const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const carousel = carouselRef.current;
@@ -85,19 +63,15 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
       startX: event.clientX,
     };
     suppressClickRef.current = false;
-    setIsDragging(true);
-    setDragOffset(0);
     carousel.setPointerCapture(event.pointerId);
   };
 
   const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    const carousel = carouselRef.current;
     const dragState = dragStateRef.current;
-    if (!carousel || !dragState.dragging) return;
+    if (!dragState.dragging) return;
 
     const deltaX = event.clientX - dragState.startX;
     if (Math.abs(deltaX) > 5) suppressClickRef.current = true;
-    setDragOffset(clampDragOffset(deltaX));
   };
 
   const endPointerDrag = (event: PointerEvent<HTMLDivElement>) => {
@@ -114,9 +88,8 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
     }
 
     dragStateRef.current.dragging = false;
-    setIsDragging(false);
-    setDragOffset(0);
     setActiveIndex(Math.min(Math.max(nextIndex, 0), total - 1));
+
     if (suppressClickRef.current) {
       window.setTimeout(() => {
         suppressClickRef.current = false;
@@ -128,10 +101,7 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
     }
   };
 
-  const trackTranslateX =
-    slideWidth > 0
-      ? -activeIndex * slideWidth + dragOffset
-      : -activeIndex * 100;
+  if (!banner || !currentSlide) return null;
 
   return (
     <section>
@@ -142,72 +112,53 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
           onPointerMove={handlePointerMove}
           onPointerUp={endPointerDrag}
           onPointerCancel={endPointerDrag}
-          className="h-[288px] w-full overflow-hidden"
+          className="relative h-[288px] w-full overflow-hidden"
           style={{ touchAction: 'pan-y' }}
+          aria-label={`${activeIndex + 1}번째 메인 배너`}
         >
-          <div
-            className={`flex h-full ${isDragging ? '' : 'transition-transform duration-300 ease-out'}`}
-            style={{
-              transform:
-                slideWidth > 0
-                  ? `translateX(${trackTranslateX}px)`
-                  : `translateX(calc(-${activeIndex * 100}% + ${dragOffset}px))`,
-            }}
-          >
-            {slides.map((slide, index) => (
-              <div
-                key={slide.id}
-                className="relative h-full shrink-0 grow-0 overflow-hidden"
-                style={{
-                  flex: '0 0 100%',
-                  width: slideWidth > 0 ? slideWidth : '100%',
+          <div key={currentSlide.id} className="relative h-full w-full overflow-hidden">
+            <CoverImage
+              sources={[currentSlide.image]}
+              fallback={currentSlide.fallback}
+              height="100%"
+              className="h-full w-full"
+              priority={activeIndex === 0}
+              ariaLabel={`${currentSlide.title} 배너`}
+            />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+            <div className="absolute bottom-4 left-4 right-4">
+              <span className="inline-block rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-[#F26522]">
+                {currentSlide.badge}
+              </span>
+              {currentSlide.subtitle && (
+                <p className="mt-2 text-base font-semibold leading-tight text-white drop-shadow">
+                  {currentSlide.subtitle}
+                </p>
+              )}
+              <p className="mt-0.5 text-2xl font-bold leading-tight text-white drop-shadow">
+                {currentSlide.title}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  if (suppressClickRef.current) {
+                    suppressClickRef.current = false;
+                    return;
+                  }
+                  trackEvent('tq_click_home_banner', {
+                    page_name: 'home',
+                    banner_name: currentSlide.title,
+                    destination_page: 'search_results',
+                    banner_index: activeIndex + 1,
+                    test_version: TEST_VERSION,
+                  });
+                  navigate(ROUTES.searchResultList);
                 }}
-                aria-label={`${index + 1}번째 메인 배너`}
+                className="mt-3 rounded-full bg-[#F26522] px-4 py-2 text-xs font-semibold text-white"
               >
-                <CoverImage
-                  sources={[slide.image]}
-                  fallback={slide.fallback}
-                  height="100%"
-                  className="h-full w-full"
-                  priority={index === 0}
-                  ariaLabel={`${slide.title} 배너`}
-                />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 px-0">
-                  <span className="inline-block rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-[#F26522]">
-                    {slide.badge}
-                  </span>
-                  {slide.subtitle && (
-                    <p className="mt-2 text-base font-semibold leading-tight text-white drop-shadow">
-                      {slide.subtitle}
-                    </p>
-                  )}
-                  <p className="mt-0.5 text-2xl font-bold leading-tight text-white drop-shadow">
-                    {slide.title}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (suppressClickRef.current) {
-                        suppressClickRef.current = false;
-                        return;
-                      }
-                      trackEvent('tq_click_home_banner', {
-                        page_name: 'home',
-                        banner_name: slide.title,
-                        destination_page: 'search_results',
-                        banner_index: index + 1,
-                        test_version: TEST_VERSION,
-                      });
-                      navigate(ROUTES.searchResultList);
-                    }}
-                    className="mt-3 rounded-full bg-[#F26522] px-4 py-2 text-xs font-semibold text-white"
-                  >
-                    {slide.ctaLabel}
-                  </button>
-                </div>
-              </div>
-            ))}
+                {currentSlide.ctaLabel}
+              </button>
+            </div>
           </div>
         </div>
         {total > 1 && (

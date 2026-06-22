@@ -5,6 +5,7 @@ import { HomeCategoryRow } from '../components/HomeCategoryRow';
 import { HomeCompactCampCard } from '../components/HomeCompactCampCard';
 import { HomeHeroBannerCarousel } from '../components/HomeHeroBannerCarousel';
 import { HomeHorizontalScroll } from '../components/HomeHorizontalScroll';
+import { HomeNewCampBundleScroll } from '../components/HomeNewCampBundleScroll';
 import { HomeNewCampCard } from '../components/HomeNewCampCard';
 import { HomePopularCampCard } from '../components/HomePopularCampCard';
 import { HomePopularCampScroll } from '../components/HomePopularCampScroll';
@@ -28,6 +29,14 @@ import { TEST_VERSION, trackEvent } from '../lib/analytics';
 
 /** 홈 맞춤/예약가능 섹션 시각 통일용 대표 캠핑 이미지 */
 const HOME_FEATURE_IMAGE = getCampMainImage('camp-1');
+
+function chunkNewCampPairs(campIds: string[]): string[][] {
+  const pairs: string[][] = [];
+  for (let i = 0; i < campIds.length; i += 2) {
+    pairs.push(campIds.slice(i, i + 2));
+  }
+  return pairs;
+}
 
 function HomeSectionCard({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -79,6 +88,11 @@ export function HomePage() {
   const filteredNewCamps = useMemo(
     () => getHomeNewCampsForRegion(newCampRegion),
     [newCampRegion],
+  );
+
+  const newCampBundles = useMemo(
+    () => chunkNewCampPairs(filteredNewCamps),
+    [filteredNewCamps],
   );
 
   const handleNewCampRegion = (region: NewCampRegion) => {
@@ -146,7 +160,7 @@ export function HomePage() {
         </HomeSectionCard>
 
         <section className="home-performance-section px-3">
-          <div className="overflow-x-hidden rounded-[23px] border border-[#EEF0F2] bg-white p-[14px] shadow-section">
+          <div className="rounded-[23px] border border-[#EEF0F2] bg-white p-[14px] shadow-section">
             <HomeSectionHeader title="신생 캠핑장" />
             <div className="scrollbar-hide mb-2.5 overflow-x-auto overscroll-x-contain">
               <div className="flex gap-2">
@@ -160,11 +174,22 @@ export function HomePage() {
                 ))}
               </div>
             </div>
-            <div className="flex flex-col gap-1.5 overflow-x-hidden">
-              {filteredNewCamps.map((id, index) => (
-                <HomeNewCampCard key={id} campgroundId={id} cardIndex={index} />
+            <HomeNewCampBundleScroll>
+              {newCampBundles.map((pair, bundleIndex) => (
+                <div
+                  key={pair.join('-')}
+                  className="flex w-[calc(100%-36px)] shrink-0 snap-start flex-col gap-2"
+                >
+                  {pair.map((id, index) => (
+                    <HomeNewCampCard
+                      key={id}
+                      campgroundId={id}
+                      cardIndex={bundleIndex * 2 + index}
+                    />
+                  ))}
+                </div>
               ))}
-            </div>
+            </HomeNewCampBundleScroll>
           </div>
         </section>
 
