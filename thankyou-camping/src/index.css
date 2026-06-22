@@ -87,6 +87,46 @@
     touch-action: auto;
   }
 
+  .home-rank-number {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 1;
+    font-size: 32px;
+    line-height: 1;
+    font-weight: 900;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.96);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+    transform: skew(-8deg) rotate(-4deg);
+    transform-origin: top left;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .home-camp-image {
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .home-camp-image .card-image {
+    object-fit: cover;
+  }
+
+  .home-popular-image {
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .home-popular-image .card-image {
+    object-fit: cover;
+  }
+
+  .home-new-image-grid {
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
   .btn-cta {
     @apply h-14 rounded-[14px] bg-[#F26522] text-sm font-semibold text-white;
   }

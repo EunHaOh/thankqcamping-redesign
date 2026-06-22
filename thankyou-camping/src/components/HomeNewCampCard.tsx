@@ -55,7 +55,7 @@ export const HomeNewCampCard = memo(function HomeNewCampCard({
       ariaLabel={`${campground.name} 상세 보기`}
       className="campground-card box-border flex w-full max-w-full min-w-0 cursor-pointer items-center gap-2.5 overflow-hidden rounded-[14px] border border-[#EEF0F2] bg-white p-2 text-left shadow-[0_1px_6px_rgba(15,23,42,0.03)]"
     >
-      <div className="h-[120px] w-[120px] shrink-0 overflow-hidden rounded-[12px] bg-[#E5E7EB]">
+      <div className="home-camp-image h-[120px] w-[120px] shrink-0 bg-[#E5E7EB]">
         <CoverImage
           sources={[thumbnail]}
           fallback={IMAGE_FALLBACK}

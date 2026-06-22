@@ -77,7 +77,7 @@ export const HomeCompactCampCard = memo(function HomeCompactCampCard({
         sources={imageSources}
         fallback={hero.fallback}
         height={96}
-        className="w-full overflow-hidden rounded-[14px]"
+        className="home-camp-image w-full"
       />
       <div className="space-y-1 px-0.5 pt-2">
         <p className="flex items-center gap-0.5 text-[11px] text-ink-muted">

@@ -47,9 +47,9 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
     <TapAction
       onTap={handleTap}
       ariaLabel={`${rank}위 ${campground.name} 상세 보기`}
-      className="home-horizontal-card campground-card w-[272px] shrink-0 snap-start cursor-pointer overflow-hidden rounded-[16px] border border-[#EEF0F2] bg-white text-left shadow-[0_2px_10px_rgba(15,23,42,0.05)]"
+      className="home-horizontal-card campground-card w-[272px] shrink-0 snap-start cursor-pointer overflow-hidden rounded-[18px] border border-[#EEF0F2] bg-white text-left shadow-[0_2px_10px_rgba(15,23,42,0.05)]"
     >
-      <div className="relative">
+      <div className="relative home-popular-image">
         <CoverImage
           sources={hero.sources}
           fallback={hero.fallback}
@@ -57,17 +57,9 @@ export const HomePopularCampCard = memo(function HomePopularCampCard({
           className="w-full"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-        <div
-          className="pointer-events-none absolute left-3.5 top-2.5 origin-top-left select-none font-sans text-[68px] font-black italic leading-none tracking-tighter text-white"
-          style={{
-            textShadow:
-              '0 6px 20px rgba(0, 0, 0, 0.7), 0 3px 10px rgba(0, 0, 0, 0.55), 0 1px 3px rgba(0, 0, 0, 0.85)',
-            transform: 'rotate(-10deg) skewX(-5deg)',
-          }}
-          aria-hidden="true"
-        >
+        <span className="home-rank-number" aria-hidden="true">
           {rank}
-        </div>
+        </span>
         <div className="absolute bottom-0 left-0 right-0 px-3 pb-3 pt-10">
           <p className="line-clamp-1 text-[11px] text-white/90">{campground.region}</p>
           <p className="mt-0.5 line-clamp-1 text-[14px] font-bold leading-snug text-white">
