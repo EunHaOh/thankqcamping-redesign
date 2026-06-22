@@ -52,6 +52,8 @@ export default {
       boxShadow: {
         card: '0 1px 4px rgba(0, 0, 0, 0.06)',
         cta: '0 -2px 12px rgba(0, 0, 0, 0.06)',
+        soft: '0 2px 10px rgba(15, 23, 42, 0.04)',
+        section: '0 4px 14px rgba(15, 23, 42, 0.05)',
       },
       maxWidth: {
         app: '600px',

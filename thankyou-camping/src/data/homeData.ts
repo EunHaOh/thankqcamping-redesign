@@ -22,20 +22,28 @@ export interface HomeHeroBanner {
   image: string;
   fallback: string;
   badge: string;
+  subtitle?: string;
   title: string;
   ctaLabel: string;
 }
 
 const bannerImages = getHomeBannerImages();
 
+/** 홈 히어로 전용 봄꽃 캠핑 일러스트 (로컬 SVG asset) */
+const HERO_SPRING_ILLUSTRATION = '/images/home/hero-spring-camping.svg';
+
+/** 레퍼런스 디자인 기준 히어로 표시용 total (실제 배너 수와 별개) */
+export const HOME_HERO_DISPLAY_TOTAL = 28;
+
 export const HOME_HERO_BANNERS: HomeHeroBanner[] = [
   {
     id: 'hero-1',
-    image: bannerImages[0] ?? IMAGE_FALLBACK,
+    image: HERO_SPRING_ILLUSTRATION,
     fallback: IMAGE_FALLBACK,
-    badge: '캠핑 시즌 오픈',
-    title: '봄꽃캠핑',
-    ctaLabel: '예약하러 가기',
+    badge: '2026 벚꽃 맛집',
+    subtitle: '캠핑시즌 활-짝',
+    title: '벚꽃캠핑',
+    ctaLabel: '봄맞이 캠핑 예약하기',
   },
   {
     id: 'hero-2',
@@ -62,18 +70,18 @@ export const HOME_AVAILABLE_CAMPS = ['camp-3', 'camp-5', 'camp-6', 'camp-7'];
 
 export interface HomePopularCamp {
   id: string;
-  viewerLabel: string;
+  viewerCount: number;
 }
 
 export const HOME_POPULAR_CAMPS: HomePopularCamp[] = [
-  { id: 'camp-8', viewerLabel: '1134명이 확인한 캠핑장' },
-  { id: 'camp-9', viewerLabel: '892명이 확인한 캠핑장' },
+  { id: 'camp-8', viewerCount: 152 },
+  { id: 'camp-9', viewerCount: 138 },
 ];
 
-export const NEW_CAMP_REGIONS = ['전체', '경기', '서울', '충남', '강원', '제주'] as const;
+export const NEW_CAMP_REGIONS = ['전체', '경기', '서울', '충북', '강원', '제주', '경북'] as const;
 
 export type NewCampRegion = (typeof NEW_CAMP_REGIONS)[number];
 
 export const HOME_NEW_CAMPS = ['camp-8', 'camp-7', 'camp-5', 'camp-9'];
 
-export const HOME_SEARCH_PLACEHOLDER = '이번주는 봄꽃캠핑 어때요?';
+export const HOME_SEARCH_PLACEHOLDER = '이번주는 벚꽃캠핑 어때요?';

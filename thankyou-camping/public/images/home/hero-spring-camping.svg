@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 390 280" width="390" height="280" role="img" aria-label="?? ?? ????">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#Dff3d6"/>
+      <stop offset="0.5" stop-color="#F2F3D8"/>
+      <stop offset="1" stop-color="#FBE0EC"/>
+    </linearGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C4E7A0"/>
+      <stop offset="1" stop-color="#A6D77E"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#FFF7D6" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#FFF7D6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="390" height="280" fill="url(#sky)"/>
+  <ellipse cx="200" cy="96" rx="150" ry="92" fill="url(#glow)"/>
+
+  <!-- ground hills -->
+  <path d="M0 214 Q98 184 200 208 T390 206 V280 H0 Z" fill="#D2EDB4"/>
+  <path d="M0 236 Q120 210 240 232 T390 228 V280 H0 Z" fill="url(#hill)"/>
+
+  <!-- back tent -->
+  <g opacity="0.95">
+    <path d="M54 214 L92 156 L130 214 Z" fill="#6FC1B9"/>
+    <path d="M92 156 L130 214 L114 214 L92 172 Z" fill="#52A8A0"/>
+    <path d="M92 166 L108 214 L76 214 Z" fill="#FBF3E2"/>
+  </g>
+
+  <!-- cherry blossom canopy -->
+  <g stroke="#9A6B4F" stroke-width="6" stroke-linecap="round" fill="none">
+    <path d="M-6 34 C30 26 54 44 78 30"/>
+    <path d="M396 30 C360 22 332 44 306 28"/>
+  </g>
+  <g fill="#F7A8C4">
+    <circle cx="14" cy="22" r="26"/><circle cx="50" cy="40" r="24"/><circle cx="84" cy="20" r="22"/>
+    <circle cx="40" cy="8" r="18"/><circle cx="76" cy="48" r="18"/>
+    <circle cx="376" cy="22" r="26"/><circle cx="340" cy="40" r="24"/><circle cx="306" cy="20" r="22"/>
+    <circle cx="350" cy="8" r="18"/><circle cx="314" cy="48" r="18"/>
+    <circle cx="196" cy="-4" r="22"/><circle cx="232" cy="14" r="18"/><circle cx="162" cy="12" r="16"/>
+  </g>
+  <g fill="#FCC9DD">
+    <circle cx="30" cy="26" r="12"/><circle cx="66" cy="30" r="11"/>
+    <circle cx="358" cy="26" r="12"/><circle cx="324" cy="30" r="11"/>
+    <circle cx="208" cy="6" r="11"/>
+  </g>
+  <g fill="#FFE3EF"><circle cx="22" cy="20" r="5"/><circle cx="366" cy="20" r="5"/><circle cx="200" cy="2" r="5"/></g>
+
+  <!-- picnic mat -->
+  <g transform="translate(196 224) rotate(-5)">
+    <rect x="-104" y="-30" width="208" height="58" rx="10" fill="#F4F1EA"/>
+    <g fill="#EE9CB1" opacity="0.85">
+      <rect x="-104" y="-30" width="26" height="29"/>
+      <rect x="-52" y="-30" width="26" height="29"/>
+      <rect x="0" y="-30" width="26" height="29"/>
+      <rect x="52" y="-30" width="26" height="29"/>
+      <rect x="-78" y="-1" width="26" height="29"/>
+      <rect x="-26" y="-1" width="26" height="29"/>
+      <rect x="26" y="-1" width="26" height="29"/>
+      <rect x="78" y="-1" width="26" height="29"/>
+    </g>
+  </g>
+
+  <!-- character A (left, orange) -->
+  <g>
+    <ellipse cx="158" cy="210" rx="26" ry="14" fill="#F2A03C"/>
+    <path d="M140 206 C140 184 176 184 176 206 Z" fill="#F4B45A"/>
+    <circle cx="158" cy="176" r="14" fill="#F8CEA8"/>
+    <path d="M145 173 a13 12 0 0 1 26 0 C171 168 145 168 145 173 Z" fill="#5A3C2E"/>
+    <ellipse cx="186" cy="210" rx="9" ry="6" fill="#F8CEA8"/>
+  </g>
+
+  <!-- character B (right, teal) -->
+  <g>
+    <ellipse cx="232" cy="212" rx="26" ry="14" fill="#5BA9E0"/>
+    <path d="M214 208 C214 186 250 186 250 208 Z" fill="#79BEEC"/>
+    <circle cx="232" cy="178" r="14" fill="#F8CEA8"/>
+    <path d="M219 176 a13 12 0 0 1 26 0 C245 170 219 170 219 176 Z" fill="#3A2A20"/>
+    <ellipse cx="206" cy="212" rx="9" ry="6" fill="#F8CEA8"/>
+  </g>
+
+  <!-- picnic basket + cups -->
+  <g transform="translate(196 214)">
+    <rect x="-13" y="-8" width="26" height="16" rx="3" fill="#CE954F"/>
+    <path d="M-13 -8 Q0 -22 13 -8" fill="none" stroke="#CE954F" stroke-width="3"/>
+    <rect x="-15" y="-3" width="30" height="4" rx="2" fill="#B27E3E"/>
+  </g>
+  <circle cx="178" cy="218" r="4" fill="#F26522"/>
+  <circle cx="216" cy="220" r="4" fill="#FFFFFF"/>
+
+  <!-- falling petals -->
+  <g fill="#F9B6CE">
+    <ellipse cx="120" cy="86" rx="6" ry="4" transform="rotate(25 120 86)"/>
+    <ellipse cx="276" cy="104" rx="5" ry="3.5" transform="rotate(-15 276 104)"/>
+    <ellipse cx="300" cy="150" rx="6" ry="4" transform="rotate(40 300 150)"/>
+    <ellipse cx="96" cy="138" rx="5" ry="3.5" transform="rotate(10 96 138)"/>
+    <ellipse cx="320" cy="92" rx="5" ry="3.5" transform="rotate(20 320 92)"/>
+    <ellipse cx="150" cy="120" rx="5" ry="3.5" transform="rotate(-22 150 120)"/>
+  </g>
+</svg>

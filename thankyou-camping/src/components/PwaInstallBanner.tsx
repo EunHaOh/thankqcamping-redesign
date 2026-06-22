@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
 import { usePwaInstallPrompt } from '../hooks/usePwaInstallPrompt';
 
@@ -15,7 +15,7 @@ function CloseIcon() {
   );
 }
 
-function InstallGuideModal({
+function InstallGuide({
   open,
   message,
   onClose,
@@ -27,91 +27,123 @@ function InstallGuideModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[120] flex items-end justify-center bg-black/40 px-4 pb-6">
+    <div className="rounded-xl border border-[#FCD9C8] bg-[#FFF7F2] p-3 text-xs leading-relaxed text-ink-secondary">
+      <p>{message}</p>
       <button
         type="button"
-        className="absolute inset-0"
-        aria-label="닫기"
         onClick={onClose}
-      />
-      <div className="relative z-10 w-full min-w-0 max-w-full rounded-2xl bg-white p-5 shadow-lg">
-        <h3 className="mb-2 text-base font-bold text-ink">앱 설치 방법</h3>
-        <p className="text-sm leading-relaxed text-ink-secondary">{message}</p>
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn-cta mt-4 flex h-11 w-full items-center justify-center text-sm"
-        >
-          확인
-        </button>
-      </div>
+        className="mt-2 text-xs font-semibold text-[#F26522]"
+      >
+        안내 닫기
+      </button>
     </div>
   );
 }
 
 export function PwaInstallBanner() {
   const {
+    canInstall,
+    isStandalone,
+    isInstalled,
+    isIosSafari,
+    isAndroidChrome,
+    isDesktopChrome,
+    isDismissed,
     browserType,
     installPromptAvailable,
-    shouldShowBanner,
-    helperText,
-    guideOpen,
-    openInstallGuide,
-    closeInstallGuide,
-    dismissBanner,
+    promptInstall,
+    dismissInstallBanner,
   } = usePwaInstallPrompt();
+  const [guideOpen, setGuideOpen] = useState(false);
+  const viewedRef = useRef(false);
 
-  const trackedViewRef = useRef(false);
+  const guideMessage = useMemo(() => {
+    if (isAndroidChrome && !installPromptAvailable) {
+      return "Chrome 메뉴에서 '앱 설치' 또는 '홈 화면에 추가'를 선택해주세요.";
+    }
+    if (isIosSafari) {
+      return "Safari 공유 버튼을 누른 뒤 '홈 화면에 추가'를 선택해주세요.";
+    }
+    if (isDesktopChrome) {
+      return "주소창 오른쪽 설치 아이콘 또는 Chrome 메뉴의 '저장 및 공유 > 앱 설치'를 확인해주세요.";
+    }
+    return '브라우저 메뉴에서 홈 화면에 추가를 확인해주세요.';
+  }, [installPromptAvailable, isAndroidChrome, isDesktopChrome, isIosSafari]);
 
   useEffect(() => {
-    if (!shouldShowBanner || trackedViewRef.current) return;
+    if (!canInstall || viewedRef.current) return;
 
-    trackedViewRef.current = true;
+    viewedRef.current = true;
     trackEvent('tq_view_pwa_install_banner', {
+      page_name: 'home',
+      browser_type: browserType,
+      install_prompt_available: installPromptAvailable,
+      is_standalone: isStandalone,
+      test_version: TEST_VERSION,
+    });
+  }, [browserType, canInstall, installPromptAvailable, isStandalone]);
+
+  if (!canInstall || isStandalone || isInstalled || isDismissed) return null;
+
+  const handleInstallClick = async () => {
+    trackEvent('tq_click_pwa_install', {
       page_name: 'home',
       browser_type: browserType,
       install_prompt_available: installPromptAvailable,
       test_version: TEST_VERSION,
     });
-  }, [browserType, installPromptAvailable, shouldShowBanner]);
 
-  if (!shouldShowBanner) return null;
+    if (installPromptAvailable) {
+      await promptInstall();
+      return;
+    }
+
+    trackEvent('tq_click_pwa_install_guide', {
+      page_name: 'home',
+      browser_type: browserType,
+      guide_type: browserType,
+      test_version: TEST_VERSION,
+    });
+    setGuideOpen(true);
+  };
 
   return (
-    <>
-      <section className="rounded-xl border border-surface-border bg-white p-3 shadow-card">
-        <div className="flex items-start gap-2">
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-ink">
-              땡큐캠핑을 앱처럼 사용해보세요
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-ink-secondary">
-              {helperText}
-            </p>
-            <button
-              type="button"
-              onClick={openInstallGuide}
-              className="mt-2.5 inline-flex h-9 items-center justify-center rounded-lg bg-[#FF5A1F] px-3.5 text-xs font-semibold text-white"
-            >
-              앱 설치하기
-            </button>
-          </div>
+    <section className="rounded-2xl border border-surface-border bg-white p-3.5 shadow-soft">
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold text-ink">
+            땡큐캠핑을 앱처럼 사용해보세요
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-ink-secondary">
+            {installPromptAvailable
+              ? '홈 화면에서 바로 열 수 있어요.'
+              : guideMessage}
+          </p>
           <button
             type="button"
-            onClick={dismissBanner}
-            aria-label="설치 안내 닫기"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-muted"
+            onClick={handleInstallClick}
+            className="mt-2.5 inline-flex h-9 items-center justify-center rounded-lg bg-[#FF5A1F] px-3.5 text-xs font-semibold text-white"
           >
-            <CloseIcon />
+            {installPromptAvailable ? '앱 설치하기' : '설치 방법 보기'}
           </button>
         </div>
-      </section>
+        <button
+          type="button"
+          onClick={() => dismissInstallBanner('banner_close')}
+          aria-label="설치 안내 닫기"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-muted"
+        >
+          <CloseIcon />
+        </button>
+      </div>
 
-      <InstallGuideModal
-        open={guideOpen}
-        message={helperText}
-        onClose={closeInstallGuide}
-      />
-    </>
+      <div className="mt-3">
+        <InstallGuide
+          open={guideOpen}
+          message={guideMessage}
+          onClose={() => setGuideOpen(false)}
+        />
+      </div>
+    </section>
   );
 }

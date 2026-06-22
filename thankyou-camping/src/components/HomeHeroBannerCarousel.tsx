@@ -1,4 +1,3 @@
-import { memo, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { HomeHeroBanner } from '../data/homeData';
 import { ROUTES } from '../routes/paths';
@@ -7,69 +6,64 @@ import { CoverImage } from './CoverImage';
 
 interface HomeHeroBannerCarouselProps {
   banners: HomeHeroBanner[];
+  /** 우하단 indicator에 표시할 total 값 (미지정 시 실제 배너 수) */
+  displayTotal?: number;
 }
 
-export const HomeHeroBannerCarousel = memo(function HomeHeroBannerCarousel({
-  banners,
-}: HomeHeroBannerCarouselProps) {
+export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBannerCarouselProps) {
   const navigate = useNavigate();
-  const [activeIndex, setActiveIndex] = useState(0);
-  const banner = banners[activeIndex] ?? banners[0];
-
-  const handleCtaClick = useCallback(() => {
-    if (!banner) return;
-    trackEvent('tq_click_home_banner', {
-      page_name: 'home',
-      banner_name: banner.title,
-      destination_page: 'search_results',
-      test_version: TEST_VERSION,
-    });
-    navigate(ROUTES.searchResultList);
-  }, [banner, navigate]);
+  const banner = banners[0];
 
   if (!banner) return null;
 
+  const total = displayTotal ?? banners.length;
+
   return (
-    <section className="home-card touch-pan-y">
-      <div className="relative overflow-hidden rounded-2xl border border-surface-border bg-white">
+    <section>
+      <div className="relative overflow-hidden rounded-[24px] border border-[#EEF0F2] bg-white shadow-section">
         <CoverImage
           sources={[banner.image]}
           fallback={banner.fallback}
-          height={200}
+          height={288}
           className="w-full"
-          priority={activeIndex === 0}
+          priority
           ariaLabel={`${banner.title} 배너`}
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent" />
-        <div className="absolute left-4 top-4 right-4">
-          <span className="inline-block rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-brand-accessible">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+        <div className="absolute bottom-4 left-4 right-4">
+          <span className="inline-block rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-[#F26522]">
             {banner.badge}
           </span>
-          <p className="mt-3 text-2xl font-bold leading-tight text-white">{banner.title}</p>
+          {banner.subtitle && (
+            <p className="mt-2 text-base font-semibold leading-tight text-white drop-shadow">
+              {banner.subtitle}
+            </p>
+          )}
+          <p className="mt-0.5 text-2xl font-bold leading-tight text-white drop-shadow">
+            {banner.title}
+          </p>
           <button
             type="button"
-            onClick={handleCtaClick}
-            className="mt-3 touch-manipulation rounded-full bg-[#F26522] px-4 py-2 text-xs font-semibold text-white"
+            onClick={() => {
+              trackEvent('tq_click_home_banner', {
+                page_name: 'home',
+                banner_name: banner.title,
+                destination_page: 'search_results',
+                test_version: TEST_VERSION,
+              });
+              navigate(ROUTES.searchResultList);
+            }}
+            className="mt-3 rounded-full bg-[#F26522] px-4 py-2 text-xs font-semibold text-white"
           >
             {banner.ctaLabel}
           </button>
         </div>
-        {banners.length > 1 && (
-          <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
-            {banners.map((item, index) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-label={`배너 ${index + 1}`}
-                onClick={() => setActiveIndex(index)}
-                className={`h-1.5 rounded-full transition-[width,background-color] duration-200 ${
-                  index === activeIndex ? 'w-4 bg-white' : 'w-1.5 bg-white/50'
-                }`}
-              />
-            ))}
+        {total > 1 && (
+          <div className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-black/45 px-2.5 py-1 text-[12px] font-medium text-white">
+            1 | {total}
           </div>
         )}
       </div>
     </section>
   );
-});
+}

@@ -158,7 +158,7 @@ export function BottomNavigation() {
 
   return (
     <nav
-      className="fixed bottom-0 left-1/2 right-auto z-40 w-full max-w-mobile min-w-0 -translate-x-1/2 overflow-x-clip border-t border-surface-border bg-white foldable:max-w-[min(100dvw,480px)]"
+      className="fixed bottom-0 left-1/2 right-auto z-40 w-full max-w-mobile min-w-0 -translate-x-1/2 overflow-x-clip border-t border-[#EFEFEF] bg-white shadow-[0_-1px_8px_rgba(15,23,42,0.03)] foldable:max-w-[min(100dvw,480px)]"
       aria-label="하단 내비게이션"
     >
       <div className="flex items-stretch pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1">
