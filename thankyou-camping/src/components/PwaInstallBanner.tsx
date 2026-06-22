@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
-import { usePwaInstallPrompt } from '../hooks/usePwaInstallPrompt';
+import { isAppInstalled, usePwaInstallPrompt } from '../hooks/usePwaInstallPrompt';
 
 function CloseIcon() {
   return (
@@ -42,69 +42,52 @@ function InstallGuide({
 
 export function PwaInstallBanner() {
   const {
-    canInstall,
-    isStandalone,
-    isInstalled,
-    isIosSafari,
-    isAndroidChrome,
-    isDesktopChrome,
-    isDismissed,
     browserType,
     installPromptAvailable,
-    promptInstall,
-    dismissInstallBanner,
+    shouldShowBanner,
+    helperText,
+    guideOpen,
+    openInstallGuide,
+    closeInstallGuide,
+    dismissBanner,
   } = usePwaInstallPrompt();
-  const [guideOpen, setGuideOpen] = useState(false);
   const viewedRef = useRef(false);
 
-  const guideMessage = useMemo(() => {
-    if (isAndroidChrome && !installPromptAvailable) {
-      return "Chrome 메뉴에서 '앱 설치' 또는 '홈 화면에 추가'를 선택해주세요.";
-    }
-    if (isIosSafari) {
-      return "Safari 공유 버튼을 누른 뒤 '홈 화면에 추가'를 선택해주세요.";
-    }
-    if (isDesktopChrome) {
-      return "주소창 오른쪽 설치 아이콘 또는 Chrome 메뉴의 '저장 및 공유 > 앱 설치'를 확인해주세요.";
-    }
-    return '브라우저 메뉴에서 홈 화면에 추가를 확인해주세요.';
-  }, [installPromptAvailable, isAndroidChrome, isDesktopChrome, isIosSafari]);
-
   useEffect(() => {
-    if (!canInstall || viewedRef.current) return;
+    if (!shouldShowBanner || viewedRef.current) return;
 
     viewedRef.current = true;
     trackEvent('tq_view_pwa_install_banner', {
       page_name: 'home',
       browser_type: browserType,
       install_prompt_available: installPromptAvailable,
-      is_standalone: isStandalone,
+      is_standalone: isAppInstalled(),
       test_version: TEST_VERSION,
     });
-  }, [browserType, canInstall, installPromptAvailable, isStandalone]);
+  }, [browserType, installPromptAvailable, shouldShowBanner]);
 
-  if (!canInstall || isStandalone || isInstalled || isDismissed) return null;
+  if (!shouldShowBanner) return null;
 
   const handleInstallClick = async () => {
-    trackEvent('tq_click_pwa_install', {
-      page_name: 'home',
-      browser_type: browserType,
-      install_prompt_available: installPromptAvailable,
-      test_version: TEST_VERSION,
-    });
-
-    if (installPromptAvailable) {
-      await promptInstall();
-      return;
+    if (!installPromptAvailable) {
+      trackEvent('tq_click_pwa_install_guide', {
+        page_name: 'home',
+        browser_type: browserType,
+        guide_type: browserType,
+        test_version: TEST_VERSION,
+      });
     }
+    openInstallGuide();
+  };
 
-    trackEvent('tq_click_pwa_install_guide', {
+  const handleDismiss = () => {
+    trackEvent('tq_dismiss_pwa_install', {
       page_name: 'home',
       browser_type: browserType,
-      guide_type: browserType,
+      reason: 'banner_close',
       test_version: TEST_VERSION,
     });
-    setGuideOpen(true);
+    dismissBanner();
   };
 
   return (
@@ -117,7 +100,7 @@ export function PwaInstallBanner() {
           <p className="mt-1 text-xs leading-relaxed text-ink-secondary">
             {installPromptAvailable
               ? '홈 화면에서 바로 열 수 있어요.'
-              : guideMessage}
+              : helperText}
           </p>
           <button
             type="button"
@@ -129,7 +112,7 @@ export function PwaInstallBanner() {
         </div>
         <button
           type="button"
-          onClick={() => dismissInstallBanner('banner_close')}
+          onClick={handleDismiss}
           aria-label="설치 안내 닫기"
           className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-muted"
         >
@@ -140,8 +123,8 @@ export function PwaInstallBanner() {
       <div className="mt-3">
         <InstallGuide
           open={guideOpen}
-          message={guideMessage}
-          onClose={() => setGuideOpen(false)}
+          message={helperText}
+          onClose={closeInstallGuide}
         />
       </div>
     </section>

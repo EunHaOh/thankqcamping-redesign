@@ -6,6 +6,7 @@ interface TapActionProps {
   className?: string;
   style?: CSSProperties;
   children: ReactNode;
+  ariaLabel?: string;
   'aria-label'?: string;
 }
 
@@ -14,15 +15,17 @@ export function TapAction({
   className = '',
   style,
   children,
+  ariaLabel: ariaLabelProp,
   'aria-label': ariaLabel,
 }: TapActionProps) {
   const handlers = useTapOnlyClick(onTap);
+  const resolvedAriaLabel = ariaLabelProp ?? ariaLabel;
 
   return (
     <div
       role="button"
       tabIndex={0}
-      aria-label={ariaLabel}
+      aria-label={resolvedAriaLabel}
       className={className}
       style={style}
       {...handlers}
