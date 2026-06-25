@@ -16,11 +16,14 @@ export function SearchConditionBar({
   onGuestClick,
 }: SearchConditionBarProps) {
   return (
-    <div className="flex items-center gap-1 rounded-lg border border-surface-border bg-[#FAFAFA] px-2 py-2 text-sm">
+    <div
+      data-testid="search-condition-bar"
+      className="flex h-[42px] items-center gap-1 rounded-[14px] border border-surface-border bg-[#FAFAFA] px-4 text-[13px] leading-[1.4]"
+    >
       <button
         type="button"
         onClick={onDateClick}
-        className="rounded px-2 py-1 font-medium text-ink hover:bg-white"
+        className="rounded px-1 font-medium text-ink hover:bg-white"
       >
         {dateLabel}
       </button>
@@ -28,7 +31,7 @@ export function SearchConditionBar({
       <button
         type="button"
         onClick={onRegionClick}
-        className="rounded px-2 py-1 text-ink-secondary hover:bg-white"
+        className="rounded px-1 font-medium text-ink hover:bg-white"
       >
         {regionLabel}
       </button>
@@ -36,7 +39,7 @@ export function SearchConditionBar({
       <button
         type="button"
         onClick={onGuestClick}
-        className="rounded px-2 py-1 text-ink-secondary hover:bg-white"
+        className="rounded px-1 font-medium text-ink hover:bg-white"
       >
         {guestLabel}
       </button>

@@ -26,6 +26,7 @@ export function CampCard({ campground, cardIndex, resultCount }: CampCardProps) 
       ? campground.photos
       : getCampDetailImages(campground.id);
   const summary = getCampgroundSummary(campground);
+  const formattedPrice = `${formatPrice(campground.priceFrom)}~`;
 
   const handleClick = () => {
     trackAnotherCampAfterReturnIfNeeded({
@@ -50,23 +51,46 @@ export function CampCard({ campground, cardIndex, resultCount }: CampCardProps) 
       <TapAction
         onTap={handleClick}
         aria-label={`${campground.name} 상세 보기`}
-        className="cursor-pointer px-4 pb-4 pt-3"
+        className="cursor-pointer px-4 pb-3 pt-2"
       >
-        <h3 className="text-[20px] font-bold leading-snug text-ink">{campground.name}</h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3
+            data-testid="search-card-name"
+            className="line-clamp-1 text-[15px] font-bold leading-[1.32] text-ink"
+          >
+            {campground.name}
+          </h3>
+        </div>
 
-        <p className="mt-1 line-clamp-1 text-[15px] leading-[1.45] text-ink">{summary}</p>
+        <p
+          data-testid="search-card-summary"
+          className="mt-0.5 line-clamp-1 text-[13px] font-normal leading-[1.35] text-ink"
+        >
+          {summary}
+        </p>
 
-        <p className="mt-1 text-[15px] leading-[1.4] text-ink-secondary">
+        <p
+          data-testid="search-card-meta"
+          className="mt-0.5 line-clamp-1 text-[12px] leading-[1.35] text-ink-secondary"
+        >
           리뷰 {campground.reviewCount.toLocaleString('ko-KR')} · {campground.location}
         </p>
 
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <span className="text-[22px] font-bold text-ink">
-            {formatPrice(campground.priceFrom)}
-            <span className="text-base font-normal text-ink-muted">~</span>
-          </span>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <p
+            data-testid="search-card-price"
+            className="text-[16px] font-bold leading-none text-ink"
+          >
+            {formattedPrice}
+          </p>
+
           {campground.available && (
-            <span className="shrink-0 text-[15px] font-semibold text-[#F26522]">예약 가능</span>
+            <span
+              data-testid="search-card-available"
+              className="shrink-0 rounded-full bg-[#FFF4EE] px-2.5 py-1 text-[11px] font-semibold text-[#F26522]"
+            >
+              예약 가능
+            </span>
           )}
         </div>
       </TapAction>

@@ -18,7 +18,7 @@ export function FixedCTA({
   return (
     <div className="app-fixed-bar bottom-0 border-t border-surface-border bg-white shadow-cta">
       <div className="flex w-full min-w-0 max-w-full items-center gap-3 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
-        {leftContent && <div className="shrink-0">{leftContent}</div>}
+        {leftContent && <div className="min-w-0 flex-1">{leftContent}</div>}
         <button
           type="button"
           onClick={onClick}

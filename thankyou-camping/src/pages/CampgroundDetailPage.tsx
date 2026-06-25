@@ -1,131 +1,63 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { BackHeader } from '../components/BackHeader';
-import { CoverImage, useResolvedImage } from '../components/CoverImage';
-import { ConditionChips } from '../components/ConditionChips';
+import { CoverImage } from '../components/CoverImage';
+import { DetailAmenitiesSection } from '../components/campgroundDetail/DetailAmenitiesSection';
+import { DetailBasicInfoSection } from '../components/campgroundDetail/DetailBasicInfoSection';
+import { DetailCampgroundIntroSection } from '../components/campgroundDetail/DetailCampgroundIntroSection';
+import { DetailNearbySection } from '../components/campgroundDetail/DetailNearbySection';
+import { DetailNoticeSection } from '../components/campgroundDetail/DetailNoticeSection';
+import { DetailReviewsSection } from '../components/campgroundDetail/DetailReviewsSection';
+import { DetailSectionDivider } from '../components/campgroundDetail/DetailSectionDivider';
+import { DetailSiteMapSection } from '../components/campgroundDetail/DetailSiteMapSection';
+import { DetailSiteSelectionSection } from '../components/campgroundDetail/DetailSiteSelectionSection';
+import { formatDateRangeLabel } from '../components/DatePickerBottomSheet';
+import { DetailTabNav } from '../components/campgroundDetail/DetailTabNav';
 import { FixedCTA } from '../components/FixedCTA';
 import { MobileShell } from '../components/MobileShell';
-import { ReviewSummaryCard } from '../components/ReviewSummaryCard';
-import { SiteSummaryCard } from '../components/SiteSummaryCard';
-import { StarRating } from '../components/StarRating';
 import { useBooking } from '../context/BookingContext';
-import { useSearch, formatDateForBooking } from '../context/SearchContext';
-import { getCampGallery, getCampHero, type GalleryItem } from '../data/images';
+import { useSearch } from '../context/SearchContext';
+import {
+  getNearbyPlaces,
+  type DetailSelectedSiteInfo,
+  type DetailTabId,
+} from '../data/campgroundDetailHelpers';
+import { formatGuestLabel } from '../data/guestData';
+import { getCampgroundSummary } from '../data/campgroundSummaries';
+import { getCampHero } from '../data/images';
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { TEST_VERSION, markDetailBackToList, trackEvent } from '../lib/analytics';
 import { campgroundAnalyticsFields } from '../lib/analyticsHelpers';
 import { ROUTES } from '../routes/paths';
 
 const HERO_HEIGHT = 320;
-const PHOTO_CARD_HEIGHT = 175;
-const PHOTO_CARD_WIDTH = 'min(81vw, 318px)';
+const SITE_SELECTION_SECTION_ID = 'site-select';
+const BOOKING_CTA_SCROLL_OFFSET = 72;
 
 const DETAIL_SECTIONS = [
-  'site_summary',
-  'site_photos',
-  'review_summary',
+  'basic_info',
+  'intro',
+  'notice',
+  'amenities',
+  'site_map',
+  'site_select',
   'reviews',
-  'location_facilities',
+  'nearby',
   'bottom_cta',
 ] as const;
 
 type DetailSectionName = (typeof DETAIL_SECTIONS)[number];
 
-function SitePhotoCard({
-  sources,
-  fallback,
-  photoIndex,
-  onPhotoClick,
-}: {
-  sources: string[];
-  fallback: string;
-  photoIndex: number;
-  onPhotoClick: (index: number) => void;
-}) {
-  const url = useResolvedImage(sources, fallback);
-
-  return (
-    <button
-      type="button"
-      onClick={() => onPhotoClick(photoIndex)}
-      className="shrink-0 snap-start rounded-2xl bg-cover bg-center bg-no-repeat"
-      style={{
-        width: PHOTO_CARD_WIDTH,
-        height: PHOTO_CARD_HEIGHT,
-        backgroundImage: `url("${url}")`,
-        scrollSnapAlign: 'start',
-      }}
-      aria-label={`사이트 사진 ${photoIndex + 1}`}
-    />
-  );
-}
-
-function SitePhotoScroll({
-  items,
-  onSwipe,
-  onPhotoClick,
-}: {
-  items: GalleryItem[];
-  onSwipe: (photoIndex: number) => void;
-  onPhotoClick: (photoIndex: number) => void;
-}) {
-  const photos = items;
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const lastIndexRef = useRef(0);
-
-  const handleScroll = () => {
-    const container = scrollRef.current;
-    if (!container || photos.length === 0) return;
-
-    const firstCard = container.firstElementChild as HTMLElement | null;
-    const cardWidth = firstCard?.offsetWidth ?? container.clientWidth * 0.81;
-    const gap = 12;
-    const index = Math.min(
-      photos.length - 1,
-      Math.max(0, Math.round(container.scrollLeft / (cardWidth + gap))),
-    );
-
-    if (index !== lastIndexRef.current) {
-      lastIndexRef.current = index;
-      onSwipe(index);
-    }
-  };
-
-  return (
-    <div
-      ref={scrollRef}
-      onScroll={handleScroll}
-      className="scrollbar-hide flex w-full gap-3 overflow-x-auto overscroll-x-contain px-6"
-      style={{
-        WebkitOverflowScrolling: 'touch',
-        touchAction: 'pan-x pan-y',
-        scrollSnapType: 'x proximity',
-      }}
-    >
-      {photos.map((item, index) => (
-        <SitePhotoCard
-          key={`${item.sources[0]}-${index}`}
-          sources={item.sources}
-          fallback={item.fallback}
-          photoIndex={index}
-          onPhotoClick={onPhotoClick}
-        />
-      ))}
-    </div>
-  );
-}
-
 export function CampgroundDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setCampground, setDates } = useBooking();
-  const { checkIn, checkOut } = useSearch();
+  const { setCampground, setSite } = useBooking();
+  const { checkIn, checkOut, guestCounts } = useSearch();
   const campground = id ? getCampgroundById(id) : undefined;
+  const [activeTab, setActiveTab] = useState<DetailTabId>('basic-info');
+  const [selectedSiteInfo, setSelectedSiteInfo] = useState<DetailSelectedSiteInfo | null>(null);
+  const [hasUserSelectedSite, setHasUserSelectedSite] = useState(false);
 
-  const siteSummaryRef = useRef<HTMLDivElement>(null);
-  const sitePhotosRef = useRef<HTMLElement>(null);
-  const reviewSummaryRef = useRef<HTMLDivElement>(null);
-  const locationRef = useRef<HTMLElement>(null);
   const bottomCtaRef = useRef<HTMLDivElement>(null);
   const viewedSectionsRef = useRef(new Set<DetailSectionName>());
 
@@ -157,12 +89,15 @@ export function CampgroundDetailPage() {
   useEffect(() => {
     if (!campground) return;
 
-    const sectionMap: Array<{ name: DetailSectionName; node: Element | null }> = [
-      { name: 'site_summary', node: siteSummaryRef.current },
-      { name: 'site_photos', node: sitePhotosRef.current },
-      { name: 'review_summary', node: reviewSummaryRef.current },
-      { name: 'location_facilities', node: locationRef.current },
-      { name: 'bottom_cta', node: bottomCtaRef.current },
+    const sectionMap: Array<{ name: DetailSectionName; id: string }> = [
+      { name: 'basic_info', id: 'basic-info' },
+      { name: 'intro', id: 'campground-intro' },
+      { name: 'notice', id: 'notice' },
+      { name: 'amenities', id: 'amenities' },
+      { name: 'site_map', id: 'site-map' },
+      { name: 'site_select', id: 'site-select' },
+      { name: 'reviews', id: 'reviews' },
+      { name: 'nearby', id: 'nearby' },
     ];
 
     const observer = new IntersectionObserver(
@@ -172,22 +107,58 @@ export function CampgroundDetailPage() {
           const section = entry.target.getAttribute('data-section') as DetailSectionName | null;
           if (!section) return;
           trackSectionView(section);
-          if (section === 'review_summary') {
-            trackSectionView('reviews');
-          }
         });
       },
       { threshold: 0.25 },
     );
 
-    sectionMap.forEach(({ node, name }) => {
+    sectionMap.forEach(({ id, name }) => {
+      const node = document.getElementById(id);
       if (!node) return;
       node.setAttribute('data-section', name);
       observer.observe(node);
     });
 
+    if (bottomCtaRef.current) {
+      bottomCtaRef.current.setAttribute('data-section', 'bottom_cta');
+      observer.observe(bottomCtaRef.current);
+    }
+
     return () => observer.disconnect();
   }, [campground?.id, trackSectionView]);
+
+  const scrollToSiteSelection = useCallback(() => {
+    setActiveTab('site-select');
+    const target = document.getElementById(SITE_SELECTION_SECTION_ID);
+    if (!target) return;
+
+    const targetTop =
+      target.getBoundingClientRect().top + window.scrollY - BOOKING_CTA_SCROLL_OFFSET;
+    window.scrollTo({ top: targetTop, behavior: 'smooth' });
+  }, []);
+
+  const handleSelectedSiteChange = useCallback(
+    (info: DetailSelectedSiteInfo | null, userInitiated: boolean) => {
+      if (userInitiated) {
+        setSelectedSiteInfo(info);
+        setHasUserSelectedSite(Boolean(info));
+        return;
+      }
+      setHasUserSelectedSite(false);
+    },
+    [],
+  );
+
+  const scrollToSection = (tabId: DetailTabId) => {
+    setActiveTab(tabId);
+    const target = document.getElementById(tabId);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  useEffect(() => {
+    setSelectedSiteInfo(null);
+    setHasUserSelectedSite(false);
+  }, [campground?.id]);
 
   if (!campground) {
     return (
@@ -201,37 +172,42 @@ export function CampgroundDetailPage() {
   }
 
   const hero = getCampHero(campground.id);
-  const gallery = getCampGallery(campground.id);
   const campFields = campgroundAnalyticsFields(campground);
+  const nearbyPlaces = getNearbyPlaces(campground);
 
-  const handleReserve = () => {
+  const dateLabel = formatDateRangeLabel(checkIn, checkOut);
+  const guestLabel = formatGuestLabel(guestCounts);
+  const canProceedToBooking = hasUserSelectedSite && Boolean(selectedSiteInfo?.site);
+  const ctaLabel = canProceedToBooking ? '예약하기' : '사이트 선택하기';
+  const siteSummaryLabel =
+    hasUserSelectedSite && selectedSiteInfo
+      ? `${selectedSiteInfo.siteNumber} · ${formatPrice(selectedSiteInfo.price)}~`
+      : '사이트를 선택해주세요';
+
+  const handleBookingCtaClick = () => {
+    if (!canProceedToBooking || !selectedSiteInfo?.site) {
+      trackEvent('tq_click_site_reserve_cta', {
+        page_name: 'camp_detail',
+        ...campFields,
+        destination_page: 'site_select_section',
+        test_version: TEST_VERSION,
+      });
+      setCampground(campground.id);
+      scrollToSiteSelection();
+      return;
+    }
+
     trackEvent('tq_click_site_reserve_cta', {
       page_name: 'camp_detail',
       ...campFields,
-      destination_page: 'site_select',
+      destination_page: 'reservation_confirm',
+      site_id: selectedSiteInfo.site.id,
+      site_name: selectedSiteInfo.site.name,
       test_version: TEST_VERSION,
     });
     setCampground(campground.id);
-    setDates(formatDateForBooking(checkIn), formatDateForBooking(checkOut));
-    navigate(`/campgrounds/${campground.id}/sites`);
-  };
-
-  const handlePhotoSwipe = (photoIndex: number) => {
-    trackEvent('tq_swipe_site_photo', {
-      page_name: 'camp_detail',
-      ...campFields,
-      photo_index: photoIndex,
-      test_version: TEST_VERSION,
-    });
-  };
-
-  const handlePhotoClick = (photoIndex: number) => {
-    trackEvent('tq_click_site_photo', {
-      page_name: 'camp_detail',
-      ...campFields,
-      photo_index: photoIndex,
-      test_version: TEST_VERSION,
-    });
+    setSite(selectedSiteInfo.site.id);
+    navigate(`/campgrounds/${campground.id}/confirm`);
   };
 
   return (
@@ -261,109 +237,65 @@ export function CampgroundDetailPage() {
         </div>
       </div>
 
-      <main className="space-y-5 px-4 pb-40 pt-5">
-        <section>
-          <h1 className="mb-1 text-xl font-bold text-ink">{campground.name}</h1>
-          <p className="mb-2 text-sm text-ink-secondary">{campground.location}</p>
-          <div className="mb-3">
-            <StarRating
-              rating={campground.rating}
-              reviewCount={campground.reviewCount}
-            />
-          </div>
-          <ConditionChips chips={campground.conditionChips} />
-        </section>
+      <section className="px-5 py-6">
+        <h1 className="text-[22px] font-bold leading-[1.35] text-ink">{campground.name}</h1>
+        <p className="mt-2 text-[15px] leading-[1.45] text-ink">
+          {getCampgroundSummary(campground)}
+        </p>
+        <p className="mt-1 text-[14px] leading-[1.4] text-ink-secondary">
+          리뷰 {campground.reviewCount.toLocaleString('ko-KR')} · {campground.location}
+        </p>
+      </section>
 
-        <div ref={siteSummaryRef}>
-          <SiteSummaryCard campground={campground} />
-        </div>
+      <DetailTabNav activeTab={activeTab} onTabClick={scrollToSection} />
 
-        <section ref={sitePhotosRef} className="-mx-4 overflow-x-hidden">
-          <h2 className="mb-3 px-4 text-base font-bold text-ink">실제 자리 사진</h2>
-          <SitePhotoScroll
-            items={gallery}
-            onSwipe={handlePhotoSwipe}
-            onPhotoClick={handlePhotoClick}
-          />
-          <p className="mt-2 px-4 text-xs text-ink-muted">
-            사이트 간 간격과 주변 환경을 확인할 수 있어요.
-          </p>
-        </section>
-
-        <div ref={reviewSummaryRef}>
-          <ReviewSummaryCard
-            items={campground.reviewSummary}
-            reviewsTo={ROUTES.reviewListPage(campground.id)}
-            onViewAllReviews={() => {
-              trackEvent('tq_click_review_more', {
-                page_name: 'camp_detail',
-                ...campFields,
-                test_version: TEST_VERSION,
-              });
-            }}
-          />
-        </div>
-
-        <section
-          ref={locationRef}
-          className="rounded-2xl border border-surface-border bg-white p-4"
-        >
-          <h2 className="mb-3 text-base font-bold text-ink">위치·시설</h2>
-          <dl className="mb-3 space-y-2.5 text-sm">
-            <div>
-              <dt className="mb-0.5 text-xs font-medium text-ink-muted">주소</dt>
-              <dd className="text-ink">{campground.address}</dd>
-            </div>
-            <div>
-              <dt className="mb-0.5 text-xs font-medium text-ink-muted">이동 시간</dt>
-              <dd className="text-ink">{campground.distance}</dd>
-            </div>
-            <div>
-              <dt className="mb-0.5 text-xs font-medium text-ink-muted">시설</dt>
-              <dd className="flex flex-wrap gap-1.5">
-                {campground.facilities.map((facility) => (
-                  <span
-                    key={facility}
-                    className="rounded-md border border-surface-border px-2 py-1 text-xs text-ink-secondary"
-                  >
-                    {facility}
-                  </span>
-                ))}
-              </dd>
-            </div>
-          </dl>
-          <button
-            type="button"
-            onClick={() => {
-              trackEvent('tq_click_map_preview', {
-                page_name: 'camp_detail',
-                ...campFields,
-                test_version: TEST_VERSION,
-              });
-            }}
-            className="w-full overflow-hidden rounded-xl border border-surface-border"
-          >
-            <div className="flex h-24 items-center justify-center text-xs text-ink-muted">
-              지도
-            </div>
-          </button>
-        </section>
+      <main className="pb-40">
+        <DetailBasicInfoSection campground={campground} />
+        <DetailSectionDivider />
+        <DetailCampgroundIntroSection campground={campground} />
+        <DetailSectionDivider />
+        <DetailNoticeSection campground={campground} />
+        <DetailSectionDivider />
+        <DetailAmenitiesSection />
+        <DetailSectionDivider />
+        <DetailSiteMapSection campground={campground} />
+        <DetailSectionDivider />
+        <DetailSiteSelectionSection
+          campground={campground}
+          onSelectedSiteChange={handleSelectedSiteChange}
+        />
+        <DetailSectionDivider />
+        <DetailReviewsSection
+          campground={campground}
+          reviewsTo={ROUTES.reviewListPage(campground.id)}
+          onReviewDetail={(reviewId) =>
+            navigate(ROUTES.reviewDetailPage(campground.id, reviewId))
+          }
+          onViewAllReviews={() => {
+            trackEvent('tq_click_review_more', {
+              page_name: 'camp_detail',
+              ...campFields,
+              test_version: TEST_VERSION,
+            });
+          }}
+        />
+        <DetailSectionDivider />
+        <DetailNearbySection places={nearbyPlaces} />
 
         <div ref={bottomCtaRef} className="h-1" aria-hidden="true" />
       </main>
 
       <FixedCTA
-        label="사이트 확인 후 예약하기"
+        label={ctaLabel}
         leftContent={
-          <div className="whitespace-nowrap">
-            <p className="text-xs text-ink-muted">1박 기준</p>
-            <p className="text-base font-bold text-ink">
-              {formatPrice(campground.priceFrom)}
-              <span className="text-sm font-normal text-ink-muted">~</span>
+          <div className="min-w-0">
+            <p className="truncate text-[13px] font-medium text-ink">
+              {dateLabel} · {guestLabel}
             </p>
+            <p className="mt-0.5 truncate text-[12px] text-ink-secondary">{siteSummaryLabel}</p>
           </div>
         }
-        onClick={handleReserve}
+        onClick={handleBookingCtaClick}
       />
     </MobileShell>
   );

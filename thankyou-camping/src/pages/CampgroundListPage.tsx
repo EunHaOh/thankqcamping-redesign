@@ -209,19 +209,16 @@ export function CampgroundListPage() {
 
       <main className="px-4 py-3">
         <div className="mb-3 flex items-center justify-between">
-          <p className="text-sm text-ink-secondary">
-            {searchQuery.trim() ? (
-              <>
-                <span className="font-semibold text-ink">{searchQuery.trim()}</span> 검색{' '}
-                <span className="font-semibold text-ink">{filtered.length}</span>곳
-              </>
-            ) : (
-              <>
-                검색결과 <span className="font-semibold text-ink">{filtered.length}</span>곳
-              </>
-            )}
+          <p
+            data-testid="search-result-count"
+            className="text-[13px] font-medium text-ink-secondary"
+          >
+            {searchQuery.trim()
+              ? `"${searchQuery.trim()}" 검색결과 ${filtered.length}곳`
+              : `검색결과 ${filtered.length}곳`}
           </p>
           <select
+            data-testid="search-sort-select"
             value={sortBy}
             onChange={(e) => {
               const sortName = e.target.value as typeof sortBy;
@@ -232,7 +229,7 @@ export function CampgroundListPage() {
                 test_version: TEST_VERSION,
               });
             }}
-            className="rounded border border-surface-border bg-white px-2 py-1 text-xs text-ink-secondary"
+            className="h-[34px] rounded-[10px] border border-surface-border bg-white px-3 text-[12px] font-medium text-ink-secondary"
           >
             <option value="추천순">추천순</option>
             <option value="가격순">가격순</option>
