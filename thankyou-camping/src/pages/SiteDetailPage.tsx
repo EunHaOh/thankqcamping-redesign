@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { CoverImage } from '../components/CoverImage';
 import { MobileShell } from '../components/MobileShell';
 import { StarIcons } from '../components/StarIcons';
 import { useBooking } from '../context/BookingContext';
@@ -13,13 +12,16 @@ import {
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { getSiteShortName } from '../data/siteHelpers';
 import {
+  collectSiteHeroPhotos,
   collectSiteReviewPhotos,
   getSiteAverageRating,
   getSiteConditionCards,
+  getSiteDetailPrice,
   getSiteDetailReviews,
   getSiteDisplayTitle,
   getSiteFeatureBarItems,
   getSiteRatingDistribution,
+  getSiteReviewCount,
   getSiteReviewFilterChips,
   getSiteReviewMetaLabel,
   getSiteReviewVisitLabel,
@@ -34,11 +36,11 @@ import { ROUTES } from '../routes/paths';
 import type { Site, SiteReview } from '../types';
 
 const HERO_HEIGHT = 190;
-const PAGE_X = 'px-4';
+const PAGE_X = 'px-3.5';
 const SECTION_GAP = 'mt-7';
 
 function FeatureBarIcon({ type }: { type: SiteFeatureBarItem['icon'] }) {
-  const common = 'h-3.5 w-3.5 shrink-0 text-[#666666]';
+  const common = 'h-4 w-4 shrink-0 text-[#666666]';
   if (type === 'parking') {
     return (
       <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -60,21 +62,67 @@ function FeatureBarIcon({ type }: { type: SiteFeatureBarItem['icon'] }) {
   );
 }
 
-function OutlineMoreButton({
-  label,
-  onClick,
-}: {
-  label: string;
-  onClick: () => void;
-}) {
+function OutlineMoreButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="mt-3.5 flex h-9 w-full items-center justify-center rounded-lg border border-[#E5E5E5] bg-white text-[13px] text-ink-secondary"
+      className="mt-3 flex h-9 w-full items-center justify-center rounded-lg border border-[#E5E5E5] bg-white text-[13px] text-ink-secondary"
     >
       {label}
     </button>
+  );
+}
+
+function SiteHeroCarousel({ photos, alt }: { photos: string[]; alt: string }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = () => {
+    const node = scrollRef.current;
+    if (!node || node.clientWidth === 0) return;
+    const index = Math.round(node.scrollLeft / node.clientWidth);
+    setActiveIndex(Math.max(0, Math.min(photos.length - 1, index)));
+  };
+
+  return (
+    <div className="relative w-full" style={{ height: HERO_HEIGHT }}>
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="scrollbar-hide flex h-full snap-x snap-mandatory overflow-x-auto"
+        style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}
+      >
+        {photos.map((photo, index) => (
+          <div key={`${photo}-${index}`} className="h-full w-full shrink-0 snap-center">
+            <img
+              src={getSiteImageSources(photo)[0] ?? photo}
+              alt={`${alt} ${index + 1}`}
+              loading={index === 0 ? 'eager' : 'lazy'}
+              decoding="async"
+              className="block h-full w-full object-cover"
+              onError={(event) => {
+                const img = event.currentTarget;
+                if (img.src !== SCENE_FALLBACK.tent) img.src = SCENE_FALLBACK.tent;
+              }}
+            />
+          </div>
+        ))}
+      </div>
+
+      {photos.length > 1 ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-2.5 flex justify-center gap-1">
+          {photos.map((photo, index) => (
+            <span
+              key={`dot-${photo}-${index}`}
+              className={`h-1.5 w-1.5 rounded-full ${
+                index === activeIndex ? 'bg-white' : 'bg-white/50'
+              }`}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -87,14 +135,14 @@ function SiteDetailReviewCard({
   site: Site;
   fallbackPhoto: string;
 }) {
-  const thumb = review.photo ?? fallbackPhoto;
+  const thumb = review.photo || fallbackPhoto;
 
   return (
-    <article className="flex gap-2.5 rounded-[14px] border border-[#EFEFEF] bg-white p-3.5">
+    <article className="flex items-center gap-2.5 rounded-[14px] border border-[#EAEAEA] bg-white p-3.5">
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+        <div className="flex items-center gap-1.5">
           <span className="text-[13px] font-bold text-ink">{review.author}</span>
-          <span className="text-[11px] text-ink-muted">{getSiteReviewVisitLabel(review)}</span>
+          <span className="text-[12px] text-ink-muted">{getSiteReviewVisitLabel(review)}</span>
         </div>
         <p className="mt-0.5 line-clamp-1 text-[11px] text-ink-muted">
           {getSiteReviewMetaLabel(site, review)}
@@ -103,13 +151,17 @@ function SiteDetailReviewCard({
           {review.fullContent ?? review.content}
         </p>
       </div>
-      <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-[#EFEFEF]">
-        <CoverImage
-          sources={getReviewImageSources(thumb)}
-          fallback={REVIEW_IMAGE_FALLBACK}
-          height="100%"
-          className="h-full w-full"
-          ariaLabel={`${review.author} 후기 사진`}
+      <div className="h-[68px] w-[68px] shrink-0 overflow-hidden rounded-lg">
+        <img
+          src={getReviewImageSources(thumb)[0] ?? thumb}
+          alt={`${review.author} 후기`}
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover"
+          onError={(event) => {
+            const img = event.currentTarget;
+            if (img.src !== REVIEW_IMAGE_FALLBACK) img.src = REVIEW_IMAGE_FALLBACK;
+          }}
         />
       </div>
     </article>
@@ -128,11 +180,11 @@ function SiteDetailFixedCta({
   onClick: () => void;
 }) {
   return (
-    <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-mobile min-w-0 -translate-x-1/2 overflow-x-clip border-t border-[#EFEFEF] bg-white shadow-cta foldable:max-w-[min(100dvw,480px)]">
-      <div className="flex min-h-[72px] items-center gap-2.5 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2.5">
+    <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-mobile min-w-0 -translate-x-1/2 overflow-x-clip border-t border-[#EFEFEF] bg-white foldable:max-w-[min(100dvw,480px)]">
+      <div className="flex min-h-[72px] items-center gap-2 px-3.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
         <div className="shrink-0">
           <p className="text-[11px] text-ink-muted">1박 기준</p>
-          <p className="text-[26px] font-bold leading-tight text-ink">
+          <p className="text-[24px] font-bold leading-tight text-ink">
             {formatPrice(price)}
             <span className="text-[13px] font-normal text-ink-muted">/박</span>
           </p>
@@ -141,7 +193,7 @@ function SiteDetailFixedCta({
           type="button"
           onClick={onClick}
           disabled={disabled}
-          className="ml-auto h-[54px] min-w-0 flex-1 rounded-[14px] bg-[#F26522] px-2 text-[15px] font-bold leading-tight text-white disabled:bg-[#E5E7EB] disabled:text-[#9CA3AF]"
+          className="ml-auto h-[52px] min-w-0 flex-1 rounded-[14px] bg-[#F26522] px-2 text-[15px] font-bold leading-tight text-white disabled:bg-[#E5E7EB] disabled:text-[#9CA3AF]"
         >
           {label}
         </button>
@@ -176,7 +228,7 @@ export function SiteDetailPage() {
   if (!campground || !site) {
     return (
       <MobileShell>
-        <div className="mx-auto w-full max-w-mobile px-4 foldable:max-w-[min(100dvw,480px)]">
+        <div className="mx-auto w-full max-w-mobile px-3.5 foldable:max-w-[min(100dvw,480px)]">
           <div className="flex h-64 items-center justify-center text-sm text-ink-secondary">
             사이트를 찾을 수 없습니다.
           </div>
@@ -187,12 +239,15 @@ export function SiteDetailPage() {
 
   const displayTitle = getSiteDisplayTitle(site);
   const specLine = getSiteSpecLine(site);
+  const displayPrice = getSiteDetailPrice(site);
   const featureItems = getSiteFeatureBarItems(site);
   const conditionCards = getSiteConditionCards(site);
   const introLines = getSiteZoneIntro(site, campground);
   const detailRows = getSiteZoneDetails(site);
+  const heroPhotos = collectSiteHeroPhotos(site, campground);
   const reviewPhotos = collectSiteReviewPhotos(site, campground);
   const averageRating = getSiteAverageRating(site);
+  const reviewCount = getSiteReviewCount(site);
   const ratingDistribution = getSiteRatingDistribution(site);
   const filterChips = getSiteReviewFilterChips();
   const reviewCards = getSiteDetailReviews(site, campground);
@@ -218,13 +273,7 @@ export function SiteDetailPage() {
     <MobileShell>
       <div className="relative mx-auto w-full max-w-mobile min-w-0 overflow-x-hidden bg-white foldable:max-w-[min(100dvw,480px)]">
         <div className="relative w-full">
-          <CoverImage
-            sources={getSiteImageSources(site.image)}
-            fallback={SCENE_FALLBACK.tent}
-            height={HERO_HEIGHT}
-            className="w-full rounded-none"
-            priority
-          />
+          <SiteHeroCarousel photos={heroPhotos} alt={`${displayTitle} 사이트`} />
           <button
             type="button"
             aria-label="뒤로가기"
@@ -243,23 +292,23 @@ export function SiteDetailPage() {
           </button>
         </div>
 
-        <main className="pb-[calc(4.75rem+env(safe-area-inset-bottom,0px))]">
-          <section className={`${PAGE_X} pt-4`}>
+        <main className="pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]">
+          <section className={`${PAGE_X} pt-3.5`}>
             <div className="flex items-start justify-between gap-2">
-              <h1 className="min-w-0 text-[21px] font-bold leading-tight text-ink">{displayTitle}</h1>
+              <h1 className="min-w-0 text-[20px] font-bold leading-tight text-ink">{displayTitle}</h1>
               {site.available ? (
-                <span className="mt-0.5 shrink-0 rounded-full border border-[#F26522] px-2 py-0.5 text-[12px] font-medium leading-none text-[#F26522]">
+                <span className="mt-0.5 flex h-[26px] shrink-0 items-center rounded-full border border-[#F26522] px-2 text-[12px] font-medium text-[#F26522]">
                   예약 가능
                 </span>
               ) : (
-                <span className="mt-0.5 shrink-0 rounded-full border border-[#E5E5E5] px-2 py-0.5 text-[12px] font-medium leading-none text-ink-muted">
+                <span className="mt-0.5 flex h-[26px] shrink-0 items-center rounded-full border border-[#E5E5E5] px-2 text-[12px] font-medium text-ink-muted">
                   예약 마감
                 </span>
               )}
             </div>
             <p className="mt-1.5 text-[13px] leading-snug text-ink-secondary">{specLine}</p>
 
-            <div className="mt-3.5 flex h-9 items-center justify-between gap-1 rounded-[5px] border border-[#EAEAEA] bg-[#FAFAFA] px-3.5">
+            <div className="mt-3 flex h-[36px] items-center justify-between gap-1 rounded-[5px] border border-[#E5E5E5] bg-[#FAFAFA] px-3">
               {featureItems.map((item) => (
                 <div key={item.label} className="flex min-w-0 flex-1 items-center justify-center gap-1">
                   <FeatureBarIcon type={item.icon} />
@@ -268,11 +317,11 @@ export function SiteDetailPage() {
               ))}
             </div>
 
-            <div className="mt-3.5 grid grid-cols-4 gap-2">
+            <div className="mt-3 grid grid-cols-4 gap-2">
               {conditionCards.map((card) => (
                 <div
                   key={card.label}
-                  className="flex h-[68px] flex-col justify-center rounded-[9px] bg-[#F7F7F7] px-1.5 text-center"
+                  className="flex h-16 flex-col justify-center rounded-[9px] bg-[#F7F7F7] px-1 text-center"
                 >
                   <p className="truncate text-[11px] text-ink-muted">{card.label}</p>
                   <p className="mt-0.5 truncate text-[13px] font-bold text-ink">{card.value}</p>
@@ -283,7 +332,7 @@ export function SiteDetailPage() {
 
           <section className={`${SECTION_GAP} ${PAGE_X}`}>
             <h2 className="text-[17px] font-bold text-ink">캠핑존 소개</h2>
-            <div className="mt-3.5 space-y-1.5 text-[13px] leading-[1.45] text-ink-secondary">
+            <div className="mt-3.5 space-y-1 text-[13px] leading-[1.45] text-ink-secondary">
               {(introExpanded ? introLines : introLines.slice(0, 2)).map((line) => (
                 <p key={line}>{line}</p>
               ))}
@@ -298,9 +347,9 @@ export function SiteDetailPage() {
             <h2 className="text-[17px] font-bold text-ink">캠핑존 세부정보</h2>
             <div className="mt-3.5 space-y-2.5">
               {(detailsExpanded ? detailRows : detailRows.slice(0, 3)).map((row) => (
-                <div key={row.label} className="flex items-start justify-between gap-3">
-                  <span className="shrink-0 text-[12px] text-ink-muted">{row.label}</span>
-                  <span className="text-right text-[13px] font-medium text-ink">{row.value}</span>
+                <div key={row.label} className="flex items-start justify-between gap-4">
+                  <span className="w-[88px] shrink-0 text-[12px] text-ink-muted">{row.label}</span>
+                  <span className="min-w-0 flex-1 text-right text-[13px] text-ink">{row.value}</span>
                 </div>
               ))}
             </div>
@@ -315,12 +364,16 @@ export function SiteDetailPage() {
             <div className="mt-3.5 grid grid-cols-3 gap-1">
               {reviewPhotos.map((photo, index) => (
                 <div key={`${photo}-${index}`} className="aspect-square overflow-hidden rounded-[4px]">
-                  <CoverImage
-                    sources={getReviewImageSources(photo)}
-                    fallback={REVIEW_IMAGE_FALLBACK}
-                    height="100%"
-                    className="h-full w-full bg-transparent"
-                    ariaLabel={`리뷰 사진 ${index + 1}`}
+                  <img
+                    src={getReviewImageSources(photo)[0] ?? photo}
+                    alt={`리뷰 사진 ${index + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                    onError={(event) => {
+                      const img = event.currentTarget;
+                      if (img.src !== REVIEW_IMAGE_FALLBACK) img.src = REVIEW_IMAGE_FALLBACK;
+                    }}
                   />
                 </div>
               ))}
@@ -330,31 +383,31 @@ export function SiteDetailPage() {
               onClick={() => navigate(ROUTES.reviewListPage(campground.id))}
             />
 
-            <div className="mt-4 flex items-start gap-3">
-              <div className="w-[88px] shrink-0">
-                <p className="text-[30px] font-bold leading-none text-ink">{averageRating.toFixed(1)}</p>
+            <div className="mt-3.5 flex items-start gap-2.5">
+              <div className="w-[76px] shrink-0">
+                <p className="text-[28px] font-bold leading-none text-ink">{averageRating.toFixed(1)}</p>
                 <StarIcons rating={Math.round(averageRating)} size={13} />
-                <p className="mt-1 text-[12px] text-ink-muted">
-                  리뷰 {site.reviewCount.toLocaleString('ko-KR')}개
+                <p className="mt-0.5 text-[12px] text-ink-muted">
+                  리뷰 {reviewCount.toLocaleString('ko-KR')}개
                 </p>
               </div>
-              <div className="min-w-0 flex-1 space-y-1.5 pt-1">
+              <div className="min-w-0 flex-1 space-y-1 pt-0.5">
                 {ratingDistribution.map((item) => (
                   <div key={item.star} className="flex items-center gap-1.5 text-[10px] text-ink-secondary">
-                    <span className="w-2.5 shrink-0 text-center">{item.star}</span>
+                    <span className="w-2 shrink-0 text-center">{item.star}</span>
                     <div className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-[#EFEFEF]">
                       <div
                         className="h-full rounded-full bg-[#F26522]"
                         style={{ width: `${item.percent}%` }}
                       />
                     </div>
-                    <span className="w-7 shrink-0 text-right">{item.percent}%</span>
+                    <span className="w-6 shrink-0 text-right">{item.percent}%</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="scrollbar-hide -mx-4 mt-3.5 flex gap-2 overflow-x-auto px-4">
+            <div className="scrollbar-hide -mx-3.5 mt-3 flex gap-1.5 overflow-x-auto px-3.5">
               {filterChips.map((chip) => {
                 const active = chip.id === activeFilterId;
                 return (
@@ -362,7 +415,7 @@ export function SiteDetailPage() {
                     key={chip.id}
                     type="button"
                     onClick={() => setActiveFilterId(chip.id)}
-                    className={`h-8 shrink-0 rounded-full px-3.5 text-[13px] font-semibold ${
+                    className={`h-[30px] shrink-0 rounded-full px-3 text-[12px] font-semibold ${
                       active ? 'bg-[#F26522] text-white' : 'bg-[#F3F3F3] text-[#888888]'
                     }`}
                   >
@@ -372,7 +425,7 @@ export function SiteDetailPage() {
               })}
             </div>
 
-            <div className="mt-3 space-y-2.5">
+            <div className="mt-2.5 space-y-2.5">
               {reviewCards.map((review) => (
                 <SiteDetailReviewCard
                   key={review.id}
@@ -387,7 +440,7 @@ export function SiteDetailPage() {
 
         <SiteDetailFixedCta
           label={`${shortName} 사이트 선택하기`}
-          price={site.price}
+          price={displayPrice}
           disabled={!site.available}
           onClick={handleSelectSite}
         />
