@@ -8,6 +8,7 @@ import {
   getSiteHighlightChips,
   getSiteSpecLabel,
   getSiteTypeLabel,
+  resolveCampgroundSiteFromSelection,
   type DetailSelectedSiteInfo,
   type DetailZoneDisplay,
 } from '../../data/campgroundDetailHelpers';
@@ -16,39 +17,11 @@ import { CoverImage } from '../CoverImage';
 
 interface DetailSiteSelectionSectionProps {
   campground: Campground;
+  preferredSiteId?: string | null;
   onSelectedSiteChange?: (info: DetailSelectedSiteInfo | null, userInitiated: boolean) => void;
 }
 
-const SITE_INFO_BAR_ITEMS = [
-  { label: '텐트 옆 주차', icon: 'parking' as const },
-  { label: '사이트 넓음', icon: 'wide' as const },
-  { label: '개수대 근접', icon: 'sink' as const },
-];
-
 const SWIPE_THRESHOLD = 40;
-
-function InfoBarIcon({ type }: { type: 'parking' | 'wide' | 'sink' }) {
-  const common = 'h-[18px] w-[18px] shrink-0 text-[#666666]';
-  if (type === 'parking') {
-    return (
-      <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M5 17h14M6 12l1.5-5h9L18 12M7 17a1 1 0 102 0 1 1 0 00-2 0zM15 17a1 1 0 102 0 1 1 0 00-2 0z" />
-      </svg>
-    );
-  }
-  if (type === 'wide') {
-    return (
-      <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <path d="M4 12h16M7 8v8M17 8v8" />
-      </svg>
-    );
-  }
-  return (
-    <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-      <path d="M8 3v3M16 3v3M6 8h12v13H6V8zM10 12v2M14 12v2" />
-    </svg>
-  );
-}
 
 function SitePhotoCarousel({
   images,
@@ -89,7 +62,7 @@ function SitePhotoCarousel({
 
   return (
     <div
-      className="relative h-[150px] w-[160px] shrink-0 overflow-hidden rounded-[14px] bg-[#F0F0F0]"
+      className="relative min-h-[160px] w-[148px] shrink-0 self-stretch overflow-hidden rounded-[14px] bg-[#F0F0F0]"
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       style={{ touchAction: 'pan-y' }}
@@ -98,15 +71,15 @@ function SitePhotoCarousel({
         <CoverImage
           sources={getSiteImageSources(currentImage)}
           fallback={SCENE_FALLBACK.tent}
-          height={150}
-          width={160}
-          className="h-full w-full"
+          height={160}
+          width={148}
+          className="absolute inset-0 h-full w-full"
           ariaLabel={alt}
         />
       ) : null}
 
       {images.length > 1 ? (
-        <div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1">
+        <div className="pointer-events-auto absolute inset-x-0 bottom-2 flex justify-center gap-1">
           {images.map((image, dotIndex) => (
             <button
               key={`${image}-${dotIndex}`}
@@ -153,33 +126,37 @@ function SiteRepresentativeCard({
   const carouselResetKey = `${zone.zoneLabel}-${selectedSiteNumber}`;
 
   return (
-    <div className="mt-4 flex items-start gap-4">
+    <div
+      className={`mt-3 flex items-stretch gap-3 rounded-[14px] transition-colors ${
+        showSelectedBadge ? 'bg-[#FFF8F4] px-2.5 py-2.5 ring-1 ring-[#F26522]/30' : 'py-0.5'
+      }`}
+    >
       <SitePhotoCarousel
         images={siteImages}
         alt={`${siteTitle} 사이트 사진`}
         resetKey={carouselResetKey}
       />
 
-      <div className="min-w-0 flex-1 pt-1">
-        <p className="text-[14px] font-bold text-[#F26522]">{zone.zoneLabel}</p>
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          <h3 className="line-clamp-1 text-[18px] font-bold leading-[1.25] text-ink">
+      <div className="flex min-w-0 flex-1 flex-col justify-center">
+        <p className="text-[13px] font-bold text-[#F26522]">{zone.zoneLabel}</p>
+        <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
+          <h3 className="line-clamp-1 text-[17px] font-bold leading-tight text-ink">
             {siteTitle}
           </h3>
           {showSelectedBadge ? (
-            <span className="rounded-full bg-[#FFF0E8] px-2 py-0.5 text-[11px] font-semibold text-[#F26522]">
+            <span className="rounded-full bg-[#FFF0E8] px-2 py-0.5 text-[10px] font-semibold text-[#F26522]">
               선택됨
             </span>
           ) : null}
         </div>
-        <p className="mt-1 text-[13px] text-ink-secondary">{typeLabel}</p>
-        <p className="mt-1 text-[14px] text-ink-secondary">{specLabel}</p>
-        <p className="mt-2 text-[19px] font-bold leading-none text-ink">{priceLabel}</p>
-        <div className="mt-2 flex flex-wrap gap-1.5">
+        <p className="mt-0.5 text-[12px] leading-snug text-ink-secondary">{typeLabel}</p>
+        <p className="text-[12px] leading-snug text-ink-secondary">{specLabel}</p>
+        <p className="mt-1.5 text-[17px] font-bold leading-none text-ink">{priceLabel}</p>
+        <div className="mt-1.5 flex flex-wrap gap-1">
           {chips.slice(0, 2).map((chip) => (
             <span
               key={chip}
-              className="rounded-[7px] bg-[#F5F5F5] px-2 py-1 text-[11px] text-ink-secondary"
+              className="rounded-[6px] bg-[#F5F5F5] px-1.5 py-0.5 text-[10px] text-ink-secondary"
             >
               {chip}
             </span>
@@ -190,41 +167,27 @@ function SiteRepresentativeCard({
   );
 }
 
-function SiteInfoBar() {
-  return (
-    <div className="mt-3 flex items-center gap-1 rounded-[12px] bg-[#F5F5F5] px-3.5 py-3.5">
-      {SITE_INFO_BAR_ITEMS.map((item) => (
-        <div key={item.label} className="flex min-w-0 flex-1 items-center justify-center gap-2">
-          <InfoBarIcon type={item.icon} />
-          <span className="truncate text-[14px] leading-none text-ink-secondary">{item.label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
+function resolveSelectedSite(
+  campground: Campground,
+  zone: DetailZoneDisplay,
+  selectedSiteNumber: string,
+): Site | undefined {
+  if (zone.sites.length > 0) {
+    const index = zone.siteNumbers.indexOf(selectedSiteNumber);
+    if (index >= 0 && zone.sites[index]) return zone.sites[index];
+    const matched = zone.sites.find((site) => getSiteChipLabel(site.name) === selectedSiteNumber);
+    if (matched) return matched;
+  }
 
-function SitePreviewReviewCard({ reviewText }: { reviewText: string }) {
-  return (
-    <div className="flex min-h-[76px] items-center rounded-[14px] bg-[#F5F5F5] px-4 py-3">
-      <p className="line-clamp-2 text-[14px] leading-[1.5] text-ink-secondary">
-        &ldquo;{reviewText}&rdquo;
-      </p>
-    </div>
-  );
-}
-
-function resolveSelectedSite(zone: DetailZoneDisplay, selectedSiteNumber: string): Site | undefined {
-  if (zone.sites.length === 0) return undefined;
-  const index = zone.siteNumbers.indexOf(selectedSiteNumber);
-  if (index >= 0 && zone.sites[index]) return zone.sites[index];
-  return zone.sites.find((site) => getSiteChipLabel(site.name) === selectedSiteNumber) ?? zone.sites[0];
+  return resolveCampgroundSiteFromSelection(campground, selectedSiteNumber, zone.zoneLabel);
 }
 
 function buildSelectedSiteInfo(
+  campground: Campground,
   zone: DetailZoneDisplay,
   selectedSiteNumber: string,
-  selectedSite: Site | undefined,
 ): DetailSelectedSiteInfo {
+  const selectedSite = resolveSelectedSite(campground, zone, selectedSiteNumber);
   return {
     siteNumber: selectedSiteNumber,
     site: selectedSite,
@@ -235,6 +198,7 @@ function buildSelectedSiteInfo(
 
 export function DetailSiteSelectionSection({
   campground,
+  preferredSiteId,
   onSelectedSiteChange,
 }: DetailSiteSelectionSectionProps) {
   const zoneDisplays = useMemo(() => getDetailZoneDisplays(campground), [campground]);
@@ -248,24 +212,49 @@ export function DetailSiteSelectionSection({
     zoneDisplays.find((zone) => zone.zoneLabel === activeZone) ?? zoneDisplays[0];
 
   useEffect(() => {
+    if (!preferredSiteId) return;
+    const zoneWithSite = zoneDisplays.find((zone) =>
+      zone.sites.some((site) => site.id === preferredSiteId),
+    );
+    if (!zoneWithSite) return;
+    if (zoneWithSite.zoneLabel !== activeZone) {
+      setActiveZone(zoneWithSite.zoneLabel);
+    }
+  }, [preferredSiteId, zoneDisplays, activeZone]);
+
+  useEffect(() => {
     if (!activeDisplay) return;
+
+    if (preferredSiteId) {
+      const preferredSite = activeDisplay.sites.find((site) => site.id === preferredSiteId);
+      if (preferredSite) {
+        const siteNumber = getSiteChipLabel(preferredSite.name);
+        setSelectedSiteNumber(siteNumber);
+        setHasUserSelectedChip(true);
+        onSelectedSiteChange?.(
+          buildSelectedSiteInfo(campground, activeDisplay, siteNumber),
+          true,
+        );
+        return;
+      }
+    }
+
     const firstSite = activeDisplay.siteNumbers[0];
     if (firstSite) setSelectedSiteNumber(firstSite);
     setHasUserSelectedChip(false);
     onSelectedSiteChange?.(null, false);
-  }, [activeZone, activeDisplay?.zoneLabel, activeDisplay?.siteNumbers]);
+  }, [activeZone, activeDisplay?.zoneLabel, activeDisplay?.siteNumbers, preferredSiteId]);
 
   const handleSiteChipSelect = (siteNumber: string) => {
     setSelectedSiteNumber(siteNumber);
     setHasUserSelectedChip(true);
     if (!activeDisplay) return;
 
-    const site = resolveSelectedSite(activeDisplay, siteNumber);
-    onSelectedSiteChange?.(buildSelectedSiteInfo(activeDisplay, siteNumber, site), true);
+    onSelectedSiteChange?.(buildSelectedSiteInfo(campground, activeDisplay, siteNumber), true);
   };
 
   const selectedSite = activeDisplay
-    ? resolveSelectedSite(activeDisplay, selectedSiteNumber)
+    ? resolveSelectedSite(campground, activeDisplay, selectedSiteNumber)
     : undefined;
   const siteIndex = activeDisplay
     ? Math.max(0, activeDisplay.siteNumbers.indexOf(selectedSiteNumber))
@@ -280,13 +269,12 @@ export function DetailSiteSelectionSection({
 
   if (!activeDisplay) return null;
 
-  const reviewQuotes = activeDisplay.reviewQuotes;
-
   return (
-    <section id="site-select" className="px-5 py-7">
+    <section id="site-select" className="px-5 py-5">
       <h2 className="text-[17px] font-bold text-ink">사이트 선택</h2>
 
-      <div className="scrollbar-hide mt-5 flex gap-2 overflow-x-auto">
+      <p className="mt-5 text-[12px] font-semibold tracking-wide text-ink-secondary">구역 선택</p>
+      <div className="scrollbar-hide mt-2 flex gap-2 overflow-x-auto">
         {zoneDisplays.map((zone) => {
           const active = activeZone === zone.zoneLabel;
           return (
@@ -294,7 +282,7 @@ export function DetailSiteSelectionSection({
               key={zone.zoneLabel}
               type="button"
               onClick={() => setActiveZone(zone.zoneLabel)}
-              className={`h-9 shrink-0 rounded-full px-4 text-[13px] font-semibold ${
+              className={`h-10 shrink-0 rounded-full px-5 text-[14px] font-semibold transition-colors ${
                 active ? 'bg-[#F26522] text-white' : 'bg-[#F3F3F3] text-[#888888]'
               }`}
             >
@@ -312,43 +300,37 @@ export function DetailSiteSelectionSection({
         showSelectedBadge={hasUserSelectedChip}
       />
 
-      <p className="mt-6 text-[14px] font-semibold text-ink">
-        잔여 사이트{' '}
-        <span className="font-bold text-[#F26522]">
-          {activeDisplay.zoneLabel} {activeDisplay.available} / {activeDisplay.total}
-        </span>
-      </p>
-
-      <div className="scrollbar-hide mt-3 flex gap-2 overflow-x-auto">
-        {activeDisplay.siteNumbers.map((siteNumber) => {
-          const active = selectedSiteNumber === siteNumber;
-          return (
-            <button
-              key={siteNumber}
-              type="button"
-              onClick={() => handleSiteChipSelect(siteNumber)}
-              className={`h-[30px] shrink-0 rounded-full px-3.5 text-[13px] font-semibold ${
-                active ? 'bg-[#F26522] text-white' : 'bg-[#F3F3F3] text-[#888888]'
-              }`}
-            >
-              {siteNumber}
-            </button>
-          );
-        })}
-      </div>
-
-      <SiteInfoBar />
-
-      {reviewQuotes.length > 0 ? (
-        <div className="mt-3 grid grid-cols-2 gap-2.5">
-          {reviewQuotes.slice(0, 2).map((reviewText, index) => (
-            <SitePreviewReviewCard
-              key={`${activeDisplay.zoneLabel}-review-${index}`}
-              reviewText={reviewText}
-            />
-          ))}
+      <div className="mt-5">
+        <p className="text-[16px] font-bold leading-snug text-ink">
+          잔여 사이트{' '}
+          <span className="font-semibold text-[#F26522]">{activeDisplay.zoneLabel}</span>{' '}
+          <span className="font-bold tabular-nums text-ink">
+            {activeDisplay.available} / {activeDisplay.total}
+          </span>
+        </p>
+        <p className="mt-2.5 text-[12px] font-semibold text-ink-secondary">
+          예약 가능한 사이트 번호
+        </p>
+        <div className="mt-2.5 flex flex-wrap gap-2.5">
+          {activeDisplay.siteNumbers.map((siteNumber) => {
+            const active = selectedSiteNumber === siteNumber;
+            return (
+              <button
+                key={siteNumber}
+                type="button"
+                onClick={() => handleSiteChipSelect(siteNumber)}
+                className={`h-10 shrink-0 rounded-lg px-4 text-[15px] font-bold transition-colors ${
+                  active
+                    ? 'bg-[#F26522] text-white'
+                    : 'bg-[#F3F3F3] text-[#888888]'
+                }`}
+              >
+                {siteNumber}
+              </button>
+            );
+          })}
         </div>
-      ) : null}
+      </div>
     </section>
   );
 }

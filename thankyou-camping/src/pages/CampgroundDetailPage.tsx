@@ -19,16 +19,19 @@ import { useBooking } from '../context/BookingContext';
 import { useSearch } from '../context/SearchContext';
 import {
   getNearbyPlaces,
+  getSiteChipLabel,
+  getSiteZoneLabel,
+  resolveCampgroundSiteFromSelection,
   type DetailSelectedSiteInfo,
   type DetailTabId,
 } from '../data/campgroundDetailHelpers';
-import { formatGuestLabel } from '../data/guestData';
 import { getCampgroundSummary } from '../data/campgroundSummaries';
 import { getCampHero } from '../data/images';
 import { formatPrice, getCampgroundById } from '../data/mockData';
 import { TEST_VERSION, markDetailBackToList, trackEvent } from '../lib/analytics';
 import { campgroundAnalyticsFields } from '../lib/analyticsHelpers';
 import { ROUTES } from '../routes/paths';
+import type { Site } from '../types';
 
 const HERO_HEIGHT = 320;
 const SITE_SELECTION_SECTION_ID = 'site-select';
@@ -51,8 +54,9 @@ type DetailSectionName = (typeof DETAIL_SECTIONS)[number];
 export function CampgroundDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { setCampground, setSite } = useBooking();
-  const { checkIn, checkOut, guestCounts } = useSearch();
+  const { setCampground, setSite, siteId: bookedSiteId, campgroundId: bookedCampgroundId } =
+    useBooking();
+  const { checkIn, checkOut } = useSearch();
   const campground = id ? getCampgroundById(id) : undefined;
   const [activeTab, setActiveTab] = useState<DetailTabId>('basic-info');
   const [selectedSiteInfo, setSelectedSiteInfo] = useState<DetailSelectedSiteInfo | null>(null);
@@ -145,6 +149,7 @@ export function CampgroundDetailPage() {
         return;
       }
       setHasUserSelectedSite(false);
+      setSelectedSiteInfo(null);
     },
     [],
   );
@@ -159,6 +164,35 @@ export function CampgroundDetailPage() {
     setSelectedSiteInfo(null);
     setHasUserSelectedSite(false);
   }, [campground?.id]);
+
+  useEffect(() => {
+    if (!campground || !bookedSiteId) return;
+    if (bookedCampgroundId && bookedCampgroundId !== campground.id) return;
+
+    const site = campground.sites.find((item) => item.id === bookedSiteId);
+    if (!site) return;
+
+    setSelectedSiteInfo({
+      siteNumber: getSiteChipLabel(site.name),
+      site,
+      price: site.price,
+      zoneLabel: getSiteZoneLabel(site.name),
+    });
+    setHasUserSelectedSite(true);
+  }, [campground, bookedSiteId, bookedCampgroundId]);
+
+  const resolveDetailSite = useCallback(
+    (info: DetailSelectedSiteInfo): Site | undefined => {
+      if (!campground) return undefined;
+      return resolveCampgroundSiteFromSelection(
+        campground,
+        info.siteNumber,
+        info.zoneLabel,
+        info.site,
+      );
+    },
+    [campground],
+  );
 
   if (!campground) {
     return (
@@ -176,16 +210,16 @@ export function CampgroundDetailPage() {
   const nearbyPlaces = getNearbyPlaces(campground);
 
   const dateLabel = formatDateRangeLabel(checkIn, checkOut);
-  const guestLabel = formatGuestLabel(guestCounts);
-  const canProceedToBooking = hasUserSelectedSite && Boolean(selectedSiteInfo?.site);
-  const ctaLabel = canProceedToBooking ? '예약하기' : '사이트 선택하기';
-  const siteSummaryLabel =
-    hasUserSelectedSite && selectedSiteInfo
-      ? `${selectedSiteInfo.siteNumber} · ${formatPrice(selectedSiteInfo.price)}~`
-      : '사이트를 선택해주세요';
+  const hasSelectedSite = hasUserSelectedSite && Boolean(selectedSiteInfo);
+  const ctaLabel = hasSelectedSite ? '사이트 상세보기' : '예약하기';
+  const siteLabel = hasSelectedSite && selectedSiteInfo ? selectedSiteInfo.siteNumber : '미선택';
+  const priceLabel =
+    hasSelectedSite && selectedSiteInfo
+      ? `${formatPrice(selectedSiteInfo.price)}~`
+      : '—';
 
   const handleBookingCtaClick = () => {
-    if (!canProceedToBooking || !selectedSiteInfo?.site) {
+    if (!hasSelectedSite || !selectedSiteInfo) {
       trackEvent('tq_click_site_reserve_cta', {
         page_name: 'camp_detail',
         ...campFields,
@@ -197,17 +231,23 @@ export function CampgroundDetailPage() {
       return;
     }
 
+    const detailSite = resolveDetailSite(selectedSiteInfo);
+    if (!detailSite) {
+      scrollToSiteSelection();
+      return;
+    }
+
     trackEvent('tq_click_site_reserve_cta', {
       page_name: 'camp_detail',
       ...campFields,
-      destination_page: 'reservation_confirm',
-      site_id: selectedSiteInfo.site.id,
-      site_name: selectedSiteInfo.site.name,
+      destination_page: 'site_detail',
+      site_id: detailSite.id,
+      site_name: detailSite.name,
       test_version: TEST_VERSION,
     });
     setCampground(campground.id);
-    setSite(selectedSiteInfo.site.id);
-    navigate(`/campgrounds/${campground.id}/confirm`);
+    setSite(detailSite.id);
+    navigate(ROUTES.siteDetailPage(campground.id, detailSite.id));
   };
 
   return (
@@ -249,7 +289,7 @@ export function CampgroundDetailPage() {
 
       <DetailTabNav activeTab={activeTab} onTabClick={scrollToSection} />
 
-      <main className="pb-40">
+      <main className="pb-[calc(5.75rem+env(safe-area-inset-bottom,0px))]">
         <DetailBasicInfoSection campground={campground} />
         <DetailSectionDivider />
         <DetailCampgroundIntroSection campground={campground} />
@@ -262,6 +302,7 @@ export function CampgroundDetailPage() {
         <DetailSectionDivider />
         <DetailSiteSelectionSection
           campground={campground}
+          preferredSiteId={bookedSiteId}
           onSelectedSiteChange={handleSelectedSiteChange}
         />
         <DetailSectionDivider />
@@ -289,10 +330,12 @@ export function CampgroundDetailPage() {
         label={ctaLabel}
         leftContent={
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-medium text-ink">
-              {dateLabel} · {guestLabel}
+            <p className="truncate text-[13px] font-medium text-ink">{dateLabel}</p>
+            <p className="mt-0.5 truncate text-[12px] text-ink-secondary">
+              <span className={hasSelectedSite ? 'font-semibold text-ink' : ''}>{siteLabel}</span>
+              <span className="text-ink-muted"> · </span>
+              <span className="font-semibold text-ink">{priceLabel}</span>
             </p>
-            <p className="mt-0.5 truncate text-[12px] text-ink-secondary">{siteSummaryLabel}</p>
           </div>
         }
         onClick={handleBookingCtaClick}

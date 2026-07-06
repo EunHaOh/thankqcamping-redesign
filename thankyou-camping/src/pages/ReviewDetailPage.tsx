@@ -55,9 +55,7 @@ export function ReviewDetailPage() {
     if (!review.siteId) return;
     setCampground(campground.id);
     setDates(formatDateForBooking(checkIn), formatDateForBooking(checkOut));
-    navigate(`/campgrounds/${campground.id}/sites`, {
-      state: { openSiteId: review.siteId },
-    });
+    navigate(ROUTES.siteDetailPage(campground.id, review.siteId));
   };
 
   return (

@@ -338,6 +338,40 @@ export function getSiteChipLabel(siteName: string): string {
   return shortName;
 }
 
+export function resolveCampgroundSiteFromSelection(
+  campground: Campground,
+  siteNumber: string,
+  zoneLabel?: string,
+  preferredSite?: Site,
+): Site | undefined {
+  if (preferredSite) return preferredSite;
+
+  const byChip = campground.sites.find((site) => getSiteChipLabel(site.name) === siteNumber);
+  if (byChip) return byChip;
+
+  const chipMatch = siteNumber.match(/^([A-Z])(\d+)$/i);
+  if (chipMatch) {
+    const letter = chipMatch[1].toUpperCase();
+    const index = Math.max(0, parseInt(chipMatch[2], 10) - 1);
+    const zoneSites = campground.sites.filter((site) => {
+      const siteZone = getSiteZoneLabel(site.name);
+      return siteZone.startsWith(letter) || site.name.toUpperCase().startsWith(`${letter}-`);
+    });
+    if (zoneSites.length > 0) {
+      return zoneSites[index % zoneSites.length];
+    }
+  }
+
+  if (zoneLabel) {
+    const zoneSites = campground.sites.filter(
+      (site) => getSiteZoneLabel(site.name) === zoneLabel,
+    );
+    if (zoneSites.length > 0) return zoneSites[0];
+  }
+
+  return campground.sites[0];
+}
+
 export function getSiteHighlightChips(site: Site): string[] {
   return [...new Set(site.nearbyInfo.filter(Boolean))].slice(0, 2);
 }

@@ -13,6 +13,7 @@ import { PerformanceCheckPage } from './pages/PerformanceCheckPage';
 import { ReservationPage } from './pages/ReservationPage';
 import { ReviewDetailPage } from './pages/ReviewDetailPage';
 import { SearchInputPage } from './pages/SearchInputPage';
+import { SiteDetailPage } from './pages/SiteDetailPage';
 import { SiteSelectionPage } from './pages/SiteSelectionPage';
 import { ImageReviewPage } from './pages/ImageReviewPage';
 
@@ -32,6 +33,10 @@ export default function App() {
               element={<ReviewDetailPage />}
             />
             <Route path="/campgrounds/:id/reviews" element={<AllReviewsPage />} />
+            <Route
+              path="/campgrounds/:id/sites/:siteId"
+              element={<SiteDetailPage />}
+            />
             <Route
               path="/campgrounds/:id/sites"
               element={<SiteSelectionPage />}

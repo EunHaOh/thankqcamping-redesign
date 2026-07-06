@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BackHeader } from '../components/BackHeader';
 import { FixedCTA } from '../components/FixedCTA';
 import { MobileShell } from '../components/MobileShell';
 import { ReviewDetailBottomSheet } from '../components/ReviewDetailBottomSheet';
-import { SiteDetailBottomSheet } from '../components/SiteDetailBottomSheet';
 import { SiteListCard } from '../components/SiteListCard';
 import { SiteMapView } from '../components/SiteMapView';
 import { SiteReviewsBottomSheet } from '../components/SiteReviewsBottomSheet';
@@ -14,6 +13,7 @@ import { formatBookingDateWithWeekday } from '../lib/dateDefaults';
 import { getCampgroundById } from '../data/mockData';
 import { campgroundTentLabels } from '../data/siteHelpers';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
+import { ROUTES } from '../routes/paths';
 import type { ReviewDetailData, Site } from '../types';
 
 interface LocationState {
@@ -27,20 +27,17 @@ export function SiteSelectionPage() {
   const { siteId, setSite, checkIn, checkOut } = useBooking();
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(siteId);
   const [viewTab, setViewTab] = useState<'list' | 'map'>('list');
-  const [detailSiteId, setDetailSiteId] = useState<string | null>(null);
   const [reviewsSiteId, setReviewsSiteId] = useState<string | null>(null);
   const [reviewDetail, setReviewDetail] = useState<ReviewDetailData | null>(null);
-  const viewedSiteDetailRef = useRef<string | null>(null);
 
   const campground = id ? getCampgroundById(id) : undefined;
 
   useEffect(() => {
     const state = location.state as LocationState | null;
-    if (state?.openSiteId) {
-      setDetailSiteId(state.openSiteId);
-      window.history.replaceState({}, '');
+    if (state?.openSiteId && id) {
+      navigate(ROUTES.siteDetailPage(id, state.openSiteId), { replace: true });
     }
-  }, [location.state]);
+  }, [id, location.state, navigate]);
 
   useEffect(() => {
     if (!campground) return;
@@ -52,26 +49,6 @@ export function SiteSelectionPage() {
       test_version: TEST_VERSION,
     });
   }, [campground?.id, campground?.name]);
-
-  useEffect(() => {
-    if (!campground || !detailSiteId) return;
-    if (viewedSiteDetailRef.current === detailSiteId) return;
-
-    const site = campground.sites.find((item) => item.id === detailSiteId);
-    if (!site) return;
-
-    viewedSiteDetailRef.current = detailSiteId;
-    trackEvent('tq_view_site_detail', {
-      page_name: 'site_detail',
-      campground_id: campground.id,
-      campground_name: campground.name,
-      site_id: site.id,
-      site_name: site.name,
-      site_size: site.size,
-      site_price: site.price,
-      test_version: TEST_VERSION,
-    });
-  }, [campground, detailSiteId]);
 
   if (!campground) {
     return (
@@ -85,7 +62,6 @@ export function SiteSelectionPage() {
   }
 
   const selectedSite = campground.sites.find((s) => s.id === selectedSiteId);
-  const detailSite = campground.sites.find((s) => s.id === detailSiteId) ?? null;
   const reviewsSite = campground.sites.find((s) => s.id === reviewsSiteId) ?? null;
 
   const trackSiteSelect = (site: Site) => {
@@ -121,7 +97,7 @@ export function SiteSelectionPage() {
       card_index: cardIndex,
       test_version: TEST_VERSION,
     });
-    setDetailSiteId(site.id);
+    navigate(ROUTES.siteDetailPage(campground.id, site.id));
   };
 
   const handleViewTabChange = (tab: 'list' | 'map') => {
@@ -212,37 +188,23 @@ export function SiteSelectionPage() {
         )}
       </main>
 
-      {!detailSiteId && (
-        <FixedCTA
-          label="예약 정보 확인"
-          disabled={!selectedSiteId || !selectedSite?.available}
-          leftContent={
-            selectedSite ? (
-              <div className="min-w-0 shrink">
-                <p className="truncate text-sm text-ink-secondary">
-                  {selectedSite.name} 선택됨
-                </p>
-              </div>
-            ) : (
-              <div className="shrink-0">
-                <p className="text-sm text-ink-muted">사이트를 선택해주세요</p>
-              </div>
-            )
-          }
-          onClick={handleContinue}
-        />
-      )}
-
-      <SiteDetailBottomSheet
-        site={detailSite}
-        allSites={campground.sites}
-        mapLandmarks={campground.mapLandmarks}
-        onClose={() => {
-          viewedSiteDetailRef.current = null;
-          setDetailSiteId(null);
-        }}
-        onSelect={(nextSiteId) => handleSelect(nextSiteId, true)}
-        onReviewClick={handleReviewDetail}
+      <FixedCTA
+        label="예약 정보 확인"
+        disabled={!selectedSiteId || !selectedSite?.available}
+        leftContent={
+          selectedSite ? (
+            <div className="min-w-0 shrink">
+              <p className="truncate text-sm text-ink-secondary">
+                {selectedSite.name} 선택됨
+              </p>
+            </div>
+          ) : (
+            <div className="shrink-0">
+              <p className="text-sm text-ink-muted">사이트를 선택해주세요</p>
+            </div>
+          )
+        }
+        onClick={handleContinue}
       />
 
       <SiteReviewsBottomSheet
@@ -257,7 +219,7 @@ export function SiteSelectionPage() {
         onClose={() => setReviewDetail(null)}
         onViewSite={(nextSiteId) => {
           handleSelect(nextSiteId, true);
-          setDetailSiteId(nextSiteId);
+          navigate(ROUTES.siteDetailPage(campground.id, nextSiteId));
         }}
       />
     </MobileShell>

@@ -16,7 +16,7 @@ export function FixedCTA({
   leftContent,
 }: FixedCTAProps) {
   return (
-    <div className="app-fixed-bar bottom-0 border-t border-surface-border bg-white shadow-cta">
+    <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-mobile min-w-0 -translate-x-1/2 overflow-x-clip border-t border-surface-border bg-white shadow-cta foldable:max-w-[min(100dvw,480px)]">
       <div className="flex w-full min-w-0 max-w-full items-center gap-3 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3">
         {leftContent && <div className="min-w-0 flex-1">{leftContent}</div>}
         <button
