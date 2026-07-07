@@ -4,6 +4,7 @@ import {
   getSiteSpecLabel,
   getSiteZoneLabel,
 } from './campgroundDetailHelpers';
+import { getSiteShortName } from './siteHelpers';
 import type { Campground, Review, Site, SiteReview } from '../types';
 
 export interface SiteFeatureBarItem {
@@ -43,6 +44,7 @@ interface SiteDetailProfile {
   zoneDetails?: SiteZoneDetailRow[];
   ratingDistribution?: SiteRatingDistribution[];
   reviewMetaPrefix?: string;
+  browseKeyword?: string;
 }
 
 const VIEW_KEYWORDS = ['호수', '계곡', '숲', '바다', '산', '강', '노을', '별'];
@@ -90,6 +92,7 @@ const SITE_DETAIL_PROFILES: Record<string, SiteDetailProfile> = {
       { star: 1, percent: 4 },
     ],
     reviewMetaPrefix: 'A존-애견동반 가능존',
+    browseKeyword: '계곡 근처',
   },
   'site-a2': {
     displayTitle: 'A Zone 02',
@@ -113,6 +116,7 @@ const SITE_DETAIL_PROFILES: Record<string, SiteDetailProfile> = {
       '데크 바닥으로 짐 정리와 텐트 설치가 수월한 구성입니다.',
     ],
     reviewMetaPrefix: 'A존-계곡 인접존',
+    browseKeyword: '개수대 근접',
   },
   'site-a3': {
     displayTitle: 'A Zone 03',
@@ -136,6 +140,7 @@ const SITE_DETAIL_PROFILES: Record<string, SiteDetailProfile> = {
       '잔디 바닥과 넓은 공간으로 아이와 반려견 동반 캠핑에 좋습니다.',
     ],
     reviewMetaPrefix: 'A존-프라이빗존',
+    browseKeyword: '사이트 넓음',
   },
 };
 
@@ -366,6 +371,42 @@ export function getSiteRatingDistribution(site: Site): SiteRatingDistribution[] 
 
 export function getSiteReviewFilterChips(): SiteReviewFilterChip[] {
   return FILTER_CHIPS;
+}
+
+export function getSiteAiReviewSummary(site: Site): string {
+  if (site.id === 'site-a2') {
+    return '이 사이트는 계곡과 가까워 산책하기 좋고, 데크 상태가 깔끔하다는 후기가 많아요. 주변 풍경이 좋지만 성수기에는 소음이 있을 수 있어요.';
+  }
+
+  if (site.siteReviewSummary.length > 0) {
+    return site.siteReviewSummary.join(' ');
+  }
+
+  return site.reviewSummary;
+}
+
+export function getSiteAiReviewBasisLabel(site: Site): string {
+  return `${getSiteShortName(site.name)} 사이트를 이용한 방문자 후기를 기준으로 요약했어요.`;
+}
+
+export function getSiteBrowseSpecLabel(site: Site): string {
+  const profile = getProfile(site);
+  if (profile?.specLine) {
+    const parts = profile.specLine.split(' · ');
+    if (parts.length >= 3) {
+      return `${parts[1]} · ${parts[2]}`;
+    }
+  }
+  return `${site.floor} · ${site.width}X${site.depth}m`;
+}
+
+export function getSiteBrowseKeyword(site: Site): string {
+  const profile = getProfile(site);
+  if (profile?.browseKeyword) return profile.browseKeyword;
+  if (site.siteReviewSummary[0]) {
+    return site.siteReviewSummary[0].replace(/다는 후기가 많아요\.?$/, '').slice(0, 14);
+  }
+  return site.reviewSummary.slice(0, 14);
 }
 
 export function getSiteDetailReviews(site: Site, campground: Campground): SiteReview[] {

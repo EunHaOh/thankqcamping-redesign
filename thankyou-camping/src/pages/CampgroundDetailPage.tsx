@@ -330,11 +330,11 @@ export function CampgroundDetailPage() {
         label={ctaLabel}
         leftContent={
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-medium text-ink">{dateLabel}</p>
-            <p className="mt-0.5 truncate text-[12px] text-ink-secondary">
-              <span className={hasSelectedSite ? 'font-semibold text-ink' : ''}>{siteLabel}</span>
-              <span className="text-ink-muted"> · </span>
-              <span className="font-semibold text-ink">{priceLabel}</span>
+            <p className="truncate text-[15px] font-semibold leading-tight text-ink">{dateLabel}</p>
+            <p className="mt-0.5 truncate text-[14px] font-semibold leading-tight text-ink">
+              <span>{siteLabel}</span>
+              <span className="text-ink-secondary"> · </span>
+              <span>{priceLabel}</span>
             </p>
           </div>
         }

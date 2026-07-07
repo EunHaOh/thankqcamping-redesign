@@ -1,30 +1,25 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { DetailReviewListItem } from '../components/campgroundDetail/DetailReviewListItem';
 import { MobileShell } from '../components/MobileShell';
-import { StarIcons } from '../components/StarIcons';
+import { SiteBrowseSection } from '../components/SiteBrowseSection';
+import { SiteDetailFixedCta } from '../components/SiteDetailFixedCta';
 import { useBooking } from '../context/BookingContext';
 import {
   SCENE_FALLBACK,
-  REVIEW_IMAGE_FALLBACK,
-  getReviewImageSources,
   getSiteImageSources,
 } from '../data/images';
-import { formatPrice, getCampgroundById } from '../data/mockData';
+import { getCampgroundById } from '../data/mockData';
 import { getSiteShortName } from '../data/siteHelpers';
 import {
   collectSiteHeroPhotos,
-  collectSiteReviewPhotos,
-  getSiteAverageRating,
+  getSiteAiReviewBasisLabel,
+  getSiteAiReviewSummary,
   getSiteConditionCards,
   getSiteDetailPrice,
   getSiteDetailReviews,
   getSiteDisplayTitle,
   getSiteFeatureBarItems,
-  getSiteRatingDistribution,
-  getSiteReviewCount,
-  getSiteReviewFilterChips,
-  getSiteReviewMetaLabel,
-  getSiteReviewVisitLabel,
   getSiteSpecLine,
   getSiteZoneDetails,
   getSiteZoneIntro,
@@ -33,14 +28,13 @@ import {
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
 import { campgroundAnalyticsFields } from '../lib/analyticsHelpers';
 import { ROUTES } from '../routes/paths';
-import type { Site, SiteReview } from '../types';
 
 const HERO_HEIGHT = 190;
 const PAGE_X = 'px-3.5';
 const SECTION_GAP = 'mt-7';
 
 function FeatureBarIcon({ type }: { type: SiteFeatureBarItem['icon'] }) {
-  const common = 'h-4 w-4 shrink-0 text-[#666666]';
+  const common = 'h-5 w-5 shrink-0 text-[#555555]';
   if (type === 'parking') {
     return (
       <svg className={common} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -126,89 +120,12 @@ function SiteHeroCarousel({ photos, alt }: { photos: string[]; alt: string }) {
   );
 }
 
-function SiteDetailReviewCard({
-  review,
-  site,
-  fallbackPhoto,
-}: {
-  review: SiteReview;
-  site: Site;
-  fallbackPhoto: string;
-}) {
-  const thumb = review.photo || fallbackPhoto;
-
-  return (
-    <article className="flex items-center gap-2.5 rounded-[14px] border border-[#EAEAEA] bg-white p-3.5">
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[13px] font-bold text-ink">{review.author}</span>
-          <span className="text-[12px] text-ink-muted">{getSiteReviewVisitLabel(review)}</span>
-        </div>
-        <p className="mt-0.5 line-clamp-1 text-[11px] text-ink-muted">
-          {getSiteReviewMetaLabel(site, review)}
-        </p>
-        <p className="mt-1.5 line-clamp-3 text-[12px] leading-[1.45] text-ink-secondary">
-          {review.fullContent ?? review.content}
-        </p>
-      </div>
-      <div className="h-[68px] w-[68px] shrink-0 overflow-hidden rounded-lg">
-        <img
-          src={getReviewImageSources(thumb)[0] ?? thumb}
-          alt={`${review.author} 후기`}
-          loading="lazy"
-          decoding="async"
-          className="h-full w-full object-cover"
-          onError={(event) => {
-            const img = event.currentTarget;
-            if (img.src !== REVIEW_IMAGE_FALLBACK) img.src = REVIEW_IMAGE_FALLBACK;
-          }}
-        />
-      </div>
-    </article>
-  );
-}
-
-function SiteDetailFixedCta({
-  label,
-  price,
-  disabled,
-  onClick,
-}: {
-  label: string;
-  price: number;
-  disabled: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-mobile min-w-0 -translate-x-1/2 overflow-x-clip border-t border-[#EFEFEF] bg-white foldable:max-w-[min(100dvw,480px)]">
-      <div className="flex min-h-[72px] items-center gap-2 px-3.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2">
-        <div className="shrink-0">
-          <p className="text-[11px] text-ink-muted">1박 기준</p>
-          <p className="text-[24px] font-bold leading-tight text-ink">
-            {formatPrice(price)}
-            <span className="text-[13px] font-normal text-ink-muted">/박</span>
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onClick}
-          disabled={disabled}
-          className="ml-auto h-[52px] min-w-0 flex-1 rounded-[14px] bg-[#F26522] px-2 text-[15px] font-bold leading-tight text-white disabled:bg-[#E5E7EB] disabled:text-[#9CA3AF]"
-        >
-          {label}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export function SiteDetailPage() {
   const { id, siteId } = useParams<{ id: string; siteId: string }>();
   const navigate = useNavigate();
   const { setCampground, setSite } = useBooking();
   const [introExpanded, setIntroExpanded] = useState(false);
   const [detailsExpanded, setDetailsExpanded] = useState(false);
-  const [activeFilterId, setActiveFilterId] = useState('view');
 
   const campground = id ? getCampgroundById(id) : undefined;
   const site = campground?.sites.find((item) => item.id === siteId);
@@ -224,6 +141,12 @@ export function SiteDetailPage() {
       test_version: TEST_VERSION,
     });
   }, [campground?.id, site?.id]);
+
+  useEffect(() => {
+    setIntroExpanded(false);
+    setDetailsExpanded(false);
+    window.scrollTo(0, 0);
+  }, [siteId]);
 
   if (!campground || !site) {
     return (
@@ -245,14 +168,13 @@ export function SiteDetailPage() {
   const introLines = getSiteZoneIntro(site, campground);
   const detailRows = getSiteZoneDetails(site);
   const heroPhotos = collectSiteHeroPhotos(site, campground);
-  const reviewPhotos = collectSiteReviewPhotos(site, campground);
-  const averageRating = getSiteAverageRating(site);
-  const reviewCount = getSiteReviewCount(site);
-  const ratingDistribution = getSiteRatingDistribution(site);
-  const filterChips = getSiteReviewFilterChips();
-  const reviewCards = getSiteDetailReviews(site, campground);
+  const reviewCards = getSiteDetailReviews(site, campground).slice(0, 3);
   const shortName = getSiteShortName(site.name);
-  const reviewThumbFallback = reviewPhotos[0] ?? site.image;
+
+  const handleBrowseSite = (targetSiteId: string) => {
+    if (targetSiteId === site.id) return;
+    navigate(ROUTES.siteDetailPage(campground.id, targetSiteId));
+  };
 
   const handleSelectSite = () => {
     trackEvent('tq_click_site_select', {
@@ -308,27 +230,35 @@ export function SiteDetailPage() {
             </div>
             <p className="mt-1.5 text-[13px] leading-snug text-ink-secondary">{specLine}</p>
 
-            <div className="mt-3 flex h-[36px] items-center justify-between gap-1 rounded-[5px] border border-[#E5E5E5] bg-[#FAFAFA] px-3">
+            <div className="mt-3 flex min-h-[42px] items-center gap-2 rounded-xl border border-[#EBEBEB] bg-[#FAFAFA] px-3.5 py-2">
               {featureItems.map((item) => (
-                <div key={item.label} className="flex min-w-0 flex-1 items-center justify-center gap-1">
+                <div key={item.label} className="flex min-w-0 flex-1 items-center justify-center gap-1.5">
                   <FeatureBarIcon type={item.icon} />
-                  <span className="truncate text-[12px] text-ink-secondary">{item.label}</span>
+                  <span className="truncate text-[13px] font-medium leading-none text-[#444444]">
+                    {item.label}
+                  </span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-3 grid grid-cols-4 gap-2">
+            <div className="mt-4 grid grid-cols-4 gap-2">
               {conditionCards.map((card) => (
                 <div
                   key={card.label}
-                  className="flex h-16 flex-col justify-center rounded-[9px] bg-[#F7F7F7] px-1 text-center"
+                  className="flex h-[72px] flex-col justify-center rounded-[9px] bg-[#F7F7F7] px-1 text-center"
                 >
-                  <p className="truncate text-[11px] text-ink-muted">{card.label}</p>
-                  <p className="mt-0.5 truncate text-[13px] font-bold text-ink">{card.value}</p>
+                  <p className="truncate text-[13px] text-[#666666]">{card.label}</p>
+                  <p className="mt-1 truncate text-[16px] font-bold text-ink">{card.value}</p>
                 </div>
               ))}
             </div>
           </section>
+
+          <SiteBrowseSection
+            campground={campground}
+            currentSiteId={site.id}
+            onSelectSite={handleBrowseSite}
+          />
 
           <section className={`${SECTION_GAP} ${PAGE_X}`}>
             <h2 className="text-[17px] font-bold text-ink">캠핑존 소개</h2>
@@ -361,80 +291,34 @@ export function SiteDetailPage() {
 
           <section className={`${SECTION_GAP} ${PAGE_X}`}>
             <h2 className="text-[17px] font-bold text-ink">리뷰</h2>
-            <div className="mt-3.5 grid grid-cols-3 gap-1">
-              {reviewPhotos.map((photo, index) => (
-                <div key={`${photo}-${index}`} className="aspect-square overflow-hidden rounded-[4px]">
-                  <img
-                    src={getReviewImageSources(photo)[0] ?? photo}
-                    alt={`리뷰 사진 ${index + 1}`}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover"
-                    onError={(event) => {
-                      const img = event.currentTarget;
-                      if (img.src !== REVIEW_IMAGE_FALLBACK) img.src = REVIEW_IMAGE_FALLBACK;
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-            <OutlineMoreButton
-              label="더 보기 >"
-              onClick={() => navigate(ROUTES.reviewListPage(campground.id))}
-            />
 
-            <div className="mt-3.5 flex items-start gap-2.5">
-              <div className="w-[76px] shrink-0">
-                <p className="text-[28px] font-bold leading-none text-ink">{averageRating.toFixed(1)}</p>
-                <StarIcons rating={Math.round(averageRating)} size={13} />
-                <p className="mt-0.5 text-[12px] text-ink-muted">
-                  리뷰 {reviewCount.toLocaleString('ko-KR')}개
-                </p>
-              </div>
-              <div className="min-w-0 flex-1 space-y-1 pt-0.5">
-                {ratingDistribution.map((item) => (
-                  <div key={item.star} className="flex items-center gap-1.5 text-[10px] text-ink-secondary">
-                    <span className="w-2 shrink-0 text-center">{item.star}</span>
-                    <div className="h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-[#EFEFEF]">
-                      <div
-                        className="h-full rounded-full bg-[#F26522]"
-                        style={{ width: `${item.percent}%` }}
-                      />
-                    </div>
-                    <span className="w-6 shrink-0 text-right">{item.percent}%</span>
-                  </div>
-                ))}
-              </div>
+            <div className="mt-4 rounded-[22px] bg-gradient-to-br from-[#EEF3FF] via-[#F3EEFF] to-[#EAF7FF] px-5 py-4">
+              <p className="text-[12px] font-semibold tracking-[-0.01em] text-[#5B6CFF]">
+                AI 리뷰 요약
+              </p>
+              <p className="mt-2 text-[15px] font-medium leading-[1.55] text-[#2B2B2B]">
+                {getSiteAiReviewSummary(site)}
+              </p>
             </div>
 
-            <div className="scrollbar-hide -mx-3.5 mt-3 flex gap-1.5 overflow-x-auto px-3.5">
-              {filterChips.map((chip) => {
-                const active = chip.id === activeFilterId;
-                return (
-                  <button
-                    key={chip.id}
-                    type="button"
-                    onClick={() => setActiveFilterId(chip.id)}
-                    className={`h-[30px] shrink-0 rounded-full px-3 text-[12px] font-semibold ${
-                      active ? 'bg-[#F26522] text-white' : 'bg-[#F3F3F3] text-[#888888]'
-                    }`}
-                  >
-                    {chip.label}
-                  </button>
-                );
-              })}
-            </div>
+            <p className="mt-2 text-[12px] text-ink-muted">{getSiteAiReviewBasisLabel(site)}</p>
 
-            <div className="mt-2.5 space-y-2.5">
+            <div className="mt-1">
               {reviewCards.map((review) => (
-                <SiteDetailReviewCard
+                <DetailReviewListItem
                   key={review.id}
                   review={review}
-                  site={site}
-                  fallbackPhoto={reviewThumbFallback}
+                  onDetail={() => navigate(ROUTES.reviewDetailPage(campground.id, review.id))}
                 />
               ))}
             </div>
+
+            <Link
+              to={ROUTES.reviewListPage(campground.id)}
+              className="btn-secondary mt-4 flex h-10 w-full items-center justify-center"
+            >
+              전체 후기 보기
+            </Link>
           </section>
         </main>
 

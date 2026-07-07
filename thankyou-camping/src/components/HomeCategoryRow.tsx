@@ -5,13 +5,13 @@ import { ROUTES } from '../routes/paths';
 import { TEST_VERSION, trackEvent } from '../lib/analytics';
 import { TapAction } from './TapAction';
 
-const CATEGORY_EMOJI: Record<string, string> = {
-  auto: '⛺',
-  glamping: '🏕️',
-  caravan: '🚐',
-  pension: '🏡',
-  car: '🚙',
-  kids: '🧸',
+const CATEGORY_ICONS: Record<string, string> = {
+  auto: '/icons/AutoCamping.png',
+  glamping: '/icons/Glamping.png',
+  caravan: '/icons/CaraBan.png',
+  pension: '/icons/Penshon.png',
+  kids: '/icons/Kids.png',
+  transfer: '/icons/Change.png',
 };
 
 interface HomeCategoryRowProps {
@@ -35,19 +35,26 @@ export function HomeCategoryRow({ categories }: HomeCategoryRowProps) {
 
   return (
     <section className="px-3">
-      <div className="overflow-hidden rounded-[22px] border border-[#EEF0F2] bg-white py-3 shadow-section">
-        <div className="home-horizontal-list">
+      <div className="rounded-[22px] border border-[#EEF0F2] bg-white py-3 shadow-section">
+        <div className="home-horizontal-list home-category-list">
           {categories.map((category) => (
             <TapAction
               key={category.id}
               onTap={() => handleClick(category)}
               ariaLabel={`${category.label} 카테고리`}
-              className="home-horizontal-card flex w-[54px] cursor-pointer flex-col items-center gap-1"
+              className="home-category-item flex shrink-0 cursor-pointer flex-col items-center gap-1"
             >
-              <span className="text-[27px] leading-none" aria-hidden="true">
-                {CATEGORY_EMOJI[category.id] ?? '⛺'}
-              </span>
-              <span className="whitespace-nowrap text-[12px] font-medium text-ink-secondary">
+              <img
+                src={CATEGORY_ICONS[category.id] ?? CATEGORY_ICONS.auto}
+                alt=""
+                aria-hidden="true"
+                width={44}
+                height={44}
+                className="h-11 w-11 shrink-0 object-contain"
+                loading="lazy"
+                decoding="async"
+              />
+              <span className="w-full text-center text-[13px] font-medium leading-snug text-ink-secondary">
                 {category.label}
               </span>
             </TapAction>

@@ -91,7 +91,7 @@ export const CoverImage = memo(function CoverImage({
         width={widthValue ?? undefined}
         height={heightValue ?? undefined}
         onError={handleError}
-        className="card-image block h-full w-full object-cover"
+        className="card-image block h-full w-full object-cover object-center"
       />
     </div>
   );

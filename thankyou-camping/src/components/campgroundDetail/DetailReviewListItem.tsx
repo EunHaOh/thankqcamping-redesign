@@ -31,33 +31,34 @@ export function DetailReviewListItem({ review, onDetail }: DetailReviewListItemP
   const displayTags = getReviewDisplayTags(review);
   const hiddenTagCount = Math.max(0, (review.confirmTags?.length ?? 0) - displayTags.length);
   const helpfulCount = getReviewHelpfulCount(review);
+  const hasTags = displayTags.length > 0 || hiddenTagCount > 0;
 
   return (
-    <article className="flex gap-3 border-b border-[#EFEFEF] py-4 last:border-b-0">
-      <button
-        type="button"
-        onClick={onDetail}
-        className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-[12px] bg-[#F0F0F0]"
-        aria-label={`${review.author} 후기 사진 보기`}
-      >
-        {review.photo ? (
-          <CoverImage
-            sources={getReviewImageSources(review.photo)}
-            fallback={REVIEW_IMAGE_FALLBACK}
-            height={88}
-            width={88}
-            className="h-full w-full"
-          />
-        ) : null}
-        {extraPhotoCount > 0 ? (
-          <span className="absolute bottom-1.5 right-1.5 rounded-[6px] bg-black/55 px-1.5 py-0.5 text-[11px] font-semibold text-white">
-            +{extraPhotoCount}
-          </span>
-        ) : null}
-      </button>
+    <article className="border-b border-[#EFEFEF] py-3.5 last:border-b-0">
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={onDetail}
+          className="relative h-[88px] w-[88px] shrink-0 overflow-hidden rounded-[12px] bg-[#F0F0F0]"
+          aria-label={`${review.author} 후기 사진 보기`}
+        >
+          {review.photo ? (
+            <CoverImage
+              sources={getReviewImageSources(review.photo)}
+              fallback={REVIEW_IMAGE_FALLBACK}
+              height={88}
+              width={88}
+              className="h-full w-full"
+            />
+          ) : null}
+          {extraPhotoCount > 0 ? (
+            <span className="absolute bottom-1.5 right-1.5 rounded-[6px] bg-black/55 px-1.5 py-0.5 text-[11px] font-semibold text-white">
+              +{extraPhotoCount}
+            </span>
+          ) : null}
+        </button>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <button type="button" onClick={onDetail} className="w-full text-left">
+        <button type="button" onClick={onDetail} className="min-w-0 flex-1 text-left">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <StarIcons rating={review.rating} />
             <span className="text-[13px] font-semibold text-ink">{review.author}</span>
@@ -70,38 +71,38 @@ export function DetailReviewListItem({ review, onDetail }: DetailReviewListItemP
             {review.content}
           </p>
         </button>
+      </div>
 
-        <div className="mt-3 flex items-center justify-between gap-3">
-          <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
-            {displayTags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full bg-[#F5F5F5] px-3 py-1.5 text-[12px] font-medium text-ink-secondary"
-              >
-                {tag}
-              </span>
-            ))}
-            {hiddenTagCount > 0 ? (
-              <span className="rounded-full bg-[#F5F5F5] px-3 py-1.5 text-[12px] font-medium text-ink-secondary">
-                +{hiddenTagCount}
-              </span>
-            ) : null}
-          </div>
-
-          <div className="ml-auto flex shrink-0 items-center gap-2">
-            <span className="whitespace-nowrap text-[12px] font-medium text-ink-muted">
-              {helpfulCount}명에게 도움 됐어요
-            </span>
-            <button
-              type="button"
-              aria-label="도움이 됐어요"
-              onClick={(event) => event.stopPropagation()}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#F5F5F5] text-ink-secondary"
+      {hasTags ? (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {displayTags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full bg-[#F5F5F5] px-2.5 py-1.5 text-[12px] font-medium leading-none text-ink-secondary"
             >
-              <ThumbsUpIcon className="h-4 w-4" />
-            </button>
-          </div>
+              {tag}
+            </span>
+          ))}
+          {hiddenTagCount > 0 ? (
+            <span className="rounded-full bg-[#F5F5F5] px-2.5 py-1.5 text-[12px] font-medium leading-none text-ink-secondary">
+              +{hiddenTagCount}
+            </span>
+          ) : null}
         </div>
+      ) : null}
+
+      <div className="mt-2 flex items-center justify-end gap-2">
+        <span className="whitespace-nowrap text-[12px] font-medium text-ink-muted">
+          {helpfulCount}명에게 도움 됐어요
+        </span>
+        <button
+          type="button"
+          aria-label="도움이 됐어요"
+          onClick={(event) => event.stopPropagation()}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F5F5F5] text-ink-secondary"
+        >
+          <ThumbsUpIcon className="h-4 w-4" />
+        </button>
       </div>
     </article>
   );

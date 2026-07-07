@@ -78,6 +78,20 @@
     touch-action: auto;
   }
 
+  .home-category-list {
+    gap: 9px;
+    padding-left: 12px;
+    padding-right: 12px;
+    scroll-padding-left: 12px;
+    scroll-padding-right: 12px;
+  }
+
+  .home-category-item {
+    flex: 0 0 64px;
+    width: 64px;
+    touch-action: auto;
+  }
+
   .home-page {
     touch-action: pan-y;
   }

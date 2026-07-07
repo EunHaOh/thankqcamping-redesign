@@ -13,8 +13,8 @@ export const HOME_CATEGORIES: HomeCategory[] = [
   { id: 'glamping', label: '글램핑', fullFilterChips: ['글램핑'], quickFilters: [] },
   { id: 'caravan', label: '카라반', fullFilterChips: ['카라반'], quickFilters: [] },
   { id: 'pension', label: '펜션', fullFilterChips: ['펜션'], quickFilters: [] },
-  { id: 'car', label: '차박', fullFilterChips: ['차박'], quickFilters: [] },
-  { id: 'kids', label: '키즈', fullFilterChips: ['키즈 전용'], quickFilters: ['가족 추천'] },
+  { id: 'kids', label: '키즈캠핑', fullFilterChips: ['키즈 전용'], quickFilters: ['가족 추천'] },
+  { id: 'transfer', label: '양도', fullFilterChips: [], quickFilters: [] },
 ];
 
 export interface HomeHeroBanner {
@@ -29,8 +29,8 @@ export interface HomeHeroBanner {
 
 const bannerImages = getHomeBannerImages();
 
-/** 홈 히어로 전용 봄꽃 캠핑 일러스트 (로컬 SVG asset) */
-const HERO_SPRING_ILLUSTRATION = '/images/home/hero-spring-camping.svg';
+/** 홈 히어로 메인 배너 배경 이미지 */
+const HERO_BACKGROUND_IMAGE = '/images/home/Background img.png';
 
 /** 레퍼런스 디자인 기준 히어로 표시용 total (실제 배너 수와 별개) */
 export const HOME_HERO_DISPLAY_TOTAL = 28;
@@ -38,12 +38,12 @@ export const HOME_HERO_DISPLAY_TOTAL = 28;
 export const HOME_HERO_BANNERS: HomeHeroBanner[] = [
   {
     id: 'hero-1',
-    image: HERO_SPRING_ILLUSTRATION,
+    image: HERO_BACKGROUND_IMAGE,
     fallback: IMAGE_FALLBACK,
-    badge: '2026 벚꽃 맛집',
-    subtitle: '캠핑시즌 활-짝',
-    title: '벚꽃캠핑',
-    ctaLabel: '봄맞이 캠핑 예약하기',
+    badge: '2026 우중캠핑',
+    subtitle: '빗소리와 함께',
+    title: '우중캠핑',
+    ctaLabel: '우중캠핑 예약하기',
   },
   {
     id: 'hero-2',
@@ -129,4 +129,4 @@ export function getHomeNewCampsForRegion(region: NewCampRegion): string[] {
 
 export const HOME_NEW_CAMPS = HOME_NEW_CAMP_BY_REGION.전체;
 
-export const HOME_SEARCH_PLACEHOLDER = '이번주는 벚꽃캠핑 어때요?';
+export const HOME_SEARCH_PLACEHOLDER = '이번주는 우중캠핑 어때요?';

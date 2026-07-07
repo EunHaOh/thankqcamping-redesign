@@ -13,9 +13,9 @@ interface HomeHeroBannerCarouselProps {
 }
 
 const FALLBACK_BANNER_COPY = [
-  { badge: '2026 벚꽃 맛집', subtitle: '캠핑시즌 활-짝', title: '벚꽃캠핑' },
-  { badge: '봄맞이 추천', subtitle: '따뜻한 주말엔', title: '감성캠핑' },
-  { badge: '가족 캠핑', subtitle: '아이와 함께', title: '봄나들이' },
+  { badge: '2026 우중캠핑', subtitle: '빗소리와 함께', title: '우중캠핑' },
+  { badge: '비 오는 날', subtitle: '포근한 텐트 안에서', title: '감성캠핑' },
+  { badge: '가족 캠핑', subtitle: '아이와 함께', title: '힐링캠핑' },
   { badge: '이번 주 인기', subtitle: '지금 떠나는', title: '힐링캠핑' },
   { badge: '예약 찬스', subtitle: '초록 숲속', title: '숲캠핑' },
 ] as const;
@@ -125,7 +125,13 @@ export function HomeHeroBannerCarousel({ banners, displayTotal }: HomeHeroBanner
               priority={activeIndex === 0}
               ariaLabel={`${currentSlide.title} 배너`}
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+            <div
+              className="pointer-events-none absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(to top, rgba(0,0,0,0.48) 0%, rgba(0,0,0,0.14) 38%, transparent 64%), linear-gradient(to right, rgba(0,0,0,0.28) 0%, transparent 54%)',
+              }}
+            />
             <div className="absolute bottom-4 left-4 right-4">
               <span className="inline-block rounded-full bg-white/90 px-2.5 py-1 text-[11px] font-semibold text-[#F26522]">
                 {currentSlide.badge}
