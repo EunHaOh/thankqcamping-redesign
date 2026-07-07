@@ -1,5 +1,13 @@
 import { DETAIL_AMENITY_ITEMS } from '../../data/campgroundDetailHelpers';
 
+/**
+ * 원본 해상도 (public/icons):
+ * - Store.png: 23×23
+ * - Shower.png: 26×23
+ * - Pet place.png: 27×23
+ * - Hot.png: 20×23
+ * 저해상도 자산이라 32px 이상으로 키우면 모바일에서 픽셀 깨짐이 두드러집니다.
+ */
 const AMENITY_ICON_SRC: Record<string, string> = {
   store: '/icons/Store.png',
   shower: '/icons/Shower.png',
@@ -7,21 +15,22 @@ const AMENITY_ICON_SRC: Record<string, string> = {
   stove: '/icons/Hot.png',
 };
 
-function AmenityIcon({ type }: { type: string }) {
+function AmenityIcon({ type, label }: { type: string; label: string }) {
   const src = AMENITY_ICON_SRC[type];
   if (!src) return null;
 
   return (
-    <img
-      src={src}
-      alt=""
-      aria-hidden="true"
-      width={40}
-      height={40}
-      className="h-10 w-10 shrink-0 object-contain"
-      loading="lazy"
-      decoding="async"
-    />
+    <div className="amenity-icon-slot">
+      <img
+        src={src}
+        alt={label}
+        width={32}
+        height={32}
+        className="amenity-icon"
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
   );
 }
 
@@ -35,11 +44,11 @@ export function DetailAmenitiesSection() {
         </svg>
       </div>
 
-      <div className="mt-7 grid grid-cols-4 gap-5">
+      <div className="mt-7 grid grid-cols-4 gap-4">
         {DETAIL_AMENITY_ITEMS.map((item) => (
-          <div key={item.label} className="flex flex-col items-center">
-            <AmenityIcon type={item.icon} />
-            <span className="mt-3 text-center text-[14px] font-medium leading-[1.35] text-ink-secondary">
+          <div key={item.label} className="flex min-w-0 flex-col items-center">
+            <AmenityIcon type={item.icon} label={item.label} />
+            <span className="mt-2 text-center text-[13px] font-medium leading-[1.35] text-[#555555]">
               {item.label}
             </span>
           </div>

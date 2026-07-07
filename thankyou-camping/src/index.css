@@ -152,6 +152,26 @@
   .btn-secondary {
     @apply rounded-lg border border-surface-border bg-white text-sm font-medium text-ink;
   }
+
+  /* 시설 및 레저: 원본 20~27px 저해상도 PNG — 32px 고정, 과확대 방지 */
+  .amenity-icon-slot {
+    display: flex;
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .amenity-icon {
+    width: 32px;
+    height: 32px;
+    max-width: 32px;
+    max-height: 32px;
+    flex-shrink: 0;
+    object-fit: contain;
+    image-rendering: auto;
+  }
 }
 
 @layer utilities {
