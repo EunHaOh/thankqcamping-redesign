@@ -242,10 +242,10 @@ export function getNoticeItems(campground: Campground): string[] {
 }
 
 export const DETAIL_AMENITY_ITEMS = [
-  { label: '무인 매점', icon: 'store' },
+  { label: '매점', icon: 'store' },
   { label: '개별 샤워실', icon: 'shower' },
-  { label: '애견 울타리', icon: 'pet' },
-  { label: '난로 대여', icon: 'stove' },
+  { label: '반려견동반', icon: 'pet' },
+  { label: '난로대여', icon: 'stove' },
 ] as const;
 
 export function getAmenityItems(_facilities?: string[]) {
@@ -325,8 +325,23 @@ export function getZoneRepresentativeSite(sites: Site[]): Site | undefined {
 
 export const CAMPGROUND_LAYOUT_MAP_FALLBACK = '/images/campgrounds/layouts/campground-layout-map.svg';
 
+export const CAMPGROUND_LAYOUT_IMAGES = [
+  '/images/Set/Set 1.jpg',
+  '/images/Set/Set 2.jpg',
+  '/images/Set/Set 3.webp',
+  '/images/Set/Set 4.jpg',
+  '/images/Set/Set 5.jpg',
+] as const;
+
+export function getCampgroundLayoutImage(campgroundId: string): string {
+  const campNumber = Number.parseInt(campgroundId.replace('camp-', ''), 10);
+  const index = Number.isFinite(campNumber) ? (campNumber - 1) % CAMPGROUND_LAYOUT_IMAGES.length : 0;
+  return CAMPGROUND_LAYOUT_IMAGES[index];
+}
+
+/** @deprecated Use campground.layoutImage or getCampgroundLayoutImage instead */
 export function getCampgroundLayoutMapSrc(campgroundId: string): string {
-  return `/images/campgrounds/layouts/${campgroundId}-map.svg`;
+  return getCampgroundLayoutImage(campgroundId);
 }
 
 export function getSiteChipLabel(siteName: string): string {

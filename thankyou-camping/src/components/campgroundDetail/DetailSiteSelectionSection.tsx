@@ -217,10 +217,8 @@ export function DetailSiteSelectionSection({
       zone.sites.some((site) => site.id === preferredSiteId),
     );
     if (!zoneWithSite) return;
-    if (zoneWithSite.zoneLabel !== activeZone) {
-      setActiveZone(zoneWithSite.zoneLabel);
-    }
-  }, [preferredSiteId, zoneDisplays, activeZone]);
+    setActiveZone(zoneWithSite.zoneLabel);
+  }, [preferredSiteId, zoneDisplays]);
 
   useEffect(() => {
     if (!activeDisplay) return;
@@ -244,6 +242,11 @@ export function DetailSiteSelectionSection({
     setHasUserSelectedChip(false);
     onSelectedSiteChange?.(null, false);
   }, [activeZone, activeDisplay?.zoneLabel, activeDisplay?.siteNumbers, preferredSiteId]);
+
+  const handleZoneSelect = (zoneLabel: string) => {
+    setActiveZone(zoneLabel);
+    setHasUserSelectedChip(false);
+  };
 
   const handleSiteChipSelect = (siteNumber: string) => {
     setSelectedSiteNumber(siteNumber);
@@ -281,8 +284,8 @@ export function DetailSiteSelectionSection({
             <button
               key={zone.zoneLabel}
               type="button"
-              onClick={() => setActiveZone(zone.zoneLabel)}
-              className={`h-10 shrink-0 rounded-full px-5 text-[14px] font-semibold transition-colors ${
+              onClick={() => handleZoneSelect(zone.zoneLabel)}
+              className={`h-11 min-h-[44px] shrink-0 rounded-full px-5 text-[14px] font-semibold transition-colors ${
                 active ? 'bg-[#F26522] text-white' : 'bg-[#F3F3F3] text-[#888888]'
               }`}
             >

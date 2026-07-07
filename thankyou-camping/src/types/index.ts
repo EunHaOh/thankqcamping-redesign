@@ -89,6 +89,8 @@ export interface Campground {
   detailImages?: string[];
   reviewImages?: string[];
   concept?: string;
+  /** 캠핑장 상세 배치도 이미지 */
+  layoutImage?: string;
 }
 
 export interface BookingState {

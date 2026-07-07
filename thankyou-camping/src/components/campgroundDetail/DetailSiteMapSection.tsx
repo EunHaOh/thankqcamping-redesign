@@ -1,8 +1,5 @@
 import { useState } from 'react';
-import {
-  CAMPGROUND_LAYOUT_MAP_FALLBACK,
-  getCampgroundLayoutMapSrc,
-} from '../../data/campgroundDetailHelpers';
+import { CAMPGROUND_LAYOUT_MAP_FALLBACK } from '../../data/campgroundDetailHelpers';
 import type { Campground } from '../../types';
 
 interface DetailSiteMapSectionProps {
@@ -10,7 +7,7 @@ interface DetailSiteMapSectionProps {
 }
 
 export function DetailSiteMapSection({ campground }: DetailSiteMapSectionProps) {
-  const [mapSrc, setMapSrc] = useState(getCampgroundLayoutMapSrc(campground.id));
+  const [mapSrc, setMapSrc] = useState(campground.layoutImage ?? '');
 
   return (
     <section id="site-map" className="px-5 py-7">
@@ -21,11 +18,11 @@ export function DetailSiteMapSection({ campground }: DetailSiteMapSectionProps) 
         </svg>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-[12px] border border-surface-border bg-white">
+      <div className="mt-4 overflow-hidden rounded-[12px] border border-surface-border bg-surface-muted">
         <img
           src={mapSrc}
           alt={`${campground.name} 배치도`}
-          className="h-[200px] w-full object-cover"
+          className="h-[200px] w-full object-contain"
           loading="lazy"
           decoding="async"
           onError={() => setMapSrc(CAMPGROUND_LAYOUT_MAP_FALLBACK)}

@@ -21,7 +21,7 @@ export function SiteBrowseSection({
   if (campground.sites.length <= 1) return null;
 
   return (
-    <section className={`mb-5 mt-5 px-3.5`}>
+    <section className="mb-8 mt-6 px-3.5">
       <h2 className="text-[17px] font-bold text-ink">다른 사이트도 둘러보기</h2>
 
       <div

@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { BookingFlowFixedBar } from '../components/BookingFlowFixedBar';
 import { DetailReviewListItem } from '../components/campgroundDetail/DetailReviewListItem';
+import { formatDateRangeLabel } from '../components/DatePickerBottomSheet';
 import { MobileShell } from '../components/MobileShell';
 import { SiteBrowseSection } from '../components/SiteBrowseSection';
-import { SiteDetailFixedCta } from '../components/SiteDetailFixedCta';
 import { useBooking } from '../context/BookingContext';
+import { useSearch } from '../context/SearchContext';
 import {
   SCENE_FALLBACK,
   getSiteImageSources,
 } from '../data/images';
-import { getCampgroundById } from '../data/mockData';
+import { getCampgroundById, formatPrice } from '../data/mockData';
 import { getSiteShortName } from '../data/siteHelpers';
 import {
   collectSiteHeroPhotos,
@@ -31,7 +33,6 @@ import { ROUTES } from '../routes/paths';
 
 const HERO_HEIGHT = 190;
 const PAGE_X = 'px-3.5';
-const SECTION_GAP = 'mt-7';
 
 function FeatureBarIcon({ type }: { type: SiteFeatureBarItem['icon'] }) {
   const common = 'h-5 w-5 shrink-0 text-[#555555]';
@@ -124,6 +125,7 @@ export function SiteDetailPage() {
   const { id, siteId } = useParams<{ id: string; siteId: string }>();
   const navigate = useNavigate();
   const { setCampground, setSite } = useBooking();
+  const { checkIn, checkOut } = useSearch();
   const [introExpanded, setIntroExpanded] = useState(false);
   const [detailsExpanded, setDetailsExpanded] = useState(false);
 
@@ -170,6 +172,8 @@ export function SiteDetailPage() {
   const heroPhotos = collectSiteHeroPhotos(site, campground);
   const reviewCards = getSiteDetailReviews(site, campground).slice(0, 3);
   const shortName = getSiteShortName(site.name);
+  const dateLabel = formatDateRangeLabel(checkIn, checkOut);
+  const bookingSubLabel = `${shortName} · ${formatPrice(displayPrice)}/박`;
 
   const handleBrowseSite = (targetSiteId: string) => {
     if (targetSiteId === site.id) return;
@@ -214,7 +218,7 @@ export function SiteDetailPage() {
           </button>
         </div>
 
-        <main className="pb-[calc(4.5rem+env(safe-area-inset-bottom,0px))]">
+        <main className="pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))]">
           <section className={`${PAGE_X} pt-3.5`}>
             <div className="flex items-start justify-between gap-2">
               <h1 className="min-w-0 text-[20px] font-bold leading-tight text-ink">{displayTitle}</h1>
@@ -260,7 +264,7 @@ export function SiteDetailPage() {
             onSelectSite={handleBrowseSite}
           />
 
-          <section className={`${SECTION_GAP} ${PAGE_X}`}>
+          <section className={`mt-7 mb-8 ${PAGE_X}`}>
             <h2 className="text-[17px] font-bold text-ink">캠핑존 소개</h2>
             <div className="mt-3.5 space-y-1 text-[13px] leading-[1.45] text-ink-secondary">
               {(introExpanded ? introLines : introLines.slice(0, 2)).map((line) => (
@@ -273,7 +277,7 @@ export function SiteDetailPage() {
             />
           </section>
 
-          <section className={`${SECTION_GAP} ${PAGE_X}`}>
+          <section className={`mt-7 mb-8 ${PAGE_X}`}>
             <h2 className="text-[17px] font-bold text-ink">캠핑존 세부정보</h2>
             <div className="mt-3.5 space-y-2.5">
               {(detailsExpanded ? detailRows : detailRows.slice(0, 3)).map((row) => (
@@ -289,7 +293,7 @@ export function SiteDetailPage() {
             />
           </section>
 
-          <section className={`${SECTION_GAP} ${PAGE_X}`}>
+          <section className={`mt-8 ${PAGE_X}`}>
             <h2 className="text-[17px] font-bold text-ink">리뷰</h2>
 
             <div className="mt-4 rounded-[22px] bg-gradient-to-br from-[#EEF3FF] via-[#F3EEFF] to-[#EAF7FF] px-5 py-4">
@@ -315,16 +319,17 @@ export function SiteDetailPage() {
 
             <Link
               to={ROUTES.reviewListPage(campground.id)}
-              className="btn-secondary mt-4 flex h-10 w-full items-center justify-center"
+              className="btn-secondary mb-10 mt-4 flex h-10 w-full items-center justify-center"
             >
               전체 후기 보기
             </Link>
           </section>
         </main>
 
-        <SiteDetailFixedCta
-          label={`${shortName} 사이트 선택하기`}
-          price={displayPrice}
+        <BookingFlowFixedBar
+          dateLabel={dateLabel}
+          subLabel={bookingSubLabel}
+          buttonLabel={`${shortName} 사이트 선택하기`}
           disabled={!site.available}
           onClick={handleSelectSite}
         />

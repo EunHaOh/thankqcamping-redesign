@@ -13,7 +13,7 @@ import { DetailSiteMapSection } from '../components/campgroundDetail/DetailSiteM
 import { DetailSiteSelectionSection } from '../components/campgroundDetail/DetailSiteSelectionSection';
 import { formatDateRangeLabel } from '../components/DatePickerBottomSheet';
 import { DetailTabNav } from '../components/campgroundDetail/DetailTabNav';
-import { FixedCTA } from '../components/FixedCTA';
+import { BookingFlowFixedBar } from '../components/BookingFlowFixedBar';
 import { MobileShell } from '../components/MobileShell';
 import { useBooking } from '../context/BookingContext';
 import { useSearch } from '../context/SearchContext';
@@ -326,18 +326,10 @@ export function CampgroundDetailPage() {
         <div ref={bottomCtaRef} className="h-1" aria-hidden="true" />
       </main>
 
-      <FixedCTA
-        label={ctaLabel}
-        leftContent={
-          <div className="min-w-0">
-            <p className="truncate text-[15px] font-semibold leading-tight text-ink">{dateLabel}</p>
-            <p className="mt-0.5 truncate text-[14px] font-semibold leading-tight text-ink">
-              <span>{siteLabel}</span>
-              <span className="text-ink-secondary"> · </span>
-              <span>{priceLabel}</span>
-            </p>
-          </div>
-        }
+      <BookingFlowFixedBar
+        dateLabel={dateLabel}
+        subLabel={`${siteLabel} · ${priceLabel}`}
+        buttonLabel={ctaLabel}
         onClick={handleBookingCtaClick}
       />
     </MobileShell>
